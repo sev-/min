@@ -1,10 +1,13 @@
 /*
- *  $Id: docom.c,v 1.1 1994/06/29 12:43:01 sev Exp $
+ *  $Id: docom.c,v 1.2 1994/07/04 19:24:31 sev Exp $
  *
  * ---------------------------------------------------------- 
  *
  * $Log: docom.c,v $
- * Revision 1.1  1994/06/29 12:43:01  sev
+ * Revision 1.2  1994/07/04 19:24:31  sev
+ * Some commands added. I need table!!!
+ *
+ * Revision 1.1  1994/06/29  12:43:01  sev
  * Initial revision
  *
  *
@@ -15,6 +18,8 @@
 do_command(command)
 unsigned char command;
 {
+  int tmpreg;
+
   switch(command)
   {
 	case 0x0:	/* nop  */
@@ -22,27 +27,44 @@ unsigned char command;
 	case 0x1:	/* lxi b,■■ */
 		reg_c = memory[reg_pc+1];
 		reg_b = memory[reg_pc+2];
+		reg_pc += 2;
 		break;
 	case 0x2:	/* stax b */
 		memory[reg_bc] = reg_a;
 		break;
 	case 0x3:	/* inx b */
+		tmpreg = reg_bc + 1;
+		reg_b = tmpreg & 0xff00;
+		reg_c = tmpreg & 0x00ff;
 		break;
 	case 0x4:	/* inr b */
+		reg_b++;
 		break;
 	case 0x5:	/* dcr b */
+		reg_b--;
 		break;
 	case 0x6:	/* mvi b,■ */
+		reg_b = memory[reg_pc+1];
+		reg_pc++;
 		break;
 	case 0x7:	/* rlc  */
 		break;
 	case 0x9:	/* dad b */
+		tmpreg = reg_bc+reg_hl;
+		Flag_c = (tmpreg > 0xffff) ? 0xff : 0x00;
+		reg_h = tmpreg & 0xff00;
+		reg_l = tmpreg & 0x00ff;
 		break;
 	case 0xa:	/* ldax b */
+		reg_a = memory[reg_bc];
 		break;
 	case 0xb:	/* dcx b */
+		tmpreg = reg_bc-1;
+		reg_b = tmpreg & 0xff00;
+		reg_c = tmpreg & 0x00ff;
 		break;
 	case 0xc:	/* inr c */
+		reg_c++;
 		break;
 	case 0xd:	/* dcr c */
 		break;
