@@ -1,12 +1,13 @@
 /*
- * $Id: commands.h,v 1.3 1995/01/07 20:03:14 sev Exp $
+ * $Id: commands.h,v 1.4 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: commands.h,v $
- * Revision 1.3  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.2  1995/01/06  21:45:10  sev It's full
+ * Revision 1.4  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.3  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.2  1995/01/06  21:45:10  sev It's full
  * emulator IMHO
  * 
  * Revision 1.1  1994/06/29  12:43:01  sev Initial revision
@@ -16,12 +17,20 @@
 
 struct COMMAND
 {
-  unsigned char code;
+  byte code;
   char *name;
-  char *oper;
+  char *args;
   char len;
-} command[] =
+};
 
+struct COMMARG
+{
+  char *name;
+  char arguments;
+};
+
+#ifdef MAIN
+struct COMMAND commandtable[] =
 {
   {
     0x0, "nop", "", 1
@@ -754,7 +763,255 @@ struct COMMAND
   },
   {
     0xff, "rst", "7", 1
+  },
+  {
+    0, 0, 0, 0
   }
 };
 
-#define NUMCOMMANDS	(sizeof(command)/sizeof(struct COMMAND))
+struct COMMARG commargtable[] =
+{
+  {
+    "aci", BYTE
+  },
+  {
+    "adc", REG
+  },
+  {
+    "add", REG
+  },
+  {
+    "adi", BYTE
+  },
+  {
+    "ana", REG
+  },
+  {
+    "ani", BYTE
+  },
+  {
+    "call", WORD
+  },
+  {
+    "cc", WORD
+  },
+  {
+    "cma", NONE
+  },
+  {
+    "cmc", NONE
+  },
+  {
+    "cmp", REG
+  },
+  {
+    "cm", WORD
+  },
+  {
+    "cnc", WORD
+  },
+  {
+    "cnz", WORD
+  },
+  {
+    "cpe", WORD
+  },
+  {
+    "cpi", BYTE
+  },
+  {
+    "cpo", WORD
+  },
+  {
+    "cp", WORD
+  },
+  {
+    "cz", WORD
+  },
+  {
+    "daa", NONE
+  },
+  {
+    "dad", DREG
+  },
+  {
+    "dcr", REG
+  },
+  {
+    "dcx", DREG
+  },
+  {
+    "di", NONE
+  },
+  {
+    "ei", NONE
+  },
+  {
+    "hlt", NONE
+  },
+  {
+    "inr", REG
+  },
+  {
+    "inx", DREG
+  },
+  {
+    "in", BYTE
+  },
+  {
+    "jc", WORD
+  },
+  {
+    "jmp", WORD
+  },
+  {
+    "jm", WORD
+  },
+  {
+    "jnc", WORD
+  },
+  {
+    "jnz", WORD
+  },
+  {
+    "jpe", WORD
+  },
+  {
+    "jpo", WORD
+  },
+  {
+    "jp", WORD
+  },
+  {
+    "jz", WORD
+  },
+  {
+    "ldax", LDAX
+  },
+  {
+    "lda", WORD
+  },
+  {
+    "lhld", NONE
+  },
+  {
+    "lxi", LXI
+  },
+  {
+    "mov", MOV
+  },
+  {
+    "mvi", MVI
+  },
+  {
+    "nop", NONE
+  },
+  {
+    "ora", REG
+  },
+  {
+    "ori", BYTE
+  },
+  {
+    "out", BYTE
+  },
+  {
+    "pchl", NONE
+  },
+  {
+    "pop", PUSH
+  },
+  {
+    "push", PUSH
+  },
+  {
+    "ral", NONE
+  },
+  {
+    "rar", NONE
+  },
+  {
+    "rc", NONE
+  },
+  {
+    "ret", NONE
+  },
+  {
+    "rlc", NONE
+  },
+  {
+    "rm", NONE
+  },
+  {
+    "rnc", NONE
+  },
+  {
+    "rnz", NONE
+  },
+  {
+    "rpe", NONE
+  },
+  {
+    "rpo", NONE
+  },
+  {
+    "rp", NONE
+  },
+  {
+    "rrc", NONE
+  },
+  {
+    "rst", RST
+  },
+  {
+    "rz", NONE
+  },
+  {
+    "sbb", REG
+  },
+  {
+    "sbi", BYTE
+  },
+  {
+    "shld", WORD
+  },
+  {
+    "sphl", NONE
+  },
+  {
+    "stax", LDAX
+  },
+  {
+    "sta", WORD
+  },
+  {
+    "stc", NONE
+  },
+  {
+    "sub", REG
+  },
+  {
+    "sui", BYTE
+  },
+  {
+    "xchg", NONE
+  },
+  {
+    "xra", REG
+  },
+  {
+    "xri", BYTE
+  },
+  {
+    "xthl", NONE
+  },
+  {
+    0, 0
+  }
+};
+
+#else
+extern struct COMMAND commandtable[];
+extern struct COMMARG commargtable[];
+
+#endif

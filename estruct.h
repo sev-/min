@@ -1,12 +1,14 @@
 /*
- * $Id: estruct.h,v 1.2 1995/01/07 20:03:14 sev Exp $
+ * $Id: estruct.h,v 1.3 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: estruct.h,v $
- * Revision 1.2  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * Revision 1.3  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * revision
  * 
  * Revision 1.4  1994/08/15  21:27:30  sev i'm sorry, but this indent IMHO more
  * better ;-) Revision 1.3  1994/08/15  20:42:11  sev Indented Revision 1.2
@@ -41,6 +43,7 @@
 
 #define TYPEAH	1		  /* type ahead causes update to be skipped	 */
 #define	CLEAN	1		  /* de-alloc memory on exit			 */
+#define MEMMAP	0
 
 /*
  * #define	CALLED	0		  /* is emacs a called subroutine? or

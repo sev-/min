@@ -1,13 +1,14 @@
 /*
- * $Id: docom.c,v 1.5 1995/01/07 20:03:14 sev Exp $
+ * $Id: docom.c,v 1.6 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: docom.c,v $
- * Revision 1.5  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.4  1995/01/06  21:45:10  sev It's full emulator
- * IMHO
+ * Revision 1.6  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.5  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.4  1995/01/06  21:45:10  sev It's full
+ * emulator IMHO
  * 
  * Revision 1.3  1994/07/04  20:19:39  sev Added all non-arithmetic command
  * (without pchl and xthl)
@@ -20,6 +21,7 @@
  */
 
 #include "hardware.h"
+#include "estruct.h"
 #include "proto.h"
 
 void do_command ()

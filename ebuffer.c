@@ -1,12 +1,14 @@
 /*
- * $Id: ebuffer.c,v 1.2 1995/01/07 20:03:14 sev Exp $
+ * $Id: ebuffer.c,v 1.3 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: ebuffer.c,v $
- * Revision 1.2  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * Revision 1.3  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * revision
  * 
  * 
  */
@@ -20,7 +22,7 @@
  */
 #include	<stdio.h>
 #include	"estruct.h"
-#include	"etype.h"
+#include	"eproto.h"
 #include	"edef.h"
 #include	"english.h"
 
@@ -137,7 +139,7 @@ BUFFER *getdefb (void)		  /* get the default buffer for a use or kill */
   return (bp);
 }
 
-zotbuf (BUFFER * bp)		  /* kill the buffer pointed to by bp */
+int zotbuf (BUFFER * bp)	  /* kill the buffer pointed to by bp */
 {
   register BUFFER *bp1;
   register BUFFER *bp2;
@@ -194,9 +196,9 @@ int anycb (void)
  * create it. The "bflag" is the settings for the flags in in buffer.
  */
 BUFFER *bfind (char *bname, int cflag, int bflag)
-/* register char *bname;	  /* name of buffer to find */
-/* int cflag;			  /* create it if not found? */
-/* int bflag;			  /* bit settings for a new buffer */
+/* register char *bname;	   name of buffer to find */
+/* int cflag;			   create it if not found? */
+/* int bflag;			   bit settings for a new buffer */
 {
   register BUFFER *bp;
   register BUFFER *sb;		  /* buffer to insert after */
@@ -272,7 +274,7 @@ BUFFER *bfind (char *bname, int cflag, int bflag)
  * if this gets called; the caller must arrange for the updates that are
  * required. Return TRUE if everything looks good.
  */
-bclear (BUFFER * bp)
+int bclear (BUFFER * bp)
 {
   register LINE *lp;
   register int s;
@@ -294,5 +296,77 @@ bclear (BUFFER * bp)
     bp->b_marko[cmark] = 0;
   }
   bp->b_fcol = 0;
+  return (TRUE);
+}
+
+/*
+ * Attach a buffer to a window. The values of dot and mark come from the
+ * buffer if the use count is 0. Otherwise, they come from some other window.
+ */
+int usebuffer (int f, int n)
+{
+  register BUFFER *bp;		  /* temporary buffer pointer */
+
+  /* get the buffer name to switch to */
+  bp = getdefb ();
+  bp = getcbuf (TEXT24, bp ? bp->b_bname : mainbuf, TRUE);
+  /* "Use buffer" */
+  if (!bp)
+    return (ABORT);
+
+  /* make it invisable if there is an argument */
+  if (f == TRUE)
+    bp->b_flag |= BFINVS;
+
+  /* switch to it in any case */
+  return (swbuffer (bp));
+}
+
+/*
+ * Dispose of a buffer, by name. Ask for the name. Look it up (don't get too
+ * upset if it isn't there at all!). Get quite upset if the buffer is being
+ * displayed. Clear the buffer (ask if the buffer has been changed). Then
+ * free the header line and the buffer header. Bound to "C-X K".
+ */
+int killbuffer (int f, int n)
+{
+  register BUFFER *bp;		  /* ptr to buffer to dump */
+
+  /* get the buffer name to kill */
+  bp = getdefb ();
+  bp = getcbuf (TEXT26, bp ? bp->b_bname : mainbuf, TRUE);
+  /* "Kill buffer" */
+  if (bp == NULL)
+    return (ABORT);
+
+  return (zotbuf (bp));
+}
+
+int namebuffer (int f, int n)	  /* Rename the current buffer	 */
+{
+  register BUFFER *bp;		  /* pointer to scan through all buffers */
+  char bufn[NBUFN];		  /* buffer to hold buffer name */
+
+  /* prompt for and get the new buffer name */
+ask:if (mlreply (TEXT29, bufn, NBUFN) != TRUE)
+    /* "Change buffer name to: " */
+    return (FALSE);
+
+  /* and check for duplicates */
+  bp = bheadp;
+  while (bp != NULL)
+  {
+    if (bp != curbp)
+    {
+      /* if the names the same */
+      if (strcmp (bufn, bp->b_bname) == 0)
+	goto ask;		  /* try again */
+    }
+    bp = bp->b_bufp;		  /* onward */
+  }
+
+  strcpy (curbp->b_bname, bufn);  /* copy buffer name to structure */
+  upmode ();			  /* make all mode lines replot */
+  mlerase ();
   return (TRUE);
 }

@@ -1,12 +1,14 @@
 /*
- * $Id: einput.c,v 1.2 1995/01/07 20:03:14 sev Exp $
+ * $Id: einput.c,v 1.3 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: einput.c,v $
- * Revision 1.2  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * Revision 1.3  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * revision
  * 
  * 
  */
@@ -45,7 +47,7 @@
 
 #include	<stdio.h>
 #include	"estruct.h"
-#include	"etype.h"
+#include	"eproto.h"
 #include	"edef.h"
 #include	"english.h"
 
@@ -452,4 +454,47 @@ char *complete (char *prompt, char *defval, int maxlen)
       }
     }
   }
+}
+
+/*
+ * getcbuf:	get a completion from the user for a buffer name.
+ * 
+ * I was goaded into this by lots of other people's completion code.
+ */
+
+BUFFER *getcbuf (char *prompt, char *defval, int createflag)
+/* char *prompt;		prompt to user on command line */
+/* char *defval;		default value to display to user */
+/* int createflag;		should this create a new buffer? */
+{
+  char *sp;			  /* ptr to the returned string */
+
+  sp = complete (prompt, defval, NBUFN);
+  if (sp == NULL)
+    return (NULL);
+
+  return (bfind (sp, createflag, 0));
+}
+
+/*
+ * Write a prompt into the message line, then read back a response. Keep
+ * track of the physical position of the cursor. If we are in a keyboard
+ * macro throw the prompt away, and return the remembered response. This lets
+ * macros run at full speed. The reply is always terminated by a carriage
+ * return. Handle erase, kill, and abort keys.
+ */
+int mlreply (char *prompt, char *buf, int nbuf)
+{
+  return (getstring (prompt, buf, nbuf, ctoec ((int) '\r')));
+}
+
+/*
+ * ctoec:	character to extended character pull out the CTRL and SPEC
+ * prefixes (if possible)
+ */
+int ctoec (int c)
+{
+  if ((c >= 0x00 && c <= 0x1F) || c == 0x7F)
+    c = CTRL | (c ^ 0x40);
+  return (c);
 }

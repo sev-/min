@@ -1,19 +1,21 @@
 /*
- * $Id: emenu.c,v 1.2 1995/01/07 20:03:14 sev Exp $
+ * $Id: emenu.c,v 1.3 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: emenu.c,v $
- * Revision 1.2  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * Revision 1.3  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * revision
  * 
  * 
  */
 
 #include	<stdio.h>
 #include	"estruct.h"
-#include	"etype.h"
+#include	"eproto.h"
 #include	"edef.h"
 
 #define LEFT_KEY	(SPEC|'F')
@@ -21,7 +23,7 @@
 #define UP_KEY		(SPEC|'P')
 #define	DOWN_KEY	(SPEC|'N')
 #define ENTER		(CTRL|'M')
-#define ESCAPE		META
+#define ESCAPE		META|CTRL|'['
 
 #define NULLFUNC	((int (*)(void))NULL)
 
@@ -73,9 +75,8 @@ int compilemenuF (void);
 int quitF (void);
 int savefileF (void);
 int readfileF (void);
-
-int compileprogram (void);
-int askquit (void);
+int runF (void);
+int compileprogramF (void);
 
 MENUITEM topmenuitem[] =
 {
@@ -83,6 +84,7 @@ MENUITEM topmenuitem[] =
   {"Text", "Tt", textmenuF, YES},
   {"Word", "Ww", NULLFUNC, NO},
   {"Compile", "Cc", compilemenuF, YES},
+  {"Run", "Rr", runF, NO},
   {"Quit", "Qq", quitF, NO},
   {"", ""}
 };
@@ -109,7 +111,8 @@ MENUITEM textmenuitem[] =
 
 MENUITEM compilemenuitem[] =
 {
-  {"Compile", "Cc", compileprogram, NO},
+  {"Compile", "Cc", compileprogramF, NO},
+  {"Output", "Oo", NULLFUNC, NO},
   {"", ""}
 };
 
@@ -141,8 +144,8 @@ int playmenu (MENU * menu)
 	  TTmove (menu->y1 + menu->curritem + 1, menu->x1 + 1);
 	  TTputc (' ');
 	  TTputs (menu->item[menu->curritem].text);
-	  for (i = 2 + strlen (menu->item[menu->curritem].text); i < menu->width - 1;
-	       i++)
+	  for (i = 2 + strlen (menu->item[menu->curritem].text);
+				i < menu->width - 1; i++)
 	    TTputc (' ');
 	  TTrev (FALSE);
 	  break;
@@ -167,7 +170,7 @@ int playmenu (MENU * menu)
 	    break;
 	}
       }
-      TTmove (term.t_nrow, term.t_ncol);
+      TTmove (0, 0);
       fflush (stdout);
     }
 
@@ -175,7 +178,9 @@ int playmenu (MENU * menu)
     if (need_enter && menu->item[menu->curritem].func != NULLFUNC &&
 	menu->item[menu->curritem].can_go_into == YES)
     {
-      menu->curritem += menu->item[menu->curritem].func ();
+      if((need_enter = menu->item[menu->curritem].func ()) == LEAVE)
+        return LEAVE;
+      menu->curritem += need_enter; 
       continue;
     }
 
@@ -208,7 +213,7 @@ int playmenu (MENU * menu)
 	break;
       case ESCAPE:
       case CTRL | 'G':
-	return STAY;
+	return LEAVE;
 	break;
       case ENTER:
 	if (menu->item[menu->curritem].func != NULLFUNC)
@@ -326,8 +331,9 @@ void outmenu (MENU * menu)
       break;
   }
 
-  fflush (stdout);
+  TTmove (0, 0);
   TTrev (FALSE);
+  fflush (stdout);
 }
 
 void closemenu (MENU * menu)
@@ -336,16 +342,15 @@ void closemenu (MENU * menu)
 
   for (i = menu->y1; i < menu->length + menu->y1; i++)
     updoneline (i, menu->x1, menu->x1 + menu->width);
+  TTmove (0, 0);
   update (TRUE);
 }
 
 int mainmenu (void)		  /* main menu on top the screen */
 {
   playmenu (topmenu);
-  TTmove (0, 0);
-  TTputs ("                                        ");
-  TTputs ("                                        ");
   updoneline (0, 0, term.t_ncol);
+  TTmove (0, 0);
   return 0;
 }
 
@@ -403,5 +408,17 @@ int savefileF (void)
 int readfileF (void)
 {
   fileread (1, 1);
+  return LEAVE;
+}
+
+int runF (void)
+{
+  runprogram ();
+  return LEAVE;
+}
+
+int compileprogramF (void)
+{
+  comp (1, 1);
   return LEAVE;
 }

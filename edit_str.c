@@ -1,17 +1,18 @@
 /*
- * $Id: edit_str.c,v 1.1 1995/01/07 20:05:08 sev Exp $
+ * $Id: edit_str.c,v 1.2 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: edit_str.c,v $
- * Revision 1.1  1995/01/07 20:05:08  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.1  1995/01/07  20:05:08  sev Initial revision
+ * 
  * 
  */
 
 #include "estruct.h"
-#include "etype.h"
+#include "eproto.h"
 
 #define ENTER		CTRL|'M'  /* ВК */
 #define HOMEKEY		SPEC|'<'  /* РТ */
@@ -36,12 +37,13 @@ void chmod (int, int, int);
  * Функция позволяет редактировать в окне заданного размера строку
  * 
  * 
- * сдвигая ее влево иои вправо и помечая выход строки за рамки окна. Функция возвращает отредактированную строку в том в
- *  row             - номер строки окна start_col       - левая координата
- * nd_col         - правая координата окна buffersize      - размер байт;
- * originalstring  - указатель на title           - указатель на sourceattr
- * - атрибуты для destattr        - атрибуты Выход: Функция , если строка не
- *  была нажата APE ), либо 1, если строка была отредактирована
+ * 
+ * 
+ * сдвигая ее влево иои вправо и помечая выход строки за рамки окна. Функция возвращает отредактированную строку в
+ * w             - номер строки окна start_col       - левая l         - правая координата
+ * uffersize      - размер байт; originalstring  - указатель на title
+ * - указатель на sourceattr - атрибуты estattr        - атрибуты Выход:
+ *  если строка не была нажата APE ), либо 1, если строка была отредактирована
  */
 int edit_string (int row, int start_col, int nd_col, int buffersize,
 	  char *originalstring, char *title, char sourceattr, char destattr)
@@ -97,7 +99,7 @@ int edit_string (int row, int start_col, int nd_col, int buffersize,
 
   /* вывести строку и текущий режим на экран */
   update_edit_str (row, start_col, end_col, beg_status, end_status, pos_beg,
-	  sourceattr);
+		   sourceattr);
   chmod (row, end_col, mode);
 
   /* установить курсор на нужную позицию */
@@ -135,7 +137,7 @@ key_loop:
 	  goto key_loop;
       }
       update_edit_str (row, start_col, end_col, beg_status,
-	      end_status, pos_beg, destattr);
+		       end_status, pos_beg, destattr);
       break;
     case PGUPKEY:		  /* нажата клавиша УТ */
       if (!entry)
@@ -148,7 +150,7 @@ key_loop:
       beg_status = 0;
       end_status = (rest <= width) ? 0 : 1;
       update_edit_str (row, start_col, end_col, beg_status,
-	      end_status, pos_beg, destattr);
+		       end_status, pos_beg, destattr);
       break;
     case LEFTKEY:
       if (!entry)
@@ -170,7 +172,7 @@ key_loop:
 	  beg_status = (rest == length) ? 0 : 1;
 	  end_status = (rest <= width) ? 0 : 1;
 	  update_edit_str (row, start_col, end_col, beg_status,
-		  end_status, pos_beg, destattr);
+			   end_status, pos_beg, destattr);
 	}
 	break;
       }
@@ -195,7 +197,7 @@ key_loop:
 	  beg_status = 1;
 	}
 	update_edit_str (row, start_col, end_col, beg_status,
-		end_status, pos_beg, destattr);
+			 end_status, pos_beg, destattr);
 	break;
       }
       goto key_loop;
@@ -203,7 +205,7 @@ key_loop:
       if (!entry)
       {
 	update_edit_str (row, start_col, end_col, beg_status,
-		end_status, pos_beg, destattr);
+			 end_status, pos_beg, destattr);
 	entry = 1;
       }
       if (cursorpos_w < endcolumn)
@@ -227,7 +229,7 @@ key_loop:
 	  beg_status = ((length - rest) < width) ? 0 : 1;
 	  end_status = (rest <= 1) ? 0 : 1;
 	  update_edit_str (row, start_col, end_col, beg_status,
-		  end_status, pos_beg, destattr);
+			   end_status, pos_beg, destattr);
 	}
 	break;
       }
@@ -248,17 +250,17 @@ key_loop:
 	    pos_beg--;
 	    beg_status = (length - rest < cursorpos_w) ? 0 : 1;
 	    update_edit_str (row, start_col, end_col, beg_status,
-		    end_status, pos_beg, destattr);
+			     end_status, pos_beg, destattr);
 	    break;
 	  }
 	  update_edit_str (row, start_col, end_col, beg_status,
-		  end_status, pos_beg, destattr);
+			   end_status, pos_beg, destattr);
 	}
 	else
 	{
 	  end_status = (rest <= width - cursorpos_w) ? 0 : 1;
 	  update_edit_str (row, start_col, end_col, beg_status,
-		  end_status, pos_beg, destattr);
+			   end_status, pos_beg, destattr);
 	}
       }
       break;
@@ -278,13 +280,13 @@ key_loop:
 	    beg_status = (length - rest <= cursorpos_w) ? 0 : 1;
 	    pos_beg--;
 	    update_edit_str (row, start_col, end_col, beg_status,
-		    end_status, pos_beg, destattr);
+			     end_status, pos_beg, destattr);
 	  }
 	  else
 	  {
 	    cursorpos_w--;
 	    update_edit_str (row, start_col, end_col, beg_status,
-		    end_status, pos_beg, destattr);
+			     end_status, pos_beg, destattr);
 	    break;
 	  }
 	}
@@ -295,7 +297,7 @@ key_loop:
 	    cursorpos_w--;
 	    end_status = (rest <= width - cursorpos_w) ? 0 : 1;
 	    update_edit_str (row, start_col, end_col, beg_status,
-		    end_status, pos_beg, destattr);
+			     end_status, pos_beg, destattr);
 	    break;
 	  }
 	  else
@@ -304,7 +306,7 @@ key_loop:
 	    {
 	      beg_status = 0;
 	      update_edit_str (row, start_col, end_col, beg_status,
-		      end_status, pos_beg, destattr);
+			       end_status, pos_beg, destattr);
 	    }
 	  }
 	}
@@ -330,7 +332,7 @@ key_loop:
 	cursorpos_s = pos_beg = buffer;
 	entry = 1;
 	update_edit_str (row, start_col, end_col, beg_status,
-		end_status, pos_beg, destattr);
+			 end_status, pos_beg, destattr);
 	at (0, 0);
       }
       if ((!mode) || (!rest))
@@ -344,7 +346,7 @@ key_loop:
 	{
 	  end_status = (rest < width - cursorpos_w) ? 0 : 1;
 	  update_edit_str (row, start_col, end_col, beg_status,
-		  end_status, pos_beg, destattr);
+			   end_status, pos_beg, destattr);
 	  cursorpos_s++;
 	  cursorpos_w++;
 	  break;
@@ -353,7 +355,7 @@ key_loop:
 	cursorpos_s++;
 	beg_status = (length - rest < cursorpos_w - width) ? 0 : 1;
 	update_edit_str (row, start_col, end_col, beg_status,
-		end_status, pos_beg, destattr);
+			 end_status, pos_beg, destattr);
       }
       else
 	/* режим замены */
@@ -367,7 +369,7 @@ key_loop:
 	rest--;
 	cursorpos_s++;
 	update_edit_str (row, start_col, end_col, beg_status,
-		end_status, pos_beg, destattr);
+			 end_status, pos_beg, destattr);
       }
   }
   at (0, cursorpos_w);
@@ -382,7 +384,7 @@ quit:
 }
 
 void update_edit_str (int row, int startcolumn, int endcolumn, int beg_status,
-	      int end_status, char *pos_beg, char attr)
+		       int end_status, char *pos_beg, char attr)
 {
   register int counter;
 

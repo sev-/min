@@ -1,12 +1,14 @@
 /*
- * $Id: english.h,v 1.2 1995/01/07 20:03:14 sev Exp $
+ * $Id: english.h,v 1.3 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: english.h,v $
- * Revision 1.2  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * Revision 1.3  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * revision
  * 
  * Revision 1.3  1994/08/15  21:27:30  sev i'm sorry, but this indent IMHO more
  * better ;-) Revision 1.2  1994/08/15  20:42:11  sev Indented Revision 1.1
@@ -25,7 +27,10 @@
 #define	TEXT9	"[Mark %d set]"
 #define	TEXT11	"No mark %d in this window"
 #define	TEXT19	"[Key not bound]"
+#define TEXT24  "Use buffer"
+#define TEXT26	"Kill buffer"
 #define	TEXT28	"Buffer is being displayed"
+#define TEXT29	"Change buffer name to: "
 #define	TEXT32	"Discard changes"
 #define	TEXT34	"File: "
 #define	TEXT61	"%%Negative argument to kill is illegal"
@@ -63,7 +68,7 @@
 #define	TEXT141	"I/O ERROR, "
 #define	TEXT142	"OUT OF MEMORY, "
 #define	TEXT143	" line"
-#define TEXT144 "Write file: "
+#define TEXT144 "Write file"
 #define	TEXT145	"No file name"
 #define	TEXT146	"Truncated file..write it out"
 #define	TEXT147	"Narrowed Buffer..write it out"
@@ -83,3 +88,12 @@
 #define	TEXT185	"Termcap entry incomplete (columns)"
 #define	TEXT186	"Incomplete termcap entry\n"
 #define	TEXT187	"Terminal description too big!\n"
+#define TEXT203 "Window number out of range"
+#define TEXT204 "Can not delete this window"
+#define TEXT205 "Cannot split a %d line window"
+#define TEXT206 "Only one window"
+#define TEXT207 "Impossible change"
+#define TEXT209 "%%Screen size out of range"
+#define TEXT210 "%%Screen width out of range"
+#define TEXT223 "%%Column origin out of range"
+#define TEXT224 "%%Row origin out of range"

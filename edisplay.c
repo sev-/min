@@ -1,12 +1,14 @@
 /*
- * $Id: edisplay.c,v 1.2 1995/01/07 20:03:14 sev Exp $
+ * $Id: edisplay.c,v 1.3 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: edisplay.c,v $
- * Revision 1.2  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * Revision 1.3  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * revision
  * 
  * 
  */
@@ -22,7 +24,7 @@
 #include	<stdio.h>
 #include	<stdarg.h>
 #include	"estruct.h"
-#include	"etype.h"
+#include	"eproto.h"
 #include	"edef.h"
 #include	"english.h"
 
@@ -34,7 +36,11 @@
 #define VFCOL	0x0010		  /* color change requested	 */
 
 static VIDEO **vscreen;		  /* Virtual screen. */
+
+#if	MEMMAP == 0
 static VIDEO **pscreen;		  /* Physical screen. */
+
+#endif
 
 /*
  * Initialize the data structures used by the display code. The edge vectors
@@ -58,10 +64,12 @@ void vtinit (void)
   if (vscreen == (VIDEO **) NULL)
     meexit (1);
 
+#if	MEMMAP == 0
   /* allocate the physical shadow screen array */
   pscreen = (VIDEO **) malloc (term.t_mrow * sizeof (VIDEO *));
   if (pscreen == (VIDEO **) NULL)
     meexit (1);
+#endif
 
   /* for every line in the display */
   for (i = 0; i < term.t_mrow; ++i)
@@ -76,6 +84,7 @@ void vtinit (void)
     /* connect virtual line to line array */
     vscreen[i] = vp;
 
+#if	MEMMAP == 0
     /* allocate and initialize physical shadow screen line */
     vp = (VIDEO *) malloc (sizeof (VIDEO) + term.t_mcol);
     if (vp == (VIDEO *) NULL)
@@ -83,6 +92,7 @@ void vtinit (void)
 
     vp->v_flag = 0;
     pscreen[i] = vp;
+#endif
   }
 }
 
@@ -219,6 +229,11 @@ int update (int force)		  /* force update past type ahead? */
 
   /* recalc the current hardware cursor location */
   updpos ();
+
+#if	MEMMAP
+  /* update the cursor and flush the buffers */
+  movecursor (currow, curcol - lbound);
+#endif
 
   /* check for lines to de-extend */
   upddex ();
@@ -546,16 +561,22 @@ void upddex (void)
 void updgar (void)
 {
   register int i;
+
+#if	MEMMAP == 0
   register int j;
   register char *txt;
+
+#endif
 
   for (i = 0; i < term.t_nrow; ++i)
   {
     vscreen[i]->v_flag |= VFCHG;
     vscreen[i]->v_flag &= ~VFREV;
+#if	MEMMAP == 0
     txt = pscreen[i]->v_text;
     for (j = 0; j < term.t_ncol; ++j)
-      txt[j] = 7;		  /* unimpossible character */
+      txt[j] = 7;		  /* impossible character */
+#endif
   }
 
   movecursor (0, 0);		  /* Erase the screen. */
@@ -581,7 +602,11 @@ int updupd (int force)		  /* forced update flag */
       if (force == FALSE && typahead ())
 	return (TRUE);
 #endif
+#if	MEMMAP
+      updateline (i, vp1);
+#else
       updateline (i, vp1, pscreen[i]);
+#endif
     }
   }
   return (TRUE);
@@ -624,6 +649,20 @@ void updext (void)
  * character sequences; we are using VT52 functionality. Update the physical
  * row and column variables. It does try an exploit erase to end of line.
  */
+#if	MEMMAP
+/* UPDATELINE specific code for memory mapped displays */
+
+int updateline (int row, struct VIDEO * vp)
+{
+  if (vp->v_flag & VFREQ)
+    TTrev (TRUE);
+  scwrite (row, vp->v_text, 7, 0);
+  if (vp->v_flag & VFREQ)
+    TTrev (FALSE);
+  vp->v_flag &= ~(VFCHG | VFCOL); /* flag this line as changed */
+}
+
+#else
 int updateline (int row, struct VIDEO * vp, struct VIDEO * pp)
 /* int row;			  /* row of screen to update */
 /* struct VIDEO *vp;		  /* virtual screen image */
@@ -755,6 +794,8 @@ int updateline (int row, struct VIDEO * vp, struct VIDEO * pp)
   vp->v_flag &= ~VFCHG;		  /* flag this line as updated */
   return (TRUE);
 }
+
+#endif
 
 /*
  * Redisplay the mode line for the window pointed to by the "wp". This is the
@@ -1125,9 +1166,11 @@ void updoneline (int i, int from, int to)
 
   vscreen[i]->v_flag |= VFCHG;
   vscreen[i]->v_flag &= ~VFREV;
+#if	MEMMAP == 0
   txt = pscreen[i]->v_text;
   for (j = from; j < to; ++j)
     txt[j] = 7;			  /* impossible character */
+#endif
 }
 
 #if	CLEAN
@@ -1139,10 +1182,14 @@ void vtfree (void)
   for (i = 0; i < term.t_mrow; ++i)
   {
     free (vscreen[i]);
+#if	MEMMAP == 0
     free (pscreen[i]);
+#endif
   }
   free (vscreen);
+#if	MEMMAP == 0
   free (pscreen);
+#endif
 }
 
 #endif

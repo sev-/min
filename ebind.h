@@ -1,12 +1,14 @@
 /*
- * $Id: ebind.h,v 1.2 1995/01/07 20:03:14 sev Exp $
+ * $Id: ebind.h,v 1.3 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: ebind.h,v $
- * Revision 1.2  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * Revision 1.3  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * revision
  * 
  * Revision 1.4  1994/08/15  21:27:30  sev i'm sorry, but this indent IMHO more
  * better ;-) Revision 1.3  1994/08/15  20:42:11  sev Indented Revision 1.2
@@ -43,8 +45,8 @@ KEYTAB keytab[NBINDS] =
   {CTRL | 'L', BINDFNC, refresh},
   {CTRL | 'M', BINDFNC, newline},
   {CTRL | 'N', BINDFNC, forwline},
-  {CTRL | 'P', BINDFNC, backline},
   {CTRL | 'O', BINDFNC, mainmenu},
+  {CTRL | 'P', BINDFNC, backline},
   {CTRL | 'Q', BINDFNC, quote},
   {CTRL | 'R', BINDFNC, backsearch},
   {CTRL | 'S', BINDFNC, forwsearch},
@@ -55,19 +57,34 @@ KEYTAB keytab[NBINDS] =
   {CTRL | 'Z', BINDFNC, backpage},
   {CTRL | '[', BINDFNC, meta},
   {CTLX | CTRL | 'C', BINDFNC, quit},
+  {CTLX | CTRL | 'N', BINDFNC, mvdnwind},
+  {CTLX | CTRL | 'P', BINDFNC, mvupwind},
   {CTLX | CTRL | 'R', BINDFNC, fileread},
-  {CTLX | CTRL | 'S', BINDFNC, filesave},
   {CTLX | CTRL | 'W', BINDFNC, filewrite},
+  {CTLX | CTRL | 'Z', BINDFNC, shrinkwind},
   {CTLX | '(', BINDFNC, ctlxlp},
   {CTLX | ')', BINDFNC, ctlxrp},
+  {CTLX | '^', BINDFNC, enlargewind},
+  {CTLX | '0', BINDFNC, delwind},
+  {CTLX | '1', BINDFNC, onlywind},
+  {CTLX | '2', BINDFNC, splitwind},
+  {CTLX | 'B', BINDFNC, usebuffer},
   {CTLX | 'C', BINDFNC, spawncli},
   {CTLX | 'E', BINDFNC, ctlxe},
+  {CTLX | 'K', BINDFNC, killbuffer},
+  {CTLX | 'O', BINDFNC, nextwind},
+  {CTLX | 'P', BINDFNC, prevwind},
+  {CTLX | 'S', BINDFNC, filesave},
+  {CTLX | 'W', BINDFNC, resize},
   {CTLX | 'X', BINDFNC, nextbuffer},
   {META | CTRL | 'G', BINDFNC, gotomark},
+  {META | CTRL | 'L', BINDFNC, reposition},
+  {META | CTRL | 'N', BINDFNC, namebuffer},
   {META | CTRL | 'R', BINDFNC, qreplace},
   {META | ' ', BINDFNC, setmark},
   {META | '>', BINDFNC, gotoeob},
   {META | '<', BINDFNC, gotobob},
+  {META | 'C', BINDFNC, comp},
   {META | 'R', BINDFNC, sreplace},
   {META | 'V', BINDFNC, backpage},
   {META | 'W', BINDFNC, copyregion},

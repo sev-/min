@@ -1,12 +1,14 @@
 /*
- * $Id: edef.h,v 1.2 1995/01/07 20:03:14 sev Exp $
+ * $Id: edef.h,v 1.3 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: edef.h,v $
- * Revision 1.2  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * Revision 1.3  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * revision
  * 
  * Revision 1.3  1994/08/15  21:27:30  sev i'm sorry, but this indent IMHO more
  * better ;-) Revision 1.2  1994/08/15  20:42:11  sev Indented Revision 1.1
@@ -35,6 +37,7 @@ CONST char *modename[] =
 {				  /* name of modes		 */
   "WRAP", "CMODE", "SPELL", "EXACT", "VIEW", "OVER",
   "MAGIC", "CRYPT", "ASAVE"};
+char mainbuf[] = "main";	  /* name of main buffer		 */
 int gmode = 0;			  /* global editor mode	   */
 int gflags = GFREAD;		  /* global control flag	      */
 int gasave = 256;		  /* global ASAVE size		 */
@@ -138,6 +141,7 @@ extern short kbdm[];		  /* Holds kayboard macro data	 */
 extern int eolexist;		  /* does clear to EOL exist?	 */
 extern int revexist;		  /* does reverse video exist?	 */
 extern CONST char *modename[];	  /* text names of modes		 */
+extern char mainbuf[];		  /* name of main buffer		 */
 extern KEYTAB keytab[];		  /* key bind to functions table	 */
 extern int gmode;		  /* global editor mode		 */
 extern int gflags;		  /* global control flag		 */

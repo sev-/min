@@ -1,12 +1,14 @@
 /*
- * $Id: proto.h,v 1.2 1995/01/07 20:03:14 sev Exp $
+ * $Id: proto.h,v 1.3 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: proto.h,v $
- * Revision 1.2  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * Revision 1.3  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * revision
  * 
  * 
  */
@@ -51,4 +53,9 @@ void SubA (byte);
 int WhatF (char);
 void XorA (byte);
 
-int compileprogram (void);	  /* compile.c */
+/* warn.c */
+void addmessage (LINE *, char *, int);
+void clearerrorbuffer (void);
+
+/* compile.c */
+void compileprogram (int);

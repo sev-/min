@@ -1,12 +1,14 @@
 /*
- * $Id: efile.c,v 1.2 1995/01/07 20:03:14 sev Exp $
+ * $Id: efile.c,v 1.3 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: efile.c,v $
- * Revision 1.2  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * Revision 1.3  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * revision
  * 
  * 
  */
@@ -22,7 +24,7 @@
 
 #include	<stdio.h>
 #include	"estruct.h"
-#include	"etype.h"
+#include	"eproto.h"
 #include	"edef.h"
 #include	"english.h"
 
@@ -259,6 +261,7 @@ int writeout (char *fn)
   int sflag;			  /* are we safe saving? */
   char tname[NSTRING];		  /* temporary file name */
   char buf[NSTRING];		  /* message buffer */
+  char tmpnam[NBUFN], *tmp1;
 
   /* determine if we will use the save method */
   sflag = FALSE;
@@ -325,10 +328,20 @@ int writeout (char *fn)
 
     if (sflag)
     {
-      /* erase original file */
+
+      /*
+       * tmp1 = ((tmp1 = strrchr(fn, '/')) == (char *)NULL) ? fn: tmp1;
+       * 
+       * if(strlen(tmp1) > 11) { sprintf(tmpnam, "%s", fn);
+       * strcpy(&tmpnam[strlen(tmpnam)-2], ".."); } else
+       */
+      sprintf (tmpnam, "%s.b", fn);
+
       /* rename temporary file to original name */
-      if (unlink (fn) == 0 && rename1 (tname, fn) == 0)
-	;
+      /* if (unlink(fn) == 0 && rename(tname, fn) == 0) { */
+      if (rename (fn, tmpnam) == 0 && rename (tname, fn) == 0)
+      {
+      }
       else
       {
 	strcat (buf, TEXT150);

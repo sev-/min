@@ -1,12 +1,14 @@
 /*
- * $Id: emain.c,v 1.2 1995/01/07 20:03:14 sev Exp $
+ * $Id: emain.c,v 1.3 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: emain.c,v $
- * Revision 1.2  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * Revision 1.3  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * revision
  * 
  * 
  */
@@ -31,7 +33,7 @@
 #define maindef
 
 #include	"estruct.h"	  /* global structures and defines */
-#include	"etype.h"	  /* variable prototype definitions */
+#include	"eproto.h"	  /* variable prototype definitions */
 #include	"edef.h"	  /* global definitions */
 #include	"english.h"	  /* human language definitions */
 #include	"ebind.h"	  /* default key bindings */

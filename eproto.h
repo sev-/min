@@ -1,12 +1,14 @@
 /*
- * $Id: eproto.h,v 1.2 1995/01/07 20:03:14 sev Exp $
+ * $Id: eproto.h,v 1.3 1995/01/14 15:08:09 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: eproto.h,v $
- * Revision 1.2  1995/01/07 20:03:14  sev
- * Maked indent and some editor changes
- * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * Revision 1.3  1995/01/14 15:08:09  sev
+ * Menu works right. Compiler also.
+ * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * revision
  * 
  * Revision 1.5  1994/08/15  21:27:30  sev i'm sorry, but this indent IMHO more
  * better ;-) Revision 1.4  1994/08/15  20:42:11  sev Indented Revision 1.3
@@ -62,6 +64,7 @@ char *complete (char *, char *, int);
 int ctlxe (int, int);
 int ctlxlp (int, int);
 int ctlxrp (int, int);
+int ctoec (int c);
 int ctrlg (int, int);
 int dcline (int, char **);
 int delins (int, char *, int);
@@ -85,6 +88,7 @@ int forwhunt (int, int);
 int forwline (int, int);
 int forwpage (int, int);
 int forwsearch (int, int);
+BUFFER *getcbuf (char *prompt, char *defval, int createflag);
 int getccol (int);
 int getcline (void);
 int getcmd (void);
@@ -101,6 +105,7 @@ int indent (int, int);
 void initchars (void);
 int insspace (int, int);
 void kdelete (void);
+int killbuffer (int, int);
 int killregion (int, int);
 int killtext (int, int);
 int kinsert (char);
@@ -119,9 +124,11 @@ void mlputf (int);
 void mlputi (int, int);
 void mlputli (long, int);
 void mlputs (char *);
+int mlreply (char *prompt, char *buf, int nbuf);
 int mlyesno (char *);
 void modeline (WINDOW *);
 void movecursor (int, int);
+int namebuffer (int, int);
 int newline (int, int);
 int nextbuffer (int, int);
 int nullproc (int, int);
@@ -147,7 +154,6 @@ int typahead (void);
 void unqname (char *);
 void updall (WINDOW *);
 int update (int);
-int updateline (int, struct VIDEO *, struct VIDEO *);
 void upddex (void);
 void updext (void);
 void updgar (void);
@@ -157,6 +163,7 @@ void updpos (void);
 int updupd (int);
 void upmode (void);
 int upscreen (int, int);
+int usebuffer (int, int);
 void vteeol (void);
 void vtinit (void);
 void vtmove (int, int);
@@ -187,7 +194,7 @@ char *strcat ();
 char *strcpy ();
 char *malloc ();
 
-/* menu.c */
+/* emenu.c */
 int mainmenu (void);
 void initmenus (void);
 
@@ -214,3 +221,38 @@ char *tgoto ();
 int ttputs ();
 void putpad (char *);
 void vtfree (void);
+
+/* compile.c */
+void compileprogram (int);
+
+/* run.c */
+void runprogram (void);
+
+/* ewindow.c */
+int reposition (int, int);
+int nextwind (int, int);
+int prevwind (int, int);
+int mvdnwind (int, int);
+int mvupwind (int, int);
+int onlywind (int, int);
+int delwind (int, int);
+int splitwind (int, int);
+int enlargewind (int, int);
+int shrinkwind (int, int);
+int resize (int, int);
+int newsize (int, int);		  /* resize the screen, re-writing the screen */
+int newwidth (int, int);	  /* resize the screen, re-writing the screen */
+int new_col_org (int, int);	  /* reposition the screen, re-writing the
+				   * screen */
+int new_row_org (int, int);	  /* reposition the screen, re-writing the
+				   * screen */
+
+#if	MEMMAP
+int updateline (int row, struct VIDEO * vp1);
+
+#else
+int updateline (int, struct VIDEO *, struct VIDEO *);
+
+#endif
+
+int comp (int f, int n);
