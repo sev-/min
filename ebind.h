@@ -1,10 +1,13 @@
 /*
- * $Id: ebind.h,v 1.7 1995/10/14 15:46:11 sev Exp $
+ * $Id: ebind.h,v 1.8 1996/11/12 15:48:56 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: ebind.h,v $
- * Revision 1.7  1995/10/14 15:46:11  sev
+ * Revision 1.8  1996/11/12 15:48:56  sev
+ * *** empty log message ***
+ *
+ * Revision 1.7  1995/10/14  15:46:11  sev
  * Program was in MSDOS and done A _LOT OF_ changes
  *
  * Revision 1.6  1995/01/27  20:52:27  sev
@@ -86,7 +89,7 @@ KEYTAB keytab[NBINDS] =
   {CTLX | 'P', BINDFNC, prevwind},	/* goto previous window */
   {CTLX | 'S', BINDFNC, filesave},	/* save current file without asking name */
   {CTLX | 'W', BINDFNC, resize},	/* resize current window */
-/*  {CTLX | 'X', BINDFNC, nextbuffer},	/* select next buffer */
+  {CTLX | 'X', BINDFNC, nextbuffer},	/* select next buffer */
   {META | CTRL | 'G', BINDFNC, gotomark},	/* goto mark */
   {META | CTRL | 'L', BINDFNC, reposition},	/* reposition in current window */
   {META | CTRL | 'N', BINDFNC, namebuffer},	/* change buffer name */

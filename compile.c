@@ -1,10 +1,13 @@
 /*
- * $Id: compile.c,v 1.8 1995/10/14 15:46:11 sev Exp $
+ * $Id: compile.c,v 1.9 1996/11/12 15:48:56 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: compile.c,v $
- * Revision 1.8  1995/10/14 15:46:11  sev
+ * Revision 1.9  1996/11/12 15:48:56  sev
+ * *** empty log message ***
+ *
+ * Revision 1.8  1995/10/14  15:46:11  sev
  * Program was in MSDOS and done A _LOT OF_ changes
  *
  * Revision 1.7  1995/01/27  20:52:27  sev
@@ -36,7 +39,7 @@
 
 enum
 {
-  TCOMMENT, TCOMMAND, TLABEL, TERROR, TWORD, TBYTE, TREG, TORG
+  TCOMMENT, TCOMMAND, TLABEL, TERROR, TWORD, TBYTE, TREG, TORG, TEQU, TDATA
 };
 
 BUFFER *bfind (char *, int, int);
@@ -137,6 +140,38 @@ void compileprogram (int pass)
 	  if (pass == 1)
 	    if (addlabel (tmp, curraddr))
 	      adderror (curline, "label redefiniton");
+	  break;
+	case TDATA:
+	  gettoken (tmp1, s, &lpos, llength (curline));
+	  if (tokentype (tmp1) != TWORD && tokentype (tmp1) != TBYTE)
+	    if (pass == 2)
+	    {
+	      adderror (curline, "number expected");
+	      break;
+	    }
+	  if (parseword (tmp1, 0) == -1)
+	  {
+	    sprintf (tmp, "undefined label (%s)", tmp1);
+	    adderror (curline, tmp);
+	    break;
+	  }
+	  switch(tmp[1])
+	  {
+	    case 'b':
+	      if (pass == 2)
+	        tomemory (liststr, curraddr, parsebyte (tmp1));
+	      curraddr++;
+	      break;
+	    case 'w':
+	      curraddr += 2;
+	      if (pass == 2)
+	      {
+		tomemory (liststr, curraddr, (byte) parseword (tmp1, 0));	/* low byte */
+		tomemory (liststr, curraddr+1, (byte) parseword (tmp1, 1));	/* high byte */
+	      }
+	      curraddr += 2;
+	      break;
+	  }
 	  break;
 	case TCOMMAND:
 	  strcpy (tmp1, tmp);
@@ -422,6 +457,34 @@ void compileprogram (int pass)
 	  lpos = llength (curline);
 	  break;
 	default:
+          gettoken (tmp1, s, &lpos, llength (curline));
+          if (tokentype(tmp1) == TEQU)
+          {
+            gettoken (tmp1, s, &lpos, llength (curline));
+            if (pass == 1)
+              break;
+	    if (tokentype (tmp1) != TWORD && tokentype (tmp1) != TREG &&
+		  tokentype (tmp1) != TBYTE)
+	    {
+	      adderror (curline, "undefined constant");
+	      break;
+	    }
+	    if (parseword (tmp1, 0) == -1)
+	    {
+	      sprintf (tmp, "undefined label (%s)", tmp1);
+	      adderror (curline, tmp);
+	      break;
+	    }
+	    strcat(tmp, ":");
+	    if (addlabel (tmp, parseword (tmp1, 2)))
+	    {
+	      sprintf (tmp1, "equ redefinition (%s)", tmp);
+	      adderror (curline, tmp1);
+	    }
+	    sprintf (liststr, "      %04x ", parseword (tmp1, 2));
+
+	    break;
+          }
 	  sprintf (tmp1, "%s unexpected", tmp);
 	  if (pass == 1)
 	    adderror (curline, tmp1);
@@ -587,6 +650,10 @@ int tokentype (char *token)
     return TLABEL;
   if (!strcasecmp (token, "org"))
     return TORG;
+  if (!strcasecmp (token, "equ"))
+    return TEQU;
+  if (!strcasecmp (token, "db") || !strcasecmp (token, "dw"))
+    return TDATA;
   if (iscommand (token))
     return TCOMMAND;
   if (!token[1] && strchr ("abcdehlABCDEHL", token[0]))
@@ -652,7 +719,7 @@ int addlabel (char *label, int addr)
   char tmp[TMPSTRLEN];
 
   strcpy (tmp, label);
-  tmp[strlen (tmp) - 1] = '\0';
+  tmp[strlen (tmp) - 1] = '\0'; /* chop off ':' */
 
   for (i = 0; i < numlabels; i++)
     if (!strcmp (tmp, labeltable[i].name))
