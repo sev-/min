@@ -1,12 +1,13 @@
 /*
- * $Id: erandom.c,v 1.3 1995/01/14 15:08:09 sev Exp $
+ * $Id: erandom.c,v 1.4 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: erandom.c,v $
- * Revision 1.3  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * Revision 1.4  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
+ * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
  * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
  * revision
  * 
@@ -24,27 +25,33 @@
 #include	"edef.h"
 #include	"english.h"
 
-int getcline (void)		  /* get the current line number */
+int getlinenum(BUFFER *bp, LINE *sline);
+
+int getcline (void)
 {
-  register LINE *lp;		  /* current line */
-  register int numlines;	  /* # of lines before point */
+  return getlinenum (curbp, curwp->w_dotp);
+}
 
-  /* starting at the beginning of the buffer */
-  lp = lforw (curbp->b_linep);
+int getlinenum(BUFFER *bp, LINE *sline)	/* get the a line number */
+{
+        register LINE   *lp;		/* current line */
+        register int	numlines;	/* # of lines before point */
 
-  /* start counting lines */
-  numlines = 0;
-  while (lp != curbp->b_linep)
-  {
-    /* if we are on the current line, record it */
-    if (lp == curwp->w_dotp)
-      break;
-    ++numlines;
-    lp = lforw (lp);
-  }
+	/* starting at the beginning of the buffer */
+        lp = lforw(bp->b_linep);
 
-  /* and return the resulting count */
-  return (numlines + 1);
+	/* start counting lines */
+        numlines = 0;
+        while (lp != bp->b_linep) {
+		/* if we are on the current line, record it */
+		if (lp == sline)
+			break;
+		++numlines;
+		lp = lforw(lp);
+        }
+
+	/* and return the resulting count */
+	return(numlines + 1);
 }
 
 /* Return current column.  Stop at first non-blank given TRUE argument. */
@@ -408,8 +415,8 @@ int ernd (void)			  /* returns a random integer */
 
 int execkey (KEYTAB * key, int f, int n)	/* execute a function bound
 						 * to a key */
-/* KEYTAB *key;			  /* key to execute */
-/* int f, n;			  /* agruments to C function */
+/* KEYTAB *key;			key to execute */
+/* int f, n;			agruments to C function */
 {
   register int status;		  /* error return */
 

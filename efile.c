@@ -1,12 +1,13 @@
 /*
- * $Id: efile.c,v 1.3 1995/01/14 15:08:09 sev Exp $
+ * $Id: efile.c,v 1.4 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: efile.c,v $
- * Revision 1.3  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * Revision 1.4  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
+ * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
  * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
  * revision
  * 
@@ -36,8 +37,8 @@
  * called after the buffer is set up and before it is read.
  */
 int readin (char *fname, int lockfl)
-/* char fname[];		  /* name of file to read */
-/* int lockfl;			  /* check for file locks? */
+/* char fname[];		name of file to read */
+/* int lockfl;			check for file locks? */
 {
   register LINE *lp1;
   register LINE *lp2;
@@ -167,7 +168,7 @@ char *makename (char *bname, char *fname)
 }
 
 void unqname (char *name)	  /* make sure a buffer name is unique */
-/* char *name;			  /* name to check on */
+/* char *name;			name to check on */
 {
   register char *sp;
 

@@ -1,12 +1,13 @@
 /*
- * $Id: ebind.h,v 1.3 1995/01/14 15:08:09 sev Exp $
+ * $Id: ebind.h,v 1.4 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: ebind.h,v $
- * Revision 1.3  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * Revision 1.4  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
+ * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
  * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
  * revision
  * 
@@ -85,6 +86,7 @@ KEYTAB keytab[NBINDS] =
   {META | '>', BINDFNC, gotoeob},
   {META | '<', BINDFNC, gotobob},
   {META | 'C', BINDFNC, comp},
+  {META | 'N', BINDFNC, runprogram},
   {META | 'R', BINDFNC, sreplace},
   {META | 'V', BINDFNC, backpage},
   {META | 'W', BINDFNC, copyregion},

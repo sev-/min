@@ -1,12 +1,13 @@
 /*
- * $Id: esearch.c,v 1.3 1995/01/14 15:08:09 sev Exp $
+ * $Id: esearch.c,v 1.4 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: esearch.c,v $
- * Revision 1.3  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * Revision 1.4  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
+ * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
  * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
  * revision
  * 
@@ -187,8 +188,8 @@ int backhunt (int f, int n)
  * Moore Software-Practice and Experience, vol 10, 501-506 (1980)
  */
 int scanner (char *patrn, int direct, int beg_or_end)
-/* char *patrn;			  /* string to scan for */
-/* int direct;			  /* which way to go. */
+/* char *patrn;			string to scan for */
+/* int direct;			which way to go. */
 
 /*
  * int beg_or_end;		  /* put point at beginning or end of
@@ -517,9 +518,9 @@ int qreplace (int f, int n)
  * might be enabled (according to kind).
  */
 int replaces (int kind, int f, int n)
-/* int kind;			  /* Query enabled flag */
-/* int f;			  /* default flag */
-/* int n;			  /* # of repetitions wanted */
+/* int kind;			Query enabled flag */
+/* int f;			default flag */
+/* int n;			# of repetitions wanted */
 {
   register int status;		  /* success flag on pattern inputs */
   register int rlength;		  /* length of replacement string */

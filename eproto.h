@@ -1,12 +1,13 @@
 /*
- * $Id: eproto.h,v 1.3 1995/01/14 15:08:09 sev Exp $
+ * $Id: eproto.h,v 1.4 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: eproto.h,v $
- * Revision 1.3  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * Revision 1.4  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
+ * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
  * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
  * revision
  * 
@@ -116,6 +117,8 @@ void lfree (LINE *);
 int linsert (int, char);
 int linstr (char *);
 int lnewline (void);
+int lover (char *ostr);
+int lowrite (char c);
 int meexit (int);
 int meta (int, int);
 void mlerase (void);
@@ -199,7 +202,7 @@ int mainmenu (void);
 void initmenus (void);
 
 /* edit_str.c */
-int edit_string (int, int, int, int, char *, char *, char, char);
+int edit_string (int, int, int, int, char *, char *);
 
 int ttopen (void);
 int ttgetc (void);
@@ -221,12 +224,6 @@ char *tgoto ();
 int ttputs ();
 void putpad (char *);
 void vtfree (void);
-
-/* compile.c */
-void compileprogram (int);
-
-/* run.c */
-void runprogram (void);
 
 /* ewindow.c */
 int reposition (int, int);
@@ -255,4 +252,8 @@ int updateline (int, struct VIDEO *, struct VIDEO *);
 
 #endif
 
+/* compile.c */
 int comp (int f, int n);
+
+/* run.c */
+int runprogram (int, int);

@@ -1,12 +1,13 @@
 /*
- * $Id: eline.c,v 1.3 1995/01/14 15:08:09 sev Exp $
+ * $Id: eline.c,v 1.4 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: eline.c,v $
- * Revision 1.3  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * Revision 1.4  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
+ * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
  * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
  * revision
  * 
@@ -344,8 +345,8 @@ int lnewline (void)
  * buffer. The "kflag" is TRUE if the text should be put in the kill buffer.
  */
 int ldelete (long n, int kflag)
-/* long n;				  /* # of chars to delete */
-/* int kflag;			  /* put killed text in kill buffer flag */
+/* long n;			# of chars to delete */
+/* int kflag;			put killed text in kill buffer flag */
 {
   register char *cp1;
   register char *cp2;
@@ -621,4 +622,41 @@ int yank (int f, int n)
     }
   }
   return (TRUE);
+}
+
+/*
+ * lover -- Overwrite a string at the current point
+ */
+int lover (char *ostr)
+{
+  register int status = TRUE;
+
+  if (ostr != NULL)
+    while (*ostr && status == TRUE)
+    {
+      status = ((*ostr == '\r') ? lnewline () : lowrite (*ostr));
+
+      /* Insertion error? */
+      if (status != TRUE)
+      {
+	mlwrite (TEXT172);
+	/* "%%Out of memory while overwriting" */
+	break;
+      }
+      ostr++;
+    }
+  return (status);
+}
+
+/*
+ * Overwrite a character into the current line at the current position
+ * 
+ */
+int lowrite (char c)
+{
+  if (curwp->w_doto < curwp->w_dotp->l_used &&
+      (lgetc (curwp->w_dotp, curwp->w_doto) != '\t' ||
+       (curwp->w_doto) % 8 == 7))
+    ldelete (1L, FALSE);
+  return (linsert (1, c));
 }

@@ -1,12 +1,13 @@
 /*
- * $Id: english.h,v 1.3 1995/01/14 15:08:09 sev Exp $
+ * $Id: english.h,v 1.4 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: english.h,v $
- * Revision 1.3  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * Revision 1.4  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
+ * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
  * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
  * revision
  * 
@@ -82,6 +83,7 @@
 #define	TEXT162	" [y/n]? "
 #define	TEXT168	"%%Can not insert string"
 #define	TEXT170	"bug: linsert"
+#define	TEXT172	"%%Out of memory while overwriting"
 #define	TEXT182	"Environment variable TERM not defined!"
 #define	TEXT183	"Unknown terminal type %s!"
 #define	TEXT184	"termcap entry incomplete (lines)"

@@ -1,12 +1,13 @@
 /*
- * $Id: emenu.c,v 1.3 1995/01/14 15:08:09 sev Exp $
+ * $Id: emenu.c,v 1.4 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: emenu.c,v $
- * Revision 1.3  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * Revision 1.4  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
+ * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
  * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
  * revision
  * 
@@ -61,6 +62,7 @@ MENU *topmenu;
 MENU *filemenu;
 MENU *textmenu;
 MENU *compilemenu;
+MENU *runmenu;
 
 int playmenu (MENU * menu);
 MENU *makemenu (int, MENUITEM *, int, int);
@@ -68,6 +70,12 @@ void outmenu (MENU * menu);
 void closemenu (MENU * menu);
 void initmenus (void);
 
+/* compile.c */
+void compileprogram (int);
+int comp (int f, int n);
+
+/* run.c */
+void askstartlabel (void);
 
 int filemenuF (void);
 int textmenuF (void);
@@ -77,15 +85,19 @@ int savefileF (void);
 int readfileF (void);
 int runF (void);
 int compileprogramF (void);
+int shellF (void);
+int saveasF (void);
+int forwsearchF (void);
+int backsearchF (void);
+int runmenuF (void);
+int startlabelF (void);
 
 MENUITEM topmenuitem[] =
 {
   {"File", "Ff", filemenuF, YES},
   {"Text", "Tt", textmenuF, YES},
-  {"Word", "Ww", NULLFUNC, NO},
   {"Compile", "Cc", compilemenuF, YES},
-  {"Run", "Rr", runF, NO},
-  {"Quit", "Qq", quitF, NO},
+  {"Run", "Rr", runmenuF, YES},
   {"", ""}
 };
 
@@ -93,26 +105,30 @@ MENUITEM filemenuitem[] =
 {
   {"Read", "Rr", readfileF, NO},
   {"Save", "Ss", savefileF, NO},
-  {"save As...", "Aa", NULLFUNC, NO},
+  {"save As...", "Aa", saveasF, NO},
   {"Load", "Ll", NULLFUNC, NO},
-  {"sHell", "Hh", NULLFUNC, NO},
+  {"sHell", "Hh", shellF, NO},
+  {"Quit", "Qq", quitF, NO},
   {"", ""}
 };
 
 MENUITEM textmenuitem[] =
 {
-  {"search Forward", "Ff", NULLFUNC, NO},
-  {"search Reverse", "Rr", NULLFUNC, NO},
-  {"hunt fOrward", "Oo", NULLFUNC, NO},
-  {"hunt Backward", "Bb", NULLFUNC, NO},
-  {"Incremental search", "Ii", NULLFUNC, NO},
+  {"search Forward", "Ff", forwsearchF, NO},
+  {"search Reverse", "Rr", backsearchF, NO},
   {"", ""}
 };
 
 MENUITEM compilemenuitem[] =
 {
   {"Compile", "Cc", compileprogramF, NO},
-  {"Output", "Oo", NULLFUNC, NO},
+  {"", ""}
+};
+
+MENUITEM runmenuitem[] =
+{
+  {"Run", "Rr", runF, NO},
+  {"Start label", "Ss", startlabelF, NO},
   {"", ""}
 };
 
@@ -145,7 +161,7 @@ int playmenu (MENU * menu)
 	  TTputc (' ');
 	  TTputs (menu->item[menu->curritem].text);
 	  for (i = 2 + strlen (menu->item[menu->curritem].text);
-				i < menu->width - 1; i++)
+	       i < menu->width - 1; i++)
 	    TTputc (' ');
 	  TTrev (FALSE);
 	  break;
@@ -171,16 +187,16 @@ int playmenu (MENU * menu)
 	}
       }
       TTmove (0, 0);
-      fflush (stdout);
+      TTflush ();
     }
 
     oldcurr = menu->curritem;
     if (need_enter && menu->item[menu->curritem].func != NULLFUNC &&
 	menu->item[menu->curritem].can_go_into == YES)
     {
-      if((need_enter = menu->item[menu->curritem].func ()) == LEAVE)
-        return LEAVE;
-      menu->curritem += need_enter; 
+      if ((need_enter = menu->item[menu->curritem].func ()) == LEAVE)
+	return LEAVE;
+      menu->curritem += need_enter;
       continue;
     }
 
@@ -333,7 +349,7 @@ void outmenu (MENU * menu)
 
   TTmove (0, 0);
   TTrev (FALSE);
-  fflush (stdout);
+  TTflush ();
 }
 
 void closemenu (MENU * menu)
@@ -380,7 +396,8 @@ void initmenus (void)
   topmenu = makemenu (HORIZ, topmenuitem, 0, 0);
   filemenu = makemenu (VERT, filemenuitem, topmenu->pos[0], 1);
   textmenu = makemenu (VERT, textmenuitem, topmenu->pos[1], 1);
-  compilemenu = makemenu (VERT, compilemenuitem, topmenu->pos[3], 1);
+  compilemenu = makemenu (VERT, compilemenuitem, topmenu->pos[2], 1);
+  runmenu = makemenu (VERT, runmenuitem, topmenu->pos[3], 1);
 }
 
 int compilemenuF (void)
@@ -413,12 +430,52 @@ int readfileF (void)
 
 int runF (void)
 {
-  runprogram ();
+  runprogram (1, 1);
   return LEAVE;
 }
 
 int compileprogramF (void)
 {
   comp (1, 1);
+  return LEAVE;
+}
+
+int shellF (void)
+{
+  spawncli (1, 1);
+  return LEAVE;
+}
+
+int saveasF (void)
+{
+  filewrite (1, 1);
+  return LEAVE;
+}
+
+int forwsearchF (void)
+{
+  forwsearch (1, 1);
+  return LEAVE;
+}
+
+int backsearchF (void)
+{
+  backsearch (1, 1);
+  return LEAVE;
+}
+
+int runmenuF (void)
+{
+  int ret;
+
+  ret = playmenu (runmenu);
+  closemenu (runmenu);
+
+  return ret;
+}
+
+int startlabelF (void)
+{
+  askstartlabel ();
   return LEAVE;
 }

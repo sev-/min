@@ -1,12 +1,13 @@
 /*
- * $Id: docom.c,v 1.6 1995/01/14 15:08:09 sev Exp $
+ * $Id: docom.c,v 1.7 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: docom.c,v $
- * Revision 1.6  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.5  1995/01/07  20:03:14  sev Maked indent and
+ * Revision 1.7  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.6  1995/01/14  15:08:09  sev Menu works right.
+ * Compiler also. Revision 1.5  1995/01/07  20:03:14  sev Maked indent and
  * some editor changes Revision 1.4  1995/01/06  21:45:10  sev It's full
  * emulator IMHO
  * 
@@ -1310,17 +1311,18 @@ int WhatF (char a)
 {
   switch (a)
   {
-      case 'c':return reg_f & 0x01;
+      case 'c':
+      return (reg_f & 0x01) ? 1 : 0;
     case 'n':
-      return reg_f & 0x02;
+      return (reg_f & 0x02) ? 1 : 0;
     case 'p':
-      return reg_f & 0x04;
+      return (reg_f & 0x04) ? 1 : 0;
     case 'h':
-      return reg_f & 0x10;
+      return (reg_f & 0x10) ? 1 : 0;
     case 'z':
-      return reg_f & 0x40;
+      return (reg_f & 0x40) ? 1 : 0;
     case 's':
-      return reg_f & 0x80;
+      return (reg_f & 0x80) ? 1 : 0;
   }
   return reg_f;
 }

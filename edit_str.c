@@ -1,52 +1,53 @@
 /*
- * $Id: edit_str.c,v 1.2 1995/01/14 15:08:09 sev Exp $
+ * $Id: edit_str.c,v 1.3 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: edit_str.c,v $
- * Revision 1.2  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.1  1995/01/07  20:05:08  sev Initial revision
+ * Revision 1.3  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.2  1995/01/14  15:08:09  sev Menu works
+ * right. Compiler also. Revision 1.1  1995/01/07  20:05:08  sev Initial
+ * revision
  * 
  * 
  */
 
+#include <stdio.h>
 #include "estruct.h"
 #include "eproto.h"
+#include "edef.h"
 
-#define ENTER		CTRL|'M'  /* ВК */
-#define HOMEKEY		SPEC|'<'  /* РТ */
-#define PGUPKEY		SPEC|'Z'  /* УТ */
+#define ENTER		CTRL|'M'
+#define HOMEKEY		CTRL|'A'
+#define PGUPKEY		SPEC|'Z'
 #define LEFTKEY		SPEC|'B'
-#define ENDKEY		SPEC|'>'  /* ВПС */
+#define ENDKEY		CTRL|'E'
 #define RIGHTKEY	SPEC|'F'
-#define DELKEY		SPEC|'D'  /* ВНТ */
-#define BACKSPACE	CTRL|'H'  /* ВШ */
-#define OVER		SPEC|'C'  /* ПТ */
+#define DELKEY		CTRL|'D'
+#define BACKSPACE	CTRL|'H'
+#define OVER		SPEC|'C'
 #define HELP		SPEC|'1'
+#define ESC		CTRL|'G'
 
 void update_edit_str (int, int, int, int, int, char *, char);
 void put_status (int, int, int, int, int);
 void delete_char (char *, int);
 void insert_char (char *, int, int);
 void chmod (int, int, int);
+void winopen (int, int, int, int, char *);
+void winclose (int y1, int x1, int y2, int x2);
 
 /**** Функция редактирования строки в окне ****/
 
 /*
  * Функция позволяет редактировать в окне заданного размера строку
  * 
+ * сдвигая ее влево иои вправо и помечая выход строки за рамки окна. Функция возвращает отредактированную строку
  * 
- * 
- * 
- * сдвигая ее влево иои вправо и помечая выход строки за рамки окна. Функция возвращает отредактированную строку в
- * w             - номер строки окна start_col       - левая l         - правая координата
- * uffersize      - размер байт; originalstring  - указатель на title
- * - указатель на sourceattr - атрибуты estattr        - атрибуты Выход:
- *  если строка не была нажата APE ), либо 1, если строка была отредактирована
  */
-int edit_string (int row, int start_col, int nd_col, int buffersize,
-	  char *originalstring, char *title, char sourceattr, char destattr)
+int edit_string (int row, int start_col, int end_col, int buffersize,
+		  char *originalstring, char *title)
 {
   int ch;			  /* код символа */
   int endcolumn, width;
@@ -72,9 +73,7 @@ int edit_string (int row, int start_col, int nd_col, int buffersize,
     return 0;
 
   /* открыть окно */
-  if ((wdo = wxopen (row - 1, start_col - 1, row + 1, end_col + 1, title,
-	     BORDER + BD1 + ACTIVE + CURSOR + NOADJ + CURTAIN, 0, 0)) == -1)
-    return 0;
+  winopen (row - 1, start_col - 1, row + 1, end_col + 1, title);
 
   /* вычислить промежуточные значения */
   width = endcolumn = end_col - start_col;
@@ -95,21 +94,20 @@ int edit_string (int row, int start_col, int nd_col, int buffersize,
   beg_status = 0;
   end_status = (rest <= width) ? 0 : 1;
   mode = 0;			  /* вставка */
-  init_edit_string_help ();
 
   /* вывести строку и текущий режим на экран */
-  update_edit_str (row, start_col, end_col, beg_status, end_status, pos_beg,
-		   sourceattr);
+  update_edit_str (row, start_col, end_col, beg_status, end_status, pos_beg, 1);
   chmod (row, end_col, mode);
 
   /* установить курсор на нужную позицию */
-  at (0, cursorpos_w);
+  TTmove (row, cursorpos_w + start_col);
+  TTflush ();
 
   entry = 0;			  /* нулевое вхождение в цикл */
 
 key_loop:
   /* прочитать код с клавиатуры */
-  switch (ch = getone ())
+  switch (ch = getkey ())
   {
     case ESC:			  /* нажата клавиша АР2 */
       ret_status = 0;
@@ -137,9 +135,10 @@ key_loop:
 	  goto key_loop;
       }
       update_edit_str (row, start_col, end_col, beg_status,
-		       end_status, pos_beg, destattr);
+		       end_status, pos_beg, 0);
       break;
     case PGUPKEY:		  /* нажата клавиша УТ */
+    case CTRL | 'Z':
       if (!entry)
 	entry = 1;
       length = rest = strlen (originalstring);
@@ -150,9 +149,10 @@ key_loop:
       beg_status = 0;
       end_status = (rest <= width) ? 0 : 1;
       update_edit_str (row, start_col, end_col, beg_status,
-		       end_status, pos_beg, destattr);
+		       end_status, pos_beg, 0);
       break;
     case LEFTKEY:
+    case CTRL | 'B':
       if (!entry)
 	entry = 1;
       if (cursorpos_w > 0)
@@ -172,7 +172,7 @@ key_loop:
 	  beg_status = (rest == length) ? 0 : 1;
 	  end_status = (rest <= width) ? 0 : 1;
 	  update_edit_str (row, start_col, end_col, beg_status,
-			   end_status, pos_beg, destattr);
+			   end_status, pos_beg, 0);
 	}
 	break;
       }
@@ -197,15 +197,16 @@ key_loop:
 	  beg_status = 1;
 	}
 	update_edit_str (row, start_col, end_col, beg_status,
-			 end_status, pos_beg, destattr);
+			 end_status, pos_beg, 0);
 	break;
       }
       goto key_loop;
     case RIGHTKEY:
+    case CTRL | 'F':
       if (!entry)
       {
 	update_edit_str (row, start_col, end_col, beg_status,
-			 end_status, pos_beg, destattr);
+			 end_status, pos_beg, 0);
 	entry = 1;
       }
       if (cursorpos_w < endcolumn)
@@ -229,7 +230,7 @@ key_loop:
 	  beg_status = ((length - rest) < width) ? 0 : 1;
 	  end_status = (rest <= 1) ? 0 : 1;
 	  update_edit_str (row, start_col, end_col, beg_status,
-			   end_status, pos_beg, destattr);
+			   end_status, pos_beg, 0);
 	}
 	break;
       }
@@ -250,17 +251,17 @@ key_loop:
 	    pos_beg--;
 	    beg_status = (length - rest < cursorpos_w) ? 0 : 1;
 	    update_edit_str (row, start_col, end_col, beg_status,
-			     end_status, pos_beg, destattr);
+			     end_status, pos_beg, 0);
 	    break;
 	  }
 	  update_edit_str (row, start_col, end_col, beg_status,
-			   end_status, pos_beg, destattr);
+			   end_status, pos_beg, 0);
 	}
 	else
 	{
 	  end_status = (rest <= width - cursorpos_w) ? 0 : 1;
 	  update_edit_str (row, start_col, end_col, beg_status,
-			   end_status, pos_beg, destattr);
+			   end_status, pos_beg, 0);
 	}
       }
       break;
@@ -280,13 +281,13 @@ key_loop:
 	    beg_status = (length - rest <= cursorpos_w) ? 0 : 1;
 	    pos_beg--;
 	    update_edit_str (row, start_col, end_col, beg_status,
-			     end_status, pos_beg, destattr);
+			     end_status, pos_beg, 0);
 	  }
 	  else
 	  {
 	    cursorpos_w--;
 	    update_edit_str (row, start_col, end_col, beg_status,
-			     end_status, pos_beg, destattr);
+			     end_status, pos_beg, 0);
 	    break;
 	  }
 	}
@@ -297,7 +298,7 @@ key_loop:
 	    cursorpos_w--;
 	    end_status = (rest <= width - cursorpos_w) ? 0 : 1;
 	    update_edit_str (row, start_col, end_col, beg_status,
-			     end_status, pos_beg, destattr);
+			     end_status, pos_beg, 0);
 	    break;
 	  }
 	  else
@@ -306,7 +307,7 @@ key_loop:
 	    {
 	      beg_status = 0;
 	      update_edit_str (row, start_col, end_col, beg_status,
-			       end_status, pos_beg, destattr);
+			       end_status, pos_beg, 0);
 	    }
 	  }
 	}
@@ -320,7 +321,6 @@ key_loop:
       chmod (row, end_col, mode);
       break;
     case HELP:
-      edit_string_help_msg ();
       break;
     default:
       if (ch < 32 || ch > 255)
@@ -332,8 +332,8 @@ key_loop:
 	cursorpos_s = pos_beg = buffer;
 	entry = 1;
 	update_edit_str (row, start_col, end_col, beg_status,
-			 end_status, pos_beg, destattr);
-	at (0, 0);
+			 end_status, pos_beg, 0);
+	TTmove (row, start_col);
       }
       if ((!mode) || (!rest))
       {
@@ -346,7 +346,7 @@ key_loop:
 	{
 	  end_status = (rest < width - cursorpos_w) ? 0 : 1;
 	  update_edit_str (row, start_col, end_col, beg_status,
-			   end_status, pos_beg, destattr);
+			   end_status, pos_beg, 0);
 	  cursorpos_s++;
 	  cursorpos_w++;
 	  break;
@@ -355,7 +355,7 @@ key_loop:
 	cursorpos_s++;
 	beg_status = (length - rest < cursorpos_w - width) ? 0 : 1;
 	update_edit_str (row, start_col, end_col, beg_status,
-			 end_status, pos_beg, destattr);
+			 end_status, pos_beg, 0);
       }
       else
 	/* режим замены */
@@ -369,15 +369,16 @@ key_loop:
 	rest--;
 	cursorpos_s++;
 	update_edit_str (row, start_col, end_col, beg_status,
-			 end_status, pos_beg, destattr);
+			 end_status, pos_beg, 0);
       }
   }
-  at (0, cursorpos_w);
+  TTmove (row, cursorpos_w + start_col);
+  TTflush ();
   goto key_loop;
 
 quit:
   free (buffer);
-  wclose (wdo);
+  winclose (row - 1, start_col - 1, row + 1, end_col + 1);
   if (!*originalstring)
     ret_status = 0;
   return ret_status;
@@ -388,35 +389,37 @@ void update_edit_str (int row, int startcolumn, int endcolumn, int beg_status,
 {
   register int counter;
 
-  at (0, 0);
-  for (counter = 0; counter <= (endcolumn - startcolumn); counter++)
-    vcputc (pos_beg[counter], attr);
+  TTmove (row, startcolumn);
+  if (attr)
+    TTrev (TRUE);
+  for (counter = 0; counter <= (endcolumn - startcolumn) && pos_beg[counter];
+       counter++)
+    TTputc (pos_beg[counter]);
+  for (; counter <= (endcolumn - startcolumn); counter++)
+    TTputc (' ');
 
+  if (attr)
+    TTrev (FALSE);
   put_status (row, startcolumn, endcolumn, beg_status, end_status);
 }
 
 void put_status (int row, int startcolumn, int endcolumn, int beg_status,
 		  int end_status)
 {
-  /* отключение оконной логики */
-  override = 1;
-
-  at (row, startcolumn - 1);
+  TTmove (row, startcolumn - 1);
 
   if (beg_status)
-    vcputc ('<', vc.white + vc.bg * vc.black);
+    TTputc ('<');
   else
-    vcputc ('\272', vc.white + vc.bg * vc.black);
+    TTputc ('\272');
 
-  at (row, endcolumn + 1);
+  TTmove (row, endcolumn + 1);
 
   if (end_status)
-    vcputc ('>', vc.white + vc.bg * vc.black);
+    TTputc ('>');
   else
-    vcputc ('\272', vc.white + vc.bg * vc.black);
-
-  /* включение оконной логики */
-  override = 0;
+    TTputc ('\272');
+  TTflush ();
 }
 
 void delete_char (char *sourcestring, int stringlength)
@@ -438,45 +441,60 @@ void insert_char (char *sourcestring, int stringlength, int character)
 
 void chmod (int row, int end_col, int mode)
 {
-  /* отключение оконной логики */
-  override = 1;
-
-  at (row - 1, end_col - 7);
+  TTmove (row - 1, end_col - 7);
 
   if (mode)
-    vcputs (" Ovr ", vc.white + vc.bg * vc.black);
+    TTputs (" Ovr ");
   else
-    vcputs (" Ins ", vc.white + vc.bg * vc.black);
-
-  /* включение оконной логики */
-  override = 0;
+    TTputs (" Ins ");
+  TTflush ();
 }
 
-void edit_string_help_msg ()	  /* функция вызывается по F1 */
+/*
+ * "ESC    - Выход без поиска.               ", "PgUp   - Вывод
+ *           ", "Home   - В начало строки.                ", "End    -
+ *                         ", "Insert - Переключение режима Ins/Ovr     ",
+ * "BkSp   - Удаление символа перед курсором.", "Del    - Удаление символа
+ *   ",
+ */
+
+void winopen (int y1, int x1, int y2, int x2, char *title)
 {
-  int edit_string_help_w;	  /* окно помощи			 */
-  int i;
-  static char *edit_string_help_window[] =
+  int i, j, c;
+
+  c = (x2 - x1 - strlen (title)) / 2;
+
+  TTmove (y1, x1);
+  TTputc ('╔');
+  for (i = 0; i < c; i++)
+    TTputc ('═');
+  TTputs (title);
+  i += strlen (title) + 1;
+  for (; i < x2 - x1; i++)
+    TTputc ('═');
+  TTputc ('╗');
+
+  for (i = 1; i < y2 - y1 - 1; i++)
   {
-    "ESC    - Выход без поиска.               ",
-    "PgUp   - Вывод исходной строки.          ",
-    "Home   - В начало строки.                ",
-    "End    - В конец.                        ",
-    "Insert - Переключение режима Ins/Ovr     ",
-    "BkSp   - Удаление символа перед курсором.",
-    "Del    - Удаление символа над курсором.  ",
-  };
+    TTmove (i + y1 + 1, x1);
+    TTputc ('║');
+    for (j = 2; j < x2 - x1; j++)
+      TTputc (' ');
+    TTputc ('║');
+  }
+  TTmove (y2, x1);
+  TTputc ('╚');
+  for (i = 1; i < x2 - x1; i++)
+    TTputc ('═');
+  TTputc ('╝');
+}
 
+void winclose (int y1, int x1, int y2, int x2)
+{
+  int i;
 
-  edit_string_help_w = wxopen (10 - sizeof (edit_string_help_sm_wind) / sizeof (char *) / 2,
-			       35 - strlen (edit_string_help_window[0]) /2,
-	       15 + sizeof (edit_string_help_sm_wind) / sizeof (char *) / 2,
-			       45 + strlen (edit_string_help_window[0]) /2,
-			   " Помощь ", ACTIVE + BORDER + BD1 + NOADJ, 0, 0);
-  for (i = 0; i < sizeof (edit_string_help_sm_wind) / sizeof (char *); i++)
-    atsay (i + 1, 5, edit_string_help_window[i]);
-  i += 2;
-  atsay (i, 9, "Нажмите любую клавишу");
-  getone ();
-  wclose (edit_string_help_w);
+  for (i = y1; i <= y2; i++)
+    updoneline (i, x1, x2);
+  TTmove (0, 0);
+  update (TRUE);
 }

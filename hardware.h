@@ -1,13 +1,14 @@
 /*
- * $Id: hardware.h,v 1.3 1995/01/14 15:08:09 sev Exp $
+ * $Id: hardware.h,v 1.4 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: hardware.h,v $
- * Revision 1.3  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
- * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * Revision 1.4  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.3  1995/01/14  15:08:09  sev Menu works
+ * right. Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent
+ * and some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
  * revision
  * 
  * Revision 1.3  1994/07/04  20:19:39  sev Added getword definition
@@ -22,7 +23,7 @@
 typedef unsigned char byte;
 typedef unsigned short word;
 
-/* reg_f =  s z ac 0 p 1 */
+/* reg_f =  s z ac 0 p 1 n c */
 
 #define NUMLABELS	100	  /* size of label list */
 #define TMPSTRLEN	80	  /* size of temporary strings */
@@ -34,6 +35,11 @@ word reg_sp, reg_pc;
 byte interrupt_state;
 
 byte memory[65536];
+char startlabel[TMPSTRLEN] = "start";
+
+byte memoryforout[3];
+byte outport[3];
+byte inport[3];
 
 #else
 
@@ -42,6 +48,11 @@ extern word reg_sp, reg_pc;
 extern byte interrupt_state;
 
 extern byte memory[65536];
+extern char startlabel[TMPSTRLEN];
+
+extern byte memoryforout[3];
+extern byte outport[3];
+extern byte inport[3];
 
 #endif
 

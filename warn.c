@@ -1,12 +1,13 @@
 /*
- * $Id: warn.c,v 1.1 1995/01/14 15:08:09 sev Exp $
+ * $Id: warn.c,v 1.2 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: warn.c,v $
- * Revision 1.1  1995/01/14 15:08:09  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.1  1995/01/14  15:08:09  sev Initial revision
+ * 
  * 
  */
 

@@ -1,12 +1,13 @@
 /*
- * $Id: einput.c,v 1.3 1995/01/14 15:08:09 sev Exp $
+ * $Id: einput.c,v 1.4 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: einput.c,v $
- * Revision 1.3  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
+ * Revision 1.4  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
+ * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
  * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
  * revision
  * 
@@ -375,9 +376,9 @@ char *gtfilename (char *prompt)	  /* prompt to user on command line */
 }
 
 char *complete (char *prompt, char *defval, int maxlen)
-/* prompt;		/* prompt to user on command line */
-/* defval;		/* default value to display to user */
-/* maxlen;		/* maximum length of input field */
+/* prompt;		prompt to user on command line */
+/* defval;		default value to display to user */
+/* maxlen;		maximum length of input field */
 {
   register int c;		  /* current input character */
   register int ec;		  /* extended input character */

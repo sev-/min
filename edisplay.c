@@ -1,13 +1,14 @@
 /*
- * $Id: edisplay.c,v 1.3 1995/01/14 15:08:09 sev Exp $
+ * $Id: edisplay.c,v 1.4 1995/01/17 12:33:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: edisplay.c,v $
- * Revision 1.3  1995/01/14 15:08:09  sev
- * Menu works right. Compiler also.
- * Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
- * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
+ * Revision 1.4  1995/01/17 12:33:59  sev
+ * Now run screen is done
+ * Revision 1.3  1995/01/14  15:08:09  sev Menu works
+ * right. Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent
+ * and some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
  * revision
  * 
  * 
@@ -664,9 +665,9 @@ int updateline (int row, struct VIDEO * vp)
 
 #else
 int updateline (int row, struct VIDEO * vp, struct VIDEO * pp)
-/* int row;			  /* row of screen to update */
-/* struct VIDEO *vp;		  /* virtual screen image */
-/* struct VIDEO *pp;		  /* physical screen image */
+/* int row;			row of screen to update */
+/* struct VIDEO *vp;		virtual screen image */
+/* struct VIDEO *pp;		physical screen image */
 {
   register char *cp1;
   register char *cp2;
