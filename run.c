@@ -1,10 +1,14 @@
 /*
- * $Id: run.c,v 1.4 1995/01/24 15:40:39 sev Exp $
+ * $Id: run.c,v 1.5 1995/01/27 20:52:27 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: run.c,v $
- * Revision 1.4  1995/01/24 15:40:39  sev
+ * Revision 1.5  1995/01/27 20:52:27  sev
+ * Added Animate (only for Unix), Step over, Continue
+ * Fixed bug with start label
+ *
+ * Revision 1.4  1995/01/24  15:40:39  sev
  * Added inverse line while run; play_error; start label; Labels buffer
  *
  * Revision 1.3  1995/01/21  15:19:59  sev
@@ -35,12 +39,12 @@ void edit_regs (void);
 void edit_ports (void);
 void out_edit_ports_help (void);
 void out_edit_regs_help (void);
-int find_start_label (void);
+int go_program (void);
+void step_over (void);
+void animate (void);
 
 int runprogram (int f, int n)
 {
-  BUFFER *runbuf, *cbuf;
-  int c, quitflag = 0;
   char tmp[TMPSTRLEN];
 
   if (need_compile ())
@@ -52,13 +56,41 @@ int runprogram (int f, int n)
       if (need_compile ())
         return 1;
     }
-      
-  if (!find_start_label ())
-  {
-    sprintf (tmp, "Start label %s not found. Set it correct", startlabel);
-    show_msg (tmp, 0);
-    return 1;
-  }
+    if (!find_start_label ())
+    {
+      sprintf (tmp, "Start label %s not found. Set it correct", startlabel);
+      show_msg (tmp, 0);
+      return 1;
+    }
+    return go_program ();
+}
+
+int continueprogram (int f, int n)
+{
+  char tmp[TMPSTRLEN];
+
+  if (need_compile ())
+    if(!show_msg ("Program not compiled. Recompile it?", 1))
+      return 1;
+    else
+    {
+      comp (1, 1);
+      if (need_compile ())
+        return 1;
+      if (!find_start_label ())
+      {
+        sprintf (tmp, "Start label %s not found. Set it correct", startlabel);
+        show_msg (tmp, 0);
+        return 1;
+      }
+    }
+    return go_program ();
+}
+
+int go_program (void)
+{
+  BUFFER *runbuf, *cbuf;
+  int c, quitflag = 0;
 
   cbuf = curbp;
   swbuffer (bfind (LISTBUFFERNAME, 1, 0));
@@ -91,9 +123,13 @@ int runprogram (int f, int n)
       case CTRL | 'L':		/* Refresh */
 	sgarbf = TRUE;
 	break;
-      case SPEC | '8':		/* Step */
-      case 's':
-      case 'S':
+      case 'a':			/* Animate */
+      case 'A':
+	animate ();
+	break;
+      case SPEC | '8':		/* trace Into */
+      case 'i':
+      case 'I':
 	if (terminateprogram)
 	  break;
 	do_command ();
@@ -101,10 +137,20 @@ int runprogram (int f, int n)
 	if (terminateprogram)
 	  show_msg ("Program  terminated", 0);
 	break;
+      case SPEC | '0':		/* Step over */
+      case 's':
+      case 'S':
+	if (terminateprogram)
+	  break;
+	step_over ();
+	outshape (1);
+	if (terminateprogram)
+	  show_msg ("Program  terminated", 0);
+	break;
       case SPEC | '1':		/* Restart */
       case 't':
       case 'T':
-	reg_pc = 0;
+	find_start_label ();
 	terminateprogram = 0;
 	outshape (1);
 	break;
@@ -131,6 +177,7 @@ int runprogram (int f, int n)
 
   onlywind (1, 1);
   modeflag = 1;
+
   return 1;
 }
 
@@ -148,21 +195,19 @@ void outshape (int numshape)
       outmem ();
       outports ();
       outhelp ();
-      gotobob (1, 1);
       outprog ();
       break;
     case 2:
       out_edit_ports_help ();
       outports ();
-      gotobob (1, 1);
       break;
     case 3:
       out_edit_regs_help ();
       outregs ();
-      gotobob (1, 1);
       break;
   }
 
+  gotobob (1, 1);
   update (TRUE);
 }
 
@@ -271,7 +316,7 @@ void outprog (void)
   } */
   gotobob (1, 1);
 
-  sprintf (tmp, "%04x  ", reg_pc);
+  sprintf (tmp, "\r%04x ", reg_pc);
   setjtable (tmp);
   scanner (tmp, FORWARD, PTEND);
 /*  if (getccol (FALSE) == 6)
@@ -325,16 +370,6 @@ void outports (void)
   outtext (PORTSY+2, PORTSX+35, tmp1);
 }
 
-#define HELPX	40
-#define HELPY	0
-
-void outhelp (void)
-{
-  outtext (HELPY, HELPX,   "F8 - Step    F3 - edit Regs           ");
-  outtext (HELPY+1, HELPX, "F1 - resTart  P - edit Ports          ");
-  outtext (HELPY+2, HELPX, "^G - eXit                             ");
-}
-
 void edit_regs (void)
 {
   int c;
@@ -361,6 +396,10 @@ void edit_regs (void)
       case 'x':
       case 'X':
 	quitflag = 1;
+	break;
+      case CTRL | 'L':		/* Refresh */
+	sgarbf = TRUE;
+	update (TRUE);
 	break;
       case CTRL | 'F':		/* Forward */
       case SPEC | 'F':
@@ -483,6 +522,10 @@ void edit_ports (void)
       case 'X':
 	quitflag = 1;
 	break;
+      case CTRL | 'L':		/* Refresh */
+	sgarbf = TRUE;
+	update (TRUE);
+	break;
       case CTRL | 'F':		/* Forward */
       case SPEC | 'F':
       case 'R':
@@ -527,6 +570,16 @@ void edit_ports (void)
     }
   }
 }  
+
+#define HELPX	40
+#define HELPY	0
+
+void outhelp (void)
+{
+  outtext (HELPY, HELPX,   "F8 - trace Into  F10 - Step over      ");
+  outtext (HELPY+1, HELPX, "F1 - resTart     P - edit Ports       ");
+  outtext (HELPY+2, HELPX, "^G - eXit        F3 - edit Regs       ");
+}
 
 void out_edit_ports_help (void)
 {
@@ -574,8 +627,61 @@ int find_start_label (void)
     swbuffer (cbuf);
     return 0;
   }
-  sscanf (curwp->w_dotp->l_text, "%*s %x", &reg_pc);
+  sscanf (curwp->w_dotp->l_text, "%*s %04x", &reg_pc);
 
   swbuffer (cbuf);
   return 1;
+}
+
+void step_over (void)
+{
+  char tmp[TMPSTRLEN];
+  const char *throw[] =
+	{"call", "cc", "cm", "cnc", "cnz", "cpe", "cpo", "cp", "cz", "rst", ""};
+  int i, nextaddr;
+
+  nextwind (0, 0);
+
+  gotobob (1, 1);
+
+  sprintf (tmp, "\r%04x ", reg_pc);
+  setjtable (tmp);
+  scanner (tmp, FORWARD, PTEND);
+
+  getcommand_fromline (tmp, curwp->w_dotp->l_text, llength (curwp->w_dotp));
+
+  nextwind (0, 0);
+
+  for (i = 0; throw[i][0] && strcmp (throw[i], tmp); i++);
+  if (throw[i][0])	/* call command */
+  {
+    if (!strcmp (tmp, "rst"))
+      nextaddr = reg_pc+1;
+    else
+      nextaddr = reg_pc+3;
+      
+    while (reg_pc != nextaddr && !terminateprogram)
+      do_command ();
+  }
+  else
+    do_command ();
+}
+
+void animate (void)
+{
+  extern void settermnowait (int);
+  extern int kbhit (void);
+
+  settermnowait (1);
+
+  while (!terminateprogram && !kbhit ())
+  {
+    do_command ();
+    outshape (1);
+  }
+
+  settermnowait (0);
+
+  if (terminateprogram)
+    show_msg ("Program  terminated", 0);
 }

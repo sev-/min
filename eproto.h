@@ -1,10 +1,14 @@
 /*
- * $Id: eproto.h,v 1.5 1995/01/24 15:40:39 sev Exp $
+ * $Id: eproto.h,v 1.6 1995/01/27 20:52:27 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: eproto.h,v $
- * Revision 1.5  1995/01/24 15:40:39  sev
+ * Revision 1.6  1995/01/27 20:52:27  sev
+ * Added Animate (only for Unix), Step over, Continue
+ * Fixed bug with start label
+ *
+ * Revision 1.5  1995/01/24  15:40:39  sev
  * Added inverse line while run; play_error; start label; Labels buffer
  *
  * Revision 1.4  1995/01/17  12:33:59  sev
@@ -260,6 +264,7 @@ int comp (int f, int n);
 
 /* run.c */
 int runprogram (int, int);
+int continueprogram (int, int);
 
 /* for eline.c  in compile.c */
 void set_need_compile ();

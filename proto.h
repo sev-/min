@@ -1,10 +1,14 @@
 /*
- * $Id: proto.h,v 1.6 1995/01/24 15:40:39 sev Exp $
+ * $Id: proto.h,v 1.7 1995/01/27 20:52:27 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: proto.h,v $
- * Revision 1.6  1995/01/24 15:40:39  sev
+ * Revision 1.7  1995/01/27 20:52:27  sev
+ * Added Animate (only for Unix), Step over, Continue
+ * Fixed bug with start label
+ *
+ * Revision 1.6  1995/01/24  15:40:39  sev
  * Added inverse line while run; play_error; start label; Labels buffer
  *
  * Revision 1.5  1995/01/21  15:19:59  sev
@@ -69,6 +73,7 @@ int show_msg (char *, int mode);
 void compileprogram (int);
 int comp (int f, int n);
 void play_errors (void);
+void getcommand_fromline (char *command, char *line, int lsize);
  
 /* run.c */
 int runprogram (int, int);
@@ -76,8 +81,8 @@ void askstartlabel (void);
 void set_need_compile(void);
 void reset_need_compile(void);
 int need_compile(void);
+int find_start_label (void);
 
 /* edit_str.c */
 void winopen (int y1, int x1, int y2, int x2, char *title);
 void winclose (int y1, int x1, int y2, int x2);
-

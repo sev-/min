@@ -1,10 +1,14 @@
 /*
- * $Id: min.c,v 1.6 1995/01/24 15:40:39 sev Exp $
+ * $Id: min.c,v 1.7 1995/01/27 20:52:27 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: min.c,v $
- * Revision 1.6  1995/01/24 15:40:39  sev
+ * Revision 1.7  1995/01/27 20:52:27  sev
+ * Added Animate (only for Unix), Step over, Continue
+ * Fixed bug with start label
+ *
+ * Revision 1.6  1995/01/24  15:40:39  sev
  * Added inverse line while run; play_error; start label; Labels buffer
  *
  * Revision 1.5  1995/01/17  12:33:59  sev
@@ -31,15 +35,6 @@ int emacs (int, char **);
 
 main (int argc, char **argv)
 {
-  memoryforout[0] = 10;
-  memoryforout[1] = 17;
-  memoryforout[2] = 20;
-  inport[0] = 22;
-  inport[1] = 0x55;
-  inport[2] = 0xaa;
-  outport[0] = 0;
-  outport[1] = 0x55;
-  outport[2] = 0xff;
-  reg_sp = 0xffff;
+  reg_sp = 0x07ff;
   emacs (argc, argv);
 }

@@ -1,10 +1,14 @@
 /*
- * $Id: emenu.c,v 1.5 1995/01/24 15:40:39 sev Exp $
+ * $Id: emenu.c,v 1.6 1995/01/27 20:52:27 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: emenu.c,v $
- * Revision 1.5  1995/01/24 15:40:39  sev
+ * Revision 1.6  1995/01/27 20:52:27  sev
+ * Added Animate (only for Unix), Step over, Continue
+ * Fixed bug with start label
+ *
+ * Revision 1.5  1995/01/24  15:40:39  sev
  * Added inverse line while run; play_error; start label; Labels buffer
  *
  * Revision 1.4  1995/01/17  12:33:59  sev
@@ -87,6 +91,7 @@ int quitF (void);
 int savefileF (void);
 int readfileF (void);
 int runF (void);
+int continueF (void);
 int compileprogramF (void);
 int shellF (void);
 int saveasF (void);
@@ -131,6 +136,7 @@ MENUITEM compilemenuitem[] =
 MENUITEM runmenuitem[] =
 {
   {"Run", "Rr", runF, NO},
+  {"Continue", "Cc", continueF, NO},
   {"Start label", "Ss", startlabelF, NO},
   {"", ""}
 };
@@ -433,6 +439,12 @@ int readfileF (void)
 int runF (void)
 {
   runprogram (1, 1);
+  return LEAVE;
+}
+
+int continueF (void)
+{
+  continueprogram (1, 1);
   return LEAVE;
 }
 

@@ -1,10 +1,14 @@
 /*
- * $Id: docom.c,v 1.8 1995/01/21 15:19:59 sev Exp $
+ * $Id: docom.c,v 1.9 1995/01/27 20:52:27 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: docom.c,v $
- * Revision 1.8  1995/01/21 15:19:59  sev
+ * Revision 1.9  1995/01/27 20:52:27  sev
+ * Added Animate (only for Unix), Step over, Continue
+ * Fixed bug with start label
+ *
+ * Revision 1.8  1995/01/21  15:19:59  sev
  * Now Run works, Ports and regs change, list creates
  *
  * Revision 1.7  1995/01/17  12:33:59  sev
@@ -423,6 +427,7 @@ void do_command ()
       break;
     case 0x76:			  /* hlt  */
       terminateprogram = 1;
+      reg_pc--;
       break;
     case 0x77:			  /* mov m,a */
       PutMem (reg_l + reg_h * 256, reg_a);
@@ -1070,7 +1075,10 @@ byte GetMem (word a)
 
 void InB (byte p)
 {
-  reg_a = p;
+  if (p < 3)
+    reg_a = inport[p];
+  else
+    reg_a = p;
 }
 
 void IncR (byte * r)
@@ -1151,7 +1159,8 @@ void OrA (byte r)
 
 void OutB (byte p)
 {
-  p++;
+  if (p < 3)
+    outport[p] = reg_a;
 }
 
 void Pop (byte * h, byte * l)

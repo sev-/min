@@ -1,10 +1,14 @@
 /*
- * $Id: compile.c,v 1.6 1995/01/24 15:40:39 sev Exp $
+ * $Id: compile.c,v 1.7 1995/01/27 20:52:27 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: compile.c,v $
- * Revision 1.6  1995/01/24 15:40:39  sev
+ * Revision 1.7  1995/01/27 20:52:27  sev
+ * Added Animate (only for Unix), Step over, Continue
+ * Fixed bug with start label
+ *
+ * Revision 1.6  1995/01/24  15:40:39  sev
  * Added inverse line while run; play_error; start label; Labels buffer
  *
  * Revision 1.5  1995/01/21  15:19:59  sev
@@ -54,6 +58,8 @@ void addlabelline (char *label, int addr);
 
 int comp (int f, int n)
 {
+  char tmp[TMPSTRLEN];
+
   reset_need_compile ();
   program_has_errors = 0;
   clearerrorbuffer ();
@@ -773,7 +779,7 @@ void addlistline (char *liststr, char *s, int len)
   char tmp[TMPSTRLEN];
 
   strcpy (tmp, liststr);
-  while (strlen (tmp) < 24)
+  while (strlen (tmp) < LISTTABSIZE)
     strcat (tmp, " ");
   strncat (tmp, s, len);
 
@@ -905,4 +911,12 @@ void addlabelline (char *label, int addr)
   forwline (1, 1);
   curbp->b_flag &= ~BFCHG;	  /* Not changed	       */
   swbuffer (cbuf);
+}
+
+void getcommand_fromline (char *command, char *line, int lsize)
+{
+  int l = 0;
+
+  while (gettoken (command, line, &l, lsize)
+		&& tokentype (command) != TCOMMAND);
 }

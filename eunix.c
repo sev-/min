@@ -1,10 +1,14 @@
 /*
- * $Id: eunix.c,v 1.4 1995/01/17 12:33:59 sev Exp $
+ * $Id: eunix.c,v 1.5 1995/01/27 20:52:27 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: eunix.c,v $
- * Revision 1.4  1995/01/17 12:33:59  sev
+ * Revision 1.5  1995/01/27 20:52:27  sev
+ * Added Animate (only for Unix), Step over, Continue
+ * Fixed bug with start label
+ *
+ * Revision 1.4  1995/01/17  12:33:59  sev
  * Now run screen is done
  * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
  * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
@@ -190,4 +194,33 @@ void rename1 (char *old, char *new)	/* change the name of a file */
 {
   link (old, new);
   unlink (old);
+}
+
+void settermnowait (int f)
+{
+  struct termio ts;
+  static struct termio tso;
+
+  if (f)
+  {
+    ioctl(0, TCGETA, &tso);
+    ts = tso;
+    ts.c_lflag &= 0;
+    ts.c_iflag &= ~(ICRNL | IGNCR | INLCR);
+    ts.c_oflag &= 0;
+    ts.c_cc[VMIN] = 0;
+    ts.c_cc[VTIME] = 0;
+    ioctl(0, TCSETA, &ts);
+  }
+  else
+    ioctl(0, TCSETA, &tso);
+}
+
+int kbhit(void)
+{
+  unsigned char xc[1];
+
+  if( read(0,xc,1) != 1 )
+	return 0;
+  return 1;
 }
