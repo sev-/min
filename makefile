@@ -1,5 +1,5 @@
 #
-#  $Id: makefile,v 1.3 1995/01/07 20:03:14 sev Exp $
+#  $Id: makefile,v 1.4 1995/01/07 20:05:08 sev Exp $
 #
 # ----------------------------------------------------------
 #
@@ -24,7 +24,7 @@ EMOFILES=	ebasic.o ebuffer.o echar.o edisplay.o\
 		efile.o efileio.o einput.o eline.o emain.o emenu.o\
 		erandom.o eregion.o esearch.o etcap.o eunix.o
 
-EMCFILES=	ebasic.c ebuffer.c echar.c edisplay.c\
+EMCFILES=	ebasic.c ebuffer.c echar.c edisplay.c edit_str.c\
 		efile.c efileio.c einput.c eline.c emain.c emenu.c\
 		erandom.c eregion.c esearch.c etcap.c eunix.c
 
