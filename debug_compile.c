@@ -1,10 +1,13 @@
 /*
- *  $Id: debug_compile.c,v 1.1 1995/01/16 11:01:18 sev Exp $
+ *  $Id: debug_compile.c,v 1.2 1995/01/21 13:57:32 sev Exp $
  *
  * ---------------------------------------------------------- 
  *
  * $Log: debug_compile.c,v $
- * Revision 1.1  1995/01/16 11:01:18  sev
+ * Revision 1.2  1995/01/21 13:57:32  sev
+ * Updated for current version
+ *
+ * Revision 1.1  1995/01/16  11:01:18  sev
  * Initial revision
  *
  *
@@ -14,14 +17,11 @@
 
 #include <stdio.h>
 #include <ctype.h>
-
-/*
- * #include "estruct.h" #include "edef.h"
- */
+/* #include "estruct.h"
+#include "edef.h"*/
 #include "hardware.h"
 #include "commands.h"
 /* #include "proto.h" */
-
 
 void PutMem (word a, byte c)
 {
@@ -38,39 +38,30 @@ typedef struct LINE
 #define llength(line)	strlen((line)->l_text)
 
 LINE lines[] =
-{"mov a, a",
- "label:xthl",
- "jmp label",
- "in 0x13	; comment",
- "call 0x15",
- "add a",
- "ldax b",
- "inx h	; comment",
- "mvi a, 010101b",
- "rst 8",
- "pop b",
+{"	org	0h",
+ " ",
+ "start:	mvi	c, 10h",
+ "loop:	dad	b",
+ "	jmp	loop   ",
+ "	hlt",
  ""
 };
 
-void adderror (LINE * line, char *msg)
+void addmessage (LINE *line, char *msg, int a)
 {
   int i;
 
-  for (i = 0; &lines[i] != line; i++);
-  printf ("Error at line %d: %s\n", i + 1, msg);
+  if (line)
+    for (i = 0; &lines[i] != line; i++);
+  if (a)
+    printf ("Error at line %d: %s\n", i + 1, msg);
+  else
+    printf ("%s\n", msg);
 }
-void madderror (LINE * line, char *msg)
-{
-  int i;
-
-  for (i = 0; &lines[i] != line; i++);
-  printf ("%d: %s\n", i + 1, msg);
-}
-
 
 enum
 {
-  TCOMMENT, TCOMMAND, TLABEL, TERROR, TWORD, TBYTE, TREG
+  TCOMMENT, TCOMMAND, TLABEL, TERROR, TWORD, TBYTE, TREG, TORG
 };
 
 int gettoken (char *, char *, int *, int);
@@ -84,12 +75,27 @@ int findlabel (char *);
 byte commandcode (char *);
 int parseword (char *, int);
 byte parsebyte (char *);
-
+void clearlabeltable (void);
+int strcasecmp (char *s1, char *s2);
+/*
 int comp (int f, int n)
 {
+  clearerrorbuffer ();
+  clearlabeltable ();
   compileprogram (1);
-}
+  gotobob (1, 1);
+  onlywind (1, 1);
+  splitwind (TRUE, 1);
 
+  nextwind (0, 0);
+  resize (TRUE, 5);
+  swbuffer (bfind ("Error", 1, 0));
+  curbp->b_mode |= MDVIEW;
+  gotobob (1, 1);
+
+  nextwind (0, 0);
+}
+*/
 void compileprogram (int pass)
 {
   LINE *curline;
@@ -100,15 +106,14 @@ void compileprogram (int pass)
   char *s;
   int numl = 0;			  /* mumu */
 
-  printf ("\nPASS %d\n", pass);
+  sprintf (tmp1, "PASS %d", pass);
+  addmessage ((LINE *) 0, tmp1, 0);
   curline = &lines[0];		  /* mumu */
 
-  /*
-   * curline = lforw (curbp->b_linep)
-   * 
-   * while (curline != curbp->b_linep)
-   */
-  while (curline->l_text[0] != '\0')	/* mumu */
+/*  curline = lforw (curbp->b_linep);
+
+  while (curline != curbp->b_linep)
+*/  while (curline->l_text[0] != '\0')	/* mumu */
   {
     lpos = 0;
     s = curline->l_text;
@@ -116,30 +121,39 @@ void compileprogram (int pass)
     {
       switch (tokentype (tmp))
       {
+	case TORG:
+	  gettoken (tmp, s, &lpos, llength (curline));
+printf ("TORG: got (%s)\n", tmp);fflush (stdout);
+	  if (tokentype (tmp) != TWORD && tokentype (tmp) != TBYTE)
+	  {
+	    if (pass == 1)
+	      adderror (curline, "directive: word expected");
+	    break;
+	  }
+	  curraddr = parseword (tmp, 3);
+	  break;
 	case TLABEL:
-	  madderror (curline, "tlabel ");
+printf ("TLABEL: (%s)\n", tmp);fflush (stdout);
 	  if (pass == 1)
 	    if (addlabel (tmp, curraddr))
 	      adderror (curline, "label redefiniton");
 	  break;
 	case TCOMMAND:
-	  madderror (curline, "tcommand ");
 	  strcpy (tmp1, tmp);
 	  switch (commandargs (tmp))
 	  {
 	    case NONE:
-	      madderror (curline, "none ");
 	      if (pass == 1)
 		curraddr++;
 	      else
 		PutMem (curraddr++, commandcode (tmp1));
 	      break;
 	    case BYTE:
-	      madderror (curline, "byte ");
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (tokentype (tmp) != TBYTE)
 	      {
-		adderror (curline, "byte expected");
+		if (pass == 1)
+		  adderror (curline, "byte expected");
 		curraddr += 2;
 		break;
 	      }
@@ -153,12 +167,13 @@ void compileprogram (int pass)
 	      break;
 
 	    case WORD:
-	      madderror (curline, "word ");
 	      gettoken (tmp, s, &lpos, llength (curline));
+printf ("WORD got label: (%s)\n", tmp);fflush (stdout);
 	      if (tokentype (tmp) != TWORD && tokentype (tmp) != TREG &&
 		  tokentype (tmp) != TBYTE)
 	      {
-		adderror (curline, "word expected");
+		if (pass == 1)
+		  adderror (curline, "word expected");
 		curraddr += 3;
 		break;
 	      }
@@ -178,11 +193,11 @@ void compileprogram (int pass)
 	      break;
 
 	    case REG:		  /* a b c d e h l m */
-	      madderror (curline, "reg ");
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, "m") && tokentype (tmp) != TREG)
 	      {
-		adderror (curline, "register expected");
+		if (pass == 1)
+		  adderror (curline, "register expected");
 		curraddr++;
 		break;
 	      }
@@ -197,11 +212,11 @@ void compileprogram (int pass)
 	      break;
 
 	    case LDAX:		  /* b d */
-	      madderror (curline, "ldax ");
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, "b") && strcmp (tmp, "d"))
 	      {
-		adderror (curline, "register b or d expected");
+		if (pass == 1)
+		  adderror (curline, "register b or d expected");
 		curraddr++;
 		break;
 	      }
@@ -216,12 +231,12 @@ void compileprogram (int pass)
 	      break;
 
 	    case DREG:		  /* b d h sp */
-	      madderror (curline, "dreg ");
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, "b") && strcmp (tmp, "d") && strcmp (tmp, "h")
 		  && strcmp (tmp, "sp"))
 	      {
-		adderror (curline, "register b, d, h or sp expected");
+		if (pass == 1)
+		  adderror (curline, "register b, d, h or sp expected");
 		curraddr++;
 		break;
 	      }
@@ -236,11 +251,11 @@ void compileprogram (int pass)
 	      break;
 
 	    case MOV:		  /* reg, reg */
-	      madderror (curline, "mov ");
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, "m") && tokentype (tmp) != TREG)
 	      {
-		adderror (curline, "first parameter must be a register");
+		if (pass == 1)
+		  adderror (curline, "first parameter must be a register");
 		curraddr++;
 		break;
 	      }
@@ -250,7 +265,8 @@ void compileprogram (int pass)
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, ","))
 	      {
-		adderror (curline, "comma expected");
+		if (pass == 1)
+		  adderror (curline, "comma expected");
 		curraddr++;
 		break;
 	      }
@@ -259,7 +275,8 @@ void compileprogram (int pass)
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, "m") && tokentype (tmp) != TREG)
 	      {
-		adderror (curline, "second parameter must be a register");
+		if (pass == 1)
+		  adderror (curline, "second parameter must be a register");
 		curraddr++;
 		break;
 	      }
@@ -271,12 +288,13 @@ void compileprogram (int pass)
 	      break;
 
 	    case LXI:		  /* [b d h sp], word */
-	      madderror (curline, "lxi ");
+printf ("LXI\n");fflush (stdout);
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, "b") && strcmp (tmp, "d") && strcmp (tmp, "h")
 		  && strcmp (tmp, "sp"))
 	      {
-		adderror (curline, "register b, d, h or sp expected");
+		if (pass == 1)
+		  adderror (curline, "register b, d, h or sp expected");
 		curraddr++;
 		break;
 	      }
@@ -291,16 +309,19 @@ void compileprogram (int pass)
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, ","))
 	      {
-		adderror (curline, "comma expected");
+		if (pass == 1)
+		  adderror (curline, "comma expected");
 		curraddr++;
 		break;
 	      }
 	      strcat (tmp1, ",");
 
 	      gettoken (tmp, s, &lpos, llength (curline));
+printf ("LXI got label: (%s)\n", tmp);fflush (stdout);
 	      if (tokentype (tmp) != TWORD && tokentype (tmp) != TREG)
 	      {
-		adderror (curline, "word expected");
+		if (pass == 1)
+		  adderror (curline, "word expected");
 		curraddr += 3;
 		break;
 	      }
@@ -320,11 +341,11 @@ void compileprogram (int pass)
 	      break;
 
 	    case MVI:		  /* [a b c d e h l m], byte */
-	      madderror (curline, "mvi ");
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, "m") && tokentype (tmp) != TREG)
 	      {
-		adderror (curline, "first parameter must be a register");
+		if (pass == 1)
+		  adderror (curline, "first parameter must be a register");
 		curraddr++;
 		break;
 	      }
@@ -334,7 +355,8 @@ void compileprogram (int pass)
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, ","))
 	      {
-		adderror (curline, "comma expected");
+		if (pass == 1)
+		  adderror (curline, "comma expected");
 		curraddr++;
 		break;
 	      }
@@ -343,7 +365,8 @@ void compileprogram (int pass)
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (tokentype (tmp) != TBYTE)
 	      {
-		adderror (curline, "byte expected");
+		if (pass == 1)
+		  adderror (curline, "byte expected");
 		curraddr += 2;
 		break;
 	      }
@@ -357,11 +380,11 @@ void compileprogram (int pass)
 	      break;
 
 	    case RST:		  /* 0 1 2 3 4 5 6 7 */
-	      madderror (curline, "rst ");
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (parsebyte (tmp) > 7)
 	      {
-		adderror (curline, "parameter must be 0-7");
+		if (pass == 1)
+		  adderror (curline, "parameter must be 0-7");
 		curraddr++;
 		break;
 	      }
@@ -374,12 +397,12 @@ void compileprogram (int pass)
 	      break;
 
 	    case PUSH:		  /* b d h psw */
-	      madderror (curline, "push ");
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, "b") && strcmp (tmp, "d") && strcmp (tmp, "h")
 		  && strcmp (tmp, "psw"))
 	      {
-		adderror (curline, "register b, d, h or psw expected");
+		if (pass == 1)
+		  adderror (curline, "register b, d, h or psw expected");
 		curraddr++;
 		break;
 	      }
@@ -393,25 +416,32 @@ void compileprogram (int pass)
 	      }
 	      break;
 	    default:
-	      adderror (curline, "INTERNAL ERROR");
+	      if (pass == 1)
+		adderror (curline, "INTERNAL ERROR");
 	  }			  /* switch commandargs */
 	  break;
 	case TCOMMENT:
-	  madderror (curline, "tcomment ");
 	  lpos = llength (curline);
 	  break;
-	case TERROR:
-	  sprintf (tmp1, "syntax error (%s)", tmp);
-	  adderror (curline, tmp1);
+	default:
+printf ("ERROR: got (%s)\n", tmp);fflush (stdout);
+	  sprintf (tmp1, "%s unexpected", tmp);
+	  if (pass == 1)
+	    adderror (curline, tmp1);
 	  break;
       }				  /* switch tokentype */
     }				  /* while gettoken */
-    /* curline = lforw (curline); */
     curline = &lines[++numl];	  /* mumu */
+/*    curline = lforw (curline); */
   }				  /* while curline */
 
   if (pass == 1)
     compileprogram (2);
+  else
+  {
+    sprintf (tmp1, "Last address %04xh", curraddr);
+    addmessage ((LINE *) 0, tmp1, 0);
+  }
 }
 
 int gettoken (char *tmp, char *str, int *lpos, int maxlen)
@@ -425,9 +455,9 @@ int gettoken (char *tmp, char *str, int *lpos, int maxlen)
     s++;
     *lpos = *lpos + 1;
   }
-  if (*lpos < maxlen && isalpha (*s))
+  if ((*lpos < maxlen) && isalpha (*s))
   {
-    while (*lpos < maxlen && isalnum (*s))
+    while (*lpos < maxlen && (isalnum (*s) || *s == '_'))
     {
       *s1++ = *s++;
       *lpos = *lpos + 1;
@@ -440,12 +470,14 @@ int gettoken (char *tmp, char *str, int *lpos, int maxlen)
       *lpos = *lpos + 1;
       s++;
     }
+printf ("gettoken: (%s) from (%s)\n", tmp, str);fflush (stdout);
     return 1;
   }				  /* isalpha */
 
   if (*lpos < maxlen && isdigit (*s))
   {
     getdigit (tmp, str, lpos, maxlen);
+printf ("gettoken: (%s) from (%s)\n", tmp, str);fflush (stdout);
     return 1;
   }
 
@@ -456,6 +488,7 @@ int gettoken (char *tmp, char *str, int *lpos, int maxlen)
   *lpos = *lpos + 1;
   tmp[1] = '\0';
 
+printf ("gettoken: (%s) from (%s)\n", tmp, str);fflush (stdout);
   return 1;
 }
 
@@ -551,6 +584,8 @@ int tokentype (char *token)
     return TCOMMENT;
   if (token[strlen (token) - 1] == ':')
     return TLABEL;
+  if (!strcasecmp (token, "org"))
+    return TORG;
   if (iscommand (token))
     return TCOMMAND;
   if (!token[1] && strchr ("abcdehlABCDEHL", token[0]))
@@ -619,6 +654,7 @@ int addlabel (char *label, int addr)
   strcpy (tmp, label);
   tmp[strlen (tmp) - 1] = '\0';
 
+printf ("addlabel: (%s)\n", tmp);fflush (stdout);
   for (i = 0; i < numlabels; i++)
     if (!strcmp (tmp, labeltable[i].name))
       return 1;
@@ -635,6 +671,7 @@ int findlabel (char *label)
 {
   int i;
 
+printf ("find: (%s)\n", label);fflush (stdout);
   for (i = 0; i < numlabels; i++)
     if (!strcmp (label, labeltable[i].name))
       return labeltable[i].addr;
@@ -690,15 +727,38 @@ int parseword (char *token, int numbyte)
   if (result == -1)
     return -1;
 
-  if (numbyte)			  /* high byte */
+  if (numbyte == 1)		  /* high byte */
     return (result & 0xff00) >> 8;
-  return result & 0xff;
+  if (numbyte == 0)		  /* low byte */
+    return result & 0xff;
+  return result;		  /* all result */
 }
 
 byte parsebyte (char *token)
 {
   return (byte) parseword (token, 0);
 }
+
+void clearlabeltable (void)
+{
+  int i;
+
+  for (i = 0; i < numlabels; i++)
+    free (labeltable[i].name);
+
+  numlabels = 0;
+}
+
+int strcasecmp (char *s1, char *s2)
+{
+  char tmp1[TMPSTRLEN];
+  char *ptr1, *ptr2;
+
+  for (ptr1 = tmp1, ptr2 = s1; *ptr1 = tolower (*ptr2); ptr1++, ptr2++);
+
+  return strcmp (tmp1, s2);
+}
+
 
 main ()
 {
