@@ -1,12 +1,13 @@
 /*
- * $Id: eregion.c,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: eregion.c,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: eregion.c,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
  * 
  */
 
@@ -25,22 +26,21 @@
  * Kill the region. Ask "getregion" to figure out the bounds of the region.
  * Move "." to the start, and kill the characters. Bound to "C-W".
  */
-killregion(f, n)
-
+int killregion (int f, int n)
 {
   register int s;
   REGION region;
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
-  if ((s = getregion(&region)) != TRUE)
+    return (rdonly ());		  /* we are in read only mode	 */
+  if ((s = getregion (&region)) != TRUE)
     return (s);
   if ((lastflag & CFKILL) == 0)	  /* This is a kill type	 */
-    kdelete();			  /* command, so do magic */
+    kdelete ();			  /* command, so do magic */
   thisflag |= CFKILL;		  /* kill buffer stuff.	 */
   curwp->w_dotp = region.r_linep;
   curwp->w_doto = region.r_offset;
-  return (ldelete(region.r_size, TRUE));
+  return (ldelete (region.r_size, TRUE));
 }
 
 /*
@@ -48,37 +48,37 @@ killregion(f, n)
  * dot at all. This is a bit like a kill region followed by a yank. Bound to
  * "M-W".
  */
-copyregion(f, n)
+int copyregion (int f, int n)
 {
   register LINE *linep;
   register int loffs;
   register int s;
   REGION region;
 
-  if ((s = getregion(&region)) != TRUE)
+  if ((s = getregion (&region)) != TRUE)
     return (s);
   if ((lastflag & CFKILL) == 0)	  /* Kill type command.	 */
-    kdelete();
+    kdelete ();
   thisflag |= CFKILL;
   linep = region.r_linep;	  /* Current line.	 */
   loffs = region.r_offset;	  /* Current offset.	 */
   while (region.r_size--)
   {
-    if (loffs == llength(linep))
+    if (loffs == llength (linep))
     {				  /* End of line. 	 */
-      if ((s = kinsert('\r')) != TRUE)
+      if ((s = kinsert ('\r')) != TRUE)
 	return (s);
-      linep = lforw(linep);
+      linep = lforw (linep);
       loffs = 0;
     }
     else
     {				  /* Middle of line.	 */
-      if ((s = kinsert(lgetc(linep, loffs))) != TRUE)
+      if ((s = kinsert (lgetc (linep, loffs))) != TRUE)
 	return (s);
       ++loffs;
     }
   }
-  mlwrite(TEXT70);
+  mlwrite (TEXT70);
   /* "[region copied]" */
   return (TRUE);
 }
@@ -91,11 +91,7 @@ copyregion(f, n)
  * Callers of this routine should be prepared to get an "ABORT" status; we
  * might make this have the confirm thing later.
  */
-
-getregion(rp)
-
-register REGION *rp;
-
+int getregion (REGION * rp)
 {
   register LINE *flp;
   register LINE *blp;
@@ -104,7 +100,7 @@ register REGION *rp;
 
   if (curwp->w_markp[0] == (LINE *) NULL)
   {
-    mlwrite(TEXT76);
+    mlwrite (TEXT76);
     /* "No mark set in this window" */
     return (FALSE);
   }
@@ -126,12 +122,12 @@ register REGION *rp;
   blp = curwp->w_dotp;
   bsize = (long) curwp->w_doto;
   flp = curwp->w_dotp;
-  fsize = (long) (llength(flp) - curwp->w_doto + 1);
-  while (flp != curbp->b_linep || lback(blp) != curbp->b_linep)
+  fsize = (long) (llength (flp) - curwp->w_doto + 1);
+  while (flp != curbp->b_linep || lback (blp) != curbp->b_linep)
   {
     if (flp != curbp->b_linep)
     {
-      flp = lforw(flp);
+      flp = lforw (flp);
       if (flp == curwp->w_markp[0])
       {
 	rp->r_linep = curwp->w_dotp;
@@ -139,12 +135,12 @@ register REGION *rp;
 	rp->r_size = fsize + curwp->w_marko[0];
 	return (TRUE);
       }
-      fsize += llength(flp) + 1;
+      fsize += llength (flp) + 1;
     }
-    if (lback(blp) != curbp->b_linep)
+    if (lback (blp) != curbp->b_linep)
     {
-      blp = lback(blp);
-      bsize += llength(blp) + 1;
+      blp = lback (blp);
+      bsize += llength (blp) + 1;
       if (blp == curwp->w_markp[0])
       {
 	rp->r_linep = blp;
@@ -154,7 +150,7 @@ register REGION *rp;
       }
     }
   }
-  mlwrite(TEXT77);
+  mlwrite (TEXT77);
   /* "Bug: lost mark" */
   return (FALSE);
 }

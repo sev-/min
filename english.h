@@ -1,16 +1,16 @@
 /*
- * $Id: english.h,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: english.h,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: english.h,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
- * Revision 1.3  1994/08/15  21:27:30  sev
- * i'm sorry, but this indent IMHO more better ;-)
- * Revision 1.2  1994/08/15  20:42:11  sev Indented Revision
- * 1.1  1994/06/24  14:17:12  sev Initial revision
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
+ * Revision 1.3  1994/08/15  21:27:30  sev i'm sorry, but this indent IMHO more
+ * better ;-) Revision 1.2  1994/08/15  20:42:11  sev Indented Revision 1.1
+ * 1994/06/24  14:17:12  sev Initial revision
  * 
  * 
  */
@@ -63,6 +63,7 @@
 #define	TEXT141	"I/O ERROR, "
 #define	TEXT142	"OUT OF MEMORY, "
 #define	TEXT143	" line"
+#define TEXT144 "Write file: "
 #define	TEXT145	"No file name"
 #define	TEXT146	"Truncated file..write it out"
 #define	TEXT147	"Narrowed Buffer..write it out"

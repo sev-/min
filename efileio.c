@@ -1,12 +1,13 @@
 /*
- * $Id: efileio.c,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: efileio.c,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: efileio.c,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
  * 
  */
 
@@ -27,10 +28,9 @@ FILE *ffp;			  /* File pointer, all functions. */
 static int eofflag;		  /* end-of-file flag */
 
 /* Open a file for reading. */
-ffropen(fn)
-char *fn;
+int ffropen (char *fn)
 {
-  if ((ffp = fopen(fn, "r")) == (FILE *) NULL)
+  if ((ffp = fopen (fn, "r")) == (FILE *) NULL)
     return (FIOFNF);
   eofflag = FALSE;
   return (FIOSUC);
@@ -40,12 +40,11 @@ char *fn;
  * Open a file for writing. Return TRUE if all is well, and FALSE on error
  * (cannot create).
  */
-ffwopen(fn)
-char *fn;
+int ffwopen (char *fn)
 {
-  if ((ffp = fopen(fn, "w")) == (FILE *) NULL)
+  if ((ffp = fopen (fn, "w")) == (FILE *) NULL)
   {
-    mlwrite(TEXT155);
+    mlwrite (TEXT155);
     /* "Cannot open file for writing" */
     return (FIOERR);
   }
@@ -53,18 +52,18 @@ char *fn;
 }
 
 /* Close a file. Should look at the status in all systems. */
-ffclose()
+int ffclose (void)
 {
   /* free this since we do not need it anymore */
   if (fline)
   {
-    free(fline);
+    free (fline);
     fline = (char *) NULL;
   }
 
-  if (fclose(ffp) != FALSE)
+  if (fclose (ffp) != FALSE)
   {
-    mlwrite(TEXT156);
+    mlwrite (TEXT156);
     /* "Error closing file" */
     return (FIOERR);
   }
@@ -76,19 +75,18 @@ ffclose()
  * and the "nbuf" is its length, less the free newline. Return the status.
  * Check only at the newline.
  */
-ffputline(buf, nbuf)
-char buf[];
+int ffputline (char *buf, int nbuf)
 {
   register int i;
 
   for (i = 0; i < nbuf; ++i)
-    putc(buf[i], ffp);
+    putc (buf[i], ffp);
 
-  putc('\n', ffp);
+  putc ('\n', ffp);
 
-  if (ferror(ffp))
+  if (ferror (ffp))
   {
-    mlwrite(TEXT157);
+    mlwrite (TEXT157);
     /* "Write I/O error" */
     return (FIOERR);
   }
@@ -102,8 +100,7 @@ char buf[];
  * the end of the file that don't have a newline present. Check for I/O
  * errors too. Return status.
  */
-ffgetline()
-
+int ffgetline (void)
 {
   register int c;		  /* current character read */
   register int i;		  /* current index into fline */
@@ -116,28 +113,28 @@ ffgetline()
   /* dump fline if it ended up too big */
   if (flen > NSTRING && fline != (char *) NULL)
   {
-    free(fline);
+    free (fline);
     fline = (char *) NULL;
   }
 
   /* if we don't have an fline, allocate one */
   if (fline == (char *) NULL)
-    if ((fline = malloc(flen = NSTRING)) == (char *) NULL)
+    if ((fline = malloc (flen = NSTRING)) == (char *) NULL)
       return (FIOMEM);
 
   /* read the line in */
   i = 0;
-  while ((c = getc(ffp)) != EOF && c != '\n')
+  while ((c = getc (ffp)) != EOF && c != '\n')
   {
     fline[i++] = c;
     /* if it's longer, get more room */
     if (i >= flen)
     {
-      if ((tmpline = malloc(flen + NSTRING)) == (char *) NULL)
+      if ((tmpline = malloc (flen + NSTRING)) == (char *) NULL)
 	return (FIOMEM);
-      bytecopy(tmpline, fline, flen);
+      bytecopy (tmpline, fline, flen);
       flen += NSTRING;
-      free(fline);
+      free (fline);
       fline = tmpline;
     }
   }
@@ -145,9 +142,9 @@ ffgetline()
   /* test for any errors that may have occured */
   if (c == EOF)
   {
-    if (ferror(ffp))
+    if (ferror (ffp))
     {
-      mlwrite(TEXT158);
+      mlwrite (TEXT158);
       /* "File read error" */
       return (FIOERR);
     }
@@ -163,21 +160,18 @@ ffgetline()
   return (FIOSUC);
 }
 
-int fexist(fname)		  /* does <fname> exist on disk? */
-
-char *fname;			  /* file to check for existance */
-
+int fexist (char *fname)	  /* does <fname> exist on disk? */
 {
   FILE *fp;
 
   /* try to open the file for reading */
-  fp = fopen(fname, "r");
+  fp = fopen (fname, "r");
 
   /* if it fails, just return false! */
   if (fp == (FILE *) NULL)
     return (FALSE);
 
   /* otherwise, close it and report true */
-  fclose(fp);
+  fclose (fp);
   return (TRUE);
 }

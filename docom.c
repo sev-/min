@@ -1,256 +1,256 @@
 /*
- *  $Id: docom.c,v 1.4 1995/01/06 21:45:10 sev Exp $
- *
- * ---------------------------------------------------------- 
- *
+ * $Id: docom.c,v 1.5 1995/01/07 20:03:14 sev Exp $
+ * 
+ * ----------------------------------------------------------
+ * 
  * $Log: docom.c,v $
- * Revision 1.4  1995/01/06 21:45:10  sev
- * It's full emulator IMHO
- *
- * Revision 1.3  1994/07/04  20:19:39  sev
- * Added all non-arithmetic command (without pchl and xthl)
- *
- * Revision 1.2  1994/07/04  19:24:31  sev
- * Some commands added. I need table!!!
- *
- * Revision 1.1  1994/06/29  12:43:01  sev
- * Initial revision
- *
- *
+ * Revision 1.5  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.4  1995/01/06  21:45:10  sev It's full emulator
+ * IMHO
+ * 
+ * Revision 1.3  1994/07/04  20:19:39  sev Added all non-arithmetic command
+ * (without pchl and xthl)
+ * 
+ * Revision 1.2  1994/07/04  19:24:31  sev Some commands added. I need table!!!
+ * 
+ * Revision 1.1  1994/06/29  12:43:01  sev Initial revision
+ * 
+ * 
  */
 
 #include "hardware.h"
 #include "proto.h"
 
-void do_command()
+void do_command ()
 {
   byte a, h, l, m;
   word hl, bc;
 
-  a = gcmd();
+  a = gcmd ();
 
   switch (a)
   {
     case 0x00:			  /* nop  */
       break;
     case 0x01:			  /* lxi b,■■ */
-      reg_c = gcmd();
-      reg_b = gcmd();
+      reg_c = gcmd ();
+      reg_b = gcmd ();
       break;
     case 0x02:			  /* stax b */
       bc = reg_c + reg_b * 256;
-      PutMem(bc, reg_a);
+      PutMem (bc, reg_a);
       break;
     case 0x03:			  /* inx b */
-      inc(reg_c);
+      inc (reg_c);
       if (!reg_c)
-	inc(reg_b);
+	inc (reg_b);
       break;
     case 0x04:			  /* inr b */
-      IncR(&reg_b);
+      IncR (&reg_b);
       break;
     case 0x05:			  /* dcr b */
-      DecR(&reg_b);
+      DecR (&reg_b);
       break;
     case 0x06:			  /* mvi b,■ */
-      reg_b = gcmd();
+      reg_b = gcmd ();
       break;
     case 0x07:			  /* rlc  */
-      LfSh();
-      ResF('h');
-      ResF('n');
+      LfSh ();
+      ResF ('h');
+      ResF ('n');
       break;
     case 0x09:			  /* dad b */
-      AddHL(reg_c + reg_b * 256);
+      AddHL (reg_c + reg_b * 256);
       break;
     case 0x0C:			  /* ldax b */
-      IncR(&reg_c);
+      IncR (&reg_c);
       break;
     case 0x0a:			  /* dcx b */
-      reg_a = GetMem(reg_c + reg_b * 256);
+      reg_a = GetMem (reg_c + reg_b * 256);
       break;
     case 0x0b:			  /* inr c */
-      dec(reg_c);
+      dec (reg_c);
       if (reg_c == 0xff)
-	dec(reg_b);
+	dec (reg_b);
       break;
     case 0x0d:			  /* dcr c */
-      DecR(&reg_c);
+      DecR (&reg_c);
       break;
     case 0x0e:			  /* mvi c,■ */
-      reg_c = gcmd();
+      reg_c = gcmd ();
       break;
     case 0x0f:			  /* rrc  */
-      RgSh();
-      ResF('h');
-      ResF('n');
+      RgSh ();
+      ResF ('h');
+      ResF ('n');
       break;
     case 0x11:			  /* lxi d,■■ */
-      reg_e = gcmd();
-      reg_d = gcmd();
+      reg_e = gcmd ();
+      reg_d = gcmd ();
       break;
     case 0x12:			  /* stax d */
       bc = reg_e + reg_d * 256;
-      PutMem(bc, reg_a);
+      PutMem (bc, reg_a);
       break;
     case 0x13:			  /* inx d */
-      inc(reg_e);
+      inc (reg_e);
       if (!reg_e)
-	inc(reg_d);
+	inc (reg_d);
       break;
     case 0x14:			  /* inr d */
-      IncR(&reg_d);
+      IncR (&reg_d);
       break;
     case 0x15:			  /* dcr d */
-      DecR(&reg_d);
+      DecR (&reg_d);
       break;
     case 0x16:			  /* mvi d,■ */
-      reg_d = gcmd();
+      reg_d = gcmd ();
       break;
     case 0x17:			  /* ral  */
-      LfShC();
-      ResF('h');
-      ResF('n');
+      LfShC ();
+      ResF ('h');
+      ResF ('n');
       break;
     case 0x19:			  /* dad d */
-      AddHL(reg_e + reg_d * 256);
+      AddHL (reg_e + reg_d * 256);
       break;
     case 0x1C:			  /* ldax d */
-      IncR(&reg_e);
+      IncR (&reg_e);
       break;
     case 0x1a:			  /* dcx d */
-      reg_a = GetMem(reg_e + reg_d * 256);
+      reg_a = GetMem (reg_e + reg_d * 256);
       break;
     case 0x1b:			  /* inr e */
-      dec(reg_e);
+      dec (reg_e);
       if (reg_e == 0xff)
-	dec(reg_d);
+	dec (reg_d);
       break;
     case 0x1d:			  /* dcr e */
-      DecR(&reg_e);
+      DecR (&reg_e);
       break;
     case 0x1e:			  /* mvi e,■ */
-      reg_e = gcmd();
+      reg_e = gcmd ();
       break;
     case 0x1f:			  /* rar  */
-      RgShC();
-      ResF('h');
-      ResF('n');
+      RgShC ();
+      ResF ('h');
+      ResF ('n');
       break;
     case 0x21:			  /* lxi h,■■ */
-      reg_l = gcmd();
-      reg_h = gcmd();
+      reg_l = gcmd ();
+      reg_h = gcmd ();
       break;
     case 0x22:			  /* shld ■■ */
-      l = gcmd();
-      h = gcmd();
+      l = gcmd ();
+      h = gcmd ();
       hl = l + h * 256;
-      PutMem(hl, reg_l);
-      PutMem(hl + 1, reg_h);
+      PutMem (hl, reg_l);
+      PutMem (hl + 1, reg_h);
       break;
     case 0x23:			  /* inx h */
-      inc(reg_l);
+      inc (reg_l);
       if (!reg_l)
-	inc(reg_h);
+	inc (reg_h);
       break;
     case 0x24:			  /* inr h */
-      IncR(&reg_h);
+      IncR (&reg_h);
       break;
     case 0x25:			  /* dcr h */
-      DecR(&reg_h);
+      DecR (&reg_h);
       break;
     case 0x26:			  /* mvi h,■ */
-      reg_h = gcmd();
+      reg_h = gcmd ();
       break;
     case 0x27:			  /* daa  */
-      Daa();
+      Daa ();
       break;
     case 0x29:			  /* dad h */
-      AddHL(reg_l + reg_h * 256);
+      AddHL (reg_l + reg_h * 256);
       break;
     case 0x2a:			  /* lhld ■■ */
-      l = gcmd();
-      h = gcmd();
-      reg_l = GetMem(l + h * 256);
-      reg_h = GetMem(l + h * 256 + 1);
+      l = gcmd ();
+      h = gcmd ();
+      reg_l = GetMem (l + h * 256);
+      reg_h = GetMem (l + h * 256 + 1);
       break;
     case 0x2b:			  /* dcx h */
-      dec(reg_l);
+      dec (reg_l);
       if (reg_l == 0xff)
-	dec(reg_h);
+	dec (reg_h);
       break;
     case 0x2c:			  /* inr l */
-      IncR(&reg_l);
+      IncR (&reg_l);
       break;
     case 0x2d:			  /* dcr l */
-      DecR(&reg_l);
+      DecR (&reg_l);
       break;
     case 0x2e:			  /* mvi l,■ */
-      reg_l = gcmd();
+      reg_l = gcmd ();
       break;
     case 0x2f:			  /* cma  */
       reg_a = reg_a ^ 0xff;
-      SetF('n');
-      SetF('h');
+      SetF ('n');
+      SetF ('h');
       break;
     case 0x31:			  /* lxi sp,■■ */
-      l = gcmd();
-      h = gcmd();
+      l = gcmd ();
+      h = gcmd ();
       reg_sp = h * 256 + l;
       break;
     case 0x32:			  /* sta ■■ */
-      l = gcmd();
-      h = gcmd();
+      l = gcmd ();
+      h = gcmd ();
       hl = l + h * 256;
-      PutMem(hl, reg_a);
+      PutMem (hl, reg_a);
       break;
     case 0x33:			  /* inx sp */
-      inc(reg_sp);
+      inc (reg_sp);
       break;
     case 0x34:			  /* inr m */
-      m = GetMem(reg_l + reg_h * 256);
-      IncR(&m);
-      PutMem(reg_l + reg_h * 256, m);
+      m = GetMem (reg_l + reg_h * 256);
+      IncR (&m);
+      PutMem (reg_l + reg_h * 256, m);
       break;
     case 0x35:			  /* dcr m */
-      m = GetMem(reg_l + reg_h * 256);
-      DecR(&m);
-      PutMem(reg_l + reg_h * 256, m);
+      m = GetMem (reg_l + reg_h * 256);
+      DecR (&m);
+      PutMem (reg_l + reg_h * 256, m);
       break;
     case 0x36:			  /* mvi m,■ */
-      PutMem(reg_l + reg_h * 256, gcmd());
+      PutMem (reg_l + reg_h * 256, gcmd ());
       break;
     case 0x37:			  /* stc  */
-      SetF('c');
-      ResF('n');
-      ResF('h');
+      SetF ('c');
+      ResF ('n');
+      ResF ('h');
       break;
     case 0x39:			  /* dad sp */
-      AddHL(reg_sp);
+      AddHL (reg_sp);
       break;
     case 0x3a:			  /* lda ■■ */
-      l = gcmd();
-      h = gcmd();
-      reg_a = GetMem(l + h * 256);
+      l = gcmd ();
+      h = gcmd ();
+      reg_a = GetMem (l + h * 256);
       break;
     case 0x3b:			  /* dcx sp */
-      dec(reg_sp);
+      dec (reg_sp);
       break;
     case 0x3c:			  /* inr a */
-      IncR(&reg_a);
+      IncR (&reg_a);
       break;
     case 0x3d:			  /* dcr a */
-      DecR(&reg_a);
+      DecR (&reg_a);
       break;
     case 0x3e:			  /* mvi a,■ */
-      reg_a = gcmd();
+      reg_a = gcmd ();
       break;
     case 0x3f:			  /* cmc  */
-      if (WhatF('c'))
-	ResF('c');
+      if (WhatF ('c'))
+	ResF ('c');
       else
-	SetF('c');
-      ResF('n');
+	SetF ('c');
+      ResF ('n');
       break;
     case 0x40:			  /* mov b,b */
       reg_b = reg_b;
@@ -271,7 +271,7 @@ void do_command()
       reg_b = reg_l;
       break;
     case 0x46:			  /* mov b,m */
-      reg_b = GetMem(reg_l + reg_h * 256);
+      reg_b = GetMem (reg_l + reg_h * 256);
       break;
     case 0x47:			  /* mov b,a */
       reg_b = reg_a;
@@ -295,7 +295,7 @@ void do_command()
       reg_c = reg_l;
       break;
     case 0x4e:			  /* mov c,m */
-      reg_c = GetMem(reg_l + reg_h * 256);
+      reg_c = GetMem (reg_l + reg_h * 256);
       break;
     case 0x4f:			  /* mov c,a */
       reg_c = reg_a;
@@ -319,7 +319,7 @@ void do_command()
       reg_d = reg_l;
       break;
     case 0x56:			  /* mov d,m */
-      reg_d = GetMem(reg_l + reg_h * 256);
+      reg_d = GetMem (reg_l + reg_h * 256);
       break;
     case 0x57:			  /* mov d,a */
       reg_d = reg_a;
@@ -343,7 +343,7 @@ void do_command()
       reg_e = reg_l;
       break;
     case 0x5e:			  /* mov e,m */
-      reg_e = GetMem(reg_l + reg_h * 256);
+      reg_e = GetMem (reg_l + reg_h * 256);
       break;
     case 0x5f:			  /* mov e,a */
       reg_e = reg_a;
@@ -367,7 +367,7 @@ void do_command()
       reg_h = reg_l;
       break;
     case 0x66:			  /* mov h,m */
-      reg_h = GetMem(reg_l + reg_h * 256);
+      reg_h = GetMem (reg_l + reg_h * 256);
       break;
     case 0x67:			  /* mov h,a */
       reg_h = reg_a;
@@ -391,33 +391,33 @@ void do_command()
       reg_l = reg_l;
       break;
     case 0x6e:			  /* mov l,m */
-      reg_l = GetMem(reg_l + reg_h * 256);
+      reg_l = GetMem (reg_l + reg_h * 256);
       break;
     case 0x6f:			  /* mov l,a */
       reg_l = reg_a;
       break;
     case 0x70:			  /* mov m,b */
-      PutMem(reg_l + reg_h * 256, reg_b);
+      PutMem (reg_l + reg_h * 256, reg_b);
       break;
     case 0x71:			  /* mov m,c */
-      PutMem(reg_l + reg_h * 256, reg_c);
+      PutMem (reg_l + reg_h * 256, reg_c);
       break;
     case 0x72:			  /* mov m,d */
-      PutMem(reg_l + reg_h * 256, reg_d);
+      PutMem (reg_l + reg_h * 256, reg_d);
       break;
     case 0x73:			  /* mov m,e */
-      PutMem(reg_l + reg_h * 256, reg_e);
+      PutMem (reg_l + reg_h * 256, reg_e);
       break;
     case 0x74:			  /* mov m,h */
-      PutMem(reg_l + reg_h * 256, reg_h);
+      PutMem (reg_l + reg_h * 256, reg_h);
       break;
     case 0x75:			  /* mov m,l */
-      PutMem(reg_l + reg_h * 256, reg_l);
+      PutMem (reg_l + reg_h * 256, reg_l);
       break;
     case 0x76:			  /* hlt  */
       break;
     case 0x77:			  /* mov m,a */
-      PutMem(reg_l + reg_h * 256, reg_a);
+      PutMem (reg_l + reg_h * 256, reg_a);
       break;
     case 0x78:			  /* mov a,b */
       reg_a = reg_b;
@@ -438,439 +438,439 @@ void do_command()
       reg_a = reg_l;
       break;
     case 0x7e:			  /* mov a,m */
-      reg_a = GetMem(reg_l + reg_h * 256);
+      reg_a = GetMem (reg_l + reg_h * 256);
       break;
     case 0x7f:			  /* mov a,a */
       reg_a = reg_a;
       break;
     case 0x80:			  /* add b */
-      AddA(reg_b);
+      AddA (reg_b);
       break;
     case 0x81:			  /* add c */
-      AddA(reg_c);
+      AddA (reg_c);
       break;
     case 0x82:			  /* add d */
-      AddA(reg_d);
+      AddA (reg_d);
       break;
     case 0x83:			  /* add e */
-      AddA(reg_e);
+      AddA (reg_e);
       break;
     case 0x84:			  /* add h */
-      AddA(reg_h);
+      AddA (reg_h);
       break;
     case 0x85:			  /* add l */
-      AddA(reg_l);
+      AddA (reg_l);
       break;
     case 0x86:			  /* add m */
-      AddA(GetMem(reg_l + reg_h * 256));
+      AddA (GetMem (reg_l + reg_h * 256));
       break;
     case 0x87:			  /* add a */
-      AddA(reg_a);
+      AddA (reg_a);
       break;
     case 0x88:			  /* adc b */
-      AddAC(reg_b);
+      AddAC (reg_b);
       break;
     case 0x89:			  /* adc c */
-      AddAC(reg_c);
+      AddAC (reg_c);
       break;
     case 0x8a:			  /* adc d */
-      AddAC(reg_d);
+      AddAC (reg_d);
       break;
     case 0x8b:			  /* adc e */
-      AddAC(reg_e);
+      AddAC (reg_e);
       break;
     case 0x8c:			  /* adc h */
-      AddAC(reg_h);
+      AddAC (reg_h);
       break;
     case 0x8d:			  /* adc l */
-      AddAC(reg_l);
+      AddAC (reg_l);
       break;
     case 0x8e:			  /* adc m */
-      AddAC(GetMem(reg_l + reg_h * 256));
+      AddAC (GetMem (reg_l + reg_h * 256));
       break;
     case 0x8f:			  /* adc a */
-      AddAC(reg_a);
+      AddAC (reg_a);
       break;
     case 0x90:			  /* sub b */
-      SubA(reg_b);
+      SubA (reg_b);
       break;
     case 0x91:			  /* sub c */
-      SubA(reg_c);
+      SubA (reg_c);
       break;
     case 0x92:			  /* sub d */
-      SubA(reg_d);
+      SubA (reg_d);
       break;
     case 0x93:			  /* sub e */
-      SubA(reg_e);
+      SubA (reg_e);
       break;
     case 0x94:			  /* sub h */
-      SubA(reg_h);
+      SubA (reg_h);
       break;
     case 0x95:			  /* sub l */
-      SubA(reg_l);
+      SubA (reg_l);
       break;
     case 0x96:			  /* sub m */
-      SubA(GetMem(reg_l + reg_h * 256));
+      SubA (GetMem (reg_l + reg_h * 256));
       break;
     case 0x97:			  /* sub a */
-      SubA(reg_a);
+      SubA (reg_a);
       break;
     case 0x98:			  /* sbb b */
-      SubAC(reg_b);
+      SubAC (reg_b);
       break;
     case 0x99:			  /* sbb c */
-      SubAC(reg_c);
+      SubAC (reg_c);
       break;
     case 0x9a:			  /* sbb d */
-      SubAC(reg_d);
+      SubAC (reg_d);
       break;
     case 0x9b:			  /* sbb e */
-      SubAC(reg_e);
+      SubAC (reg_e);
       break;
     case 0x9c:			  /* sbb h */
-      SubAC(reg_h);
+      SubAC (reg_h);
       break;
     case 0x9d:			  /* sbb l */
-      SubAC(reg_l);
+      SubAC (reg_l);
       break;
     case 0x9e:			  /* sbb m */
-      SubAC(GetMem(reg_l + reg_h * 256));
+      SubAC (GetMem (reg_l + reg_h * 256));
       break;
     case 0x9f:			  /* sbb a */
-      SubAC(reg_a);
+      SubAC (reg_a);
       break;
     case 0xa0:			  /* ana b */
-      AndA(reg_b);
+      AndA (reg_b);
       break;
     case 0xa1:			  /* ana c */
-      AndA(reg_c);
+      AndA (reg_c);
       break;
     case 0xa2:			  /* ana d */
-      AndA(reg_d);
+      AndA (reg_d);
       break;
     case 0xa3:			  /* ana e */
-      AndA(reg_e);
+      AndA (reg_e);
       break;
     case 0xa4:			  /* ana h */
-      AndA(reg_h);
+      AndA (reg_h);
       break;
     case 0xa5:			  /* ana l */
-      AndA(reg_l);
+      AndA (reg_l);
       break;
     case 0xa6:			  /* ana m */
-      AndA(GetMem(reg_l + reg_h * 256));
+      AndA (GetMem (reg_l + reg_h * 256));
       break;
     case 0xa7:			  /* ana a */
-      AndA(reg_a);
+      AndA (reg_a);
       break;
     case 0xa8:			  /* xra b */
-      XorA(reg_b);
+      XorA (reg_b);
       break;
     case 0xa9:			  /* xra c */
-      XorA(reg_c);
+      XorA (reg_c);
       break;
     case 0xaa:			  /* xra d */
-      XorA(reg_d);
+      XorA (reg_d);
       break;
     case 0xab:			  /* xra e */
-      XorA(reg_e);
+      XorA (reg_e);
       break;
     case 0xac:			  /* xra h */
-      XorA(reg_h);
+      XorA (reg_h);
       break;
     case 0xad:			  /* xra l */
-      XorA(reg_l);
+      XorA (reg_l);
       break;
     case 0xae:			  /* xra m */
-      XorA(GetMem(reg_l + reg_h * 256));
+      XorA (GetMem (reg_l + reg_h * 256));
       break;
     case 0xaf:			  /* xra a */
-      XorA(reg_a);
+      XorA (reg_a);
       break;
     case 0xb0:			  /* ora b */
-      OrA(reg_b);
+      OrA (reg_b);
       break;
     case 0xb1:			  /* ora c */
-      OrA(reg_c);
+      OrA (reg_c);
       break;
     case 0xb2:			  /* ora d */
-      OrA(reg_d);
+      OrA (reg_d);
       break;
     case 0xb3:			  /* ora e */
-      OrA(reg_e);
+      OrA (reg_e);
       break;
     case 0xb4:			  /* ora h */
-      OrA(reg_h);
+      OrA (reg_h);
       break;
     case 0xb5:			  /* ora l */
-      OrA(reg_l);
+      OrA (reg_l);
       break;
     case 0xb6:			  /* ora m */
-      OrA(GetMem(reg_l + reg_h * 256));
+      OrA (GetMem (reg_l + reg_h * 256));
       break;
     case 0xb7:			  /* ora a */
-      OrA(reg_a);
+      OrA (reg_a);
       break;
     case 0xb8:			  /* cmp b */
-      CpA(reg_b);
+      CpA (reg_b);
       break;
     case 0xb9:			  /* cmp c */
-      CpA(reg_c);
+      CpA (reg_c);
       break;
     case 0xba:			  /* cmp d */
-      CpA(reg_d);
+      CpA (reg_d);
       break;
     case 0xbb:			  /* cmp e */
-      CpA(reg_e);
+      CpA (reg_e);
       break;
     case 0xbc:			  /* cmp h */
-      CpA(reg_h);
+      CpA (reg_h);
       break;
     case 0xbd:			  /* cmp l */
-      CpA(reg_l);
+      CpA (reg_l);
       break;
     case 0xbe:			  /* cmp m */
-      CpA(GetMem(reg_l + reg_h * 256));
+      CpA (GetMem (reg_l + reg_h * 256));
       break;
     case 0xbf:			  /* cmp a */
-      CpA(reg_a);
+      CpA (reg_a);
       break;
     case 0xc0:			  /* rnz  */
-      Ret(!WhatF('z'));
+      Ret (!WhatF ('z'));
       break;
     case 0xc1:			  /* pop b */
-      Pop(&reg_b, &reg_c);
+      Pop (&reg_b, &reg_c);
       break;
     case 0xc2:			  /* jnz ■■ */
-      Jmp(!WhatF('z'));
+      Jmp (!WhatF ('z'));
       break;
     case 0xc3:			  /* jmp ■■ */
-      Jmp(True);
+      Jmp (True);
       break;
     case 0xc4:			  /* cnz ■■ */
-      Call(!WhatF('z'));
+      Call (!WhatF ('z'));
       break;
     case 0xc5:			  /* push b */
-      Push(reg_b, reg_c);
+      Push (reg_b, reg_c);
       break;
     case 0xc6:			  /* adi ■ */
-      AddA(gcmd());
+      AddA (gcmd ());
       break;
     case 0xc7:			  /* rst 0 */
-      Rst(0x00);
+      Rst (0x00);
       break;
     case 0xc8:			  /* rz  */
-      Ret(WhatF('z'));
+      Ret (WhatF ('z'));
       break;
     case 0xc9:			  /* ret  */
-      Ret(True);
+      Ret (True);
       break;
     case 0xca:			  /* jz ■■ */
-      Jmp(WhatF('z'));
+      Jmp (WhatF ('z'));
       break;
     case 0xcc:			  /* cz ■■ */
-      Call(WhatF('z'));
+      Call (WhatF ('z'));
       break;
     case 0xcd:			  /* call ■■ */
-      Call(True);
+      Call (True);
       break;
     case 0xce:			  /* aci ■ */
-      AddAC(gcmd());
+      AddAC (gcmd ());
       break;
     case 0xcf:			  /* rst 1 */
-      Rst(0x08);
+      Rst (0x08);
       break;
     case 0xd0:			  /* rnc  */
-      Ret(!WhatF('c'));
+      Ret (!WhatF ('c'));
       break;
     case 0xd1:			  /* pop d */
-      Pop(&reg_d, &reg_e);
+      Pop (&reg_d, &reg_e);
       break;
     case 0xd2:			  /* jnc ■■ */
-      Jmp(!WhatF('c'));
+      Jmp (!WhatF ('c'));
       break;
     case 0xd3:			  /* out ■ */
-      OutB(gcmd());
+      OutB (gcmd ());
       break;
     case 0xd4:			  /* cnc ■■ */
-      Call(!WhatF('c'));
+      Call (!WhatF ('c'));
       break;
     case 0xd5:			  /* push d */
-      Push(reg_d, reg_e);
+      Push (reg_d, reg_e);
       break;
     case 0xd6:			  /* sui ■ */
-      SubA(gcmd());
+      SubA (gcmd ());
       break;
     case 0xd7:			  /* rst 2 */
-      Rst(0x10);
+      Rst (0x10);
       break;
     case 0xd8:			  /* rc  */
-      Ret(WhatF('c'));
+      Ret (WhatF ('c'));
       break;
     case 0xda:			  /* jc ■■ */
-      Jmp(WhatF('c'));
+      Jmp (WhatF ('c'));
       break;
     case 0xdb:			  /* in ■ */
-      InB(gcmd());
+      InB (gcmd ());
       break;
     case 0xdc:			  /* cc ■■ */
-      Call(WhatF('c'));
+      Call (WhatF ('c'));
       break;
     case 0xde:			  /* sbi ■ */
-      SubAC(gcmd());
+      SubAC (gcmd ());
       break;
     case 0xdf:			  /* rst 3 */
-      Rst(0x18);
+      Rst (0x18);
       break;
     case 0xe0:			  /* rpo  */
-      Ret(!WhatF('p'));
+      Ret (!WhatF ('p'));
       break;
     case 0xe1:			  /* pop h */
-      Pop(&reg_h, &reg_l);
+      Pop (&reg_h, &reg_l);
       break;
     case 0xe2:			  /* jpo ■■ */
-      Jmp(!WhatF('p'));
+      Jmp (!WhatF ('p'));
       break;
     case 0xe3:			  /* xthl  */
-      h = GetMem(reg_sp + 1);
-      l = GetMem(reg_sp);
-      ExB(&reg_h, &h);
-      ExB(&reg_l, &l);
-      PutMem(reg_sp + 1, h);
-      PutMem(reg_sp, l);
+      h = GetMem (reg_sp + 1);
+      l = GetMem (reg_sp);
+      ExB (&reg_h, &h);
+      ExB (&reg_l, &l);
+      PutMem (reg_sp + 1, h);
+      PutMem (reg_sp, l);
       break;
     case 0xe4:			  /* cpo ■■ */
-      Call(!WhatF('p'));
+      Call (!WhatF ('p'));
       break;
     case 0xe5:			  /* push h */
-      Push(reg_h, reg_l);
+      Push (reg_h, reg_l);
       break;
     case 0xe6:			  /* ani ■ */
-      AndA(gcmd());
+      AndA (gcmd ());
       break;
     case 0xe7:			  /* rst 4 */
-      Rst(0x20);
+      Rst (0x20);
       break;
     case 0xe8:			  /* rpe  */
-      Ret(WhatF('p'));
+      Ret (WhatF ('p'));
       break;
     case 0xe9:			  /* pchl  */
       reg_pc = reg_l + reg_h * 256;
       break;
     case 0xea:			  /* jpe ■■ */
-      Jmp(WhatF('p'));
+      Jmp (WhatF ('p'));
       break;
     case 0xeb:			  /* xchg  */
-      ExB(&reg_d, &reg_h);
-      ExB(&reg_e, &reg_l);
+      ExB (&reg_d, &reg_h);
+      ExB (&reg_e, &reg_l);
       break;
     case 0xec:			  /* cpe ■■ */
-      Call(WhatF('p'));
+      Call (WhatF ('p'));
       break;
     case 0xee:			  /* xri ■ */
-      XorA(gcmd());
+      XorA (gcmd ());
       break;
     case 0xef:			  /* rst 5 */
-      Rst(0x28);
+      Rst (0x28);
       break;
     case 0xf0:			  /* rp  */
-      Ret(!WhatF('s'));
+      Ret (!WhatF ('s'));
       break;
     case 0xf1:			  /* pop psw */
-      Pop(&reg_a, &reg_f);
+      Pop (&reg_a, &reg_f);
       break;
     case 0xf2:			  /* jp ■■ */
-      Jmp(!WhatF('s'));
+      Jmp (!WhatF ('s'));
       break;
     case 0xf3:			  /* di  */
       interrupt_state = False;
       break;
     case 0xf4:			  /* cp ■■ */
-      Call(!WhatF('s'));
+      Call (!WhatF ('s'));
       break;
     case 0xf5:			  /* push psw */
-      Push(reg_a, reg_f);
+      Push (reg_a, reg_f);
       break;
     case 0xf6:			  /* ori ■ */
-      OrA(gcmd());
+      OrA (gcmd ());
       break;
     case 0xf7:			  /* rst 6 */
-      Rst(0x30);
+      Rst (0x30);
       break;
     case 0xf8:			  /* rm  */
-      Ret(WhatF('s'));
+      Ret (WhatF ('s'));
       break;
     case 0xf9:			  /* sphl  */
       reg_sp = reg_l + reg_h * 256;
       break;
     case 0xfa:			  /* jm ■■ */
-      Jmp(WhatF('s'));
+      Jmp (WhatF ('s'));
       break;
     case 0xfb:			  /* ei  */
       interrupt_state = True;
       break;
     case 0xfc:			  /* cm ■■ */
-      Call(WhatF('s'));
+      Call (WhatF ('s'));
       break;
     case 0xfe:			  /* cpi ■ */
-      CpA(gcmd());
+      CpA (gcmd ());
       break;
     case 0xff:			  /* rst 7 */
-      Rst(0x38);
+      Rst (0x38);
       break;
   }
 }
 
-byte gcmd(void)
+byte gcmd (void)
 {
   return memory[reg_pc++];
 }
 
-void AddAC(byte r)
+void AddAC (byte r)
 {
-   byte a;
+  byte a;
 
-   a = reg_a + r;
+  a = reg_a + r;
 
-   if(WhatF('c'))
-     inc(a);
+  if (WhatF ('c'))
+    inc (a);
 
-   if(a < r)
-   {
-     SetF('c');
-     SetF('v');
-   }
-   else
-   {
-     ResF('c');
-     ResF('v');
-   }
+  if (a < r)
+  {
+    SetF ('c');
+    SetF ('v');
+  }
+  else
+  {
+    ResF ('c');
+    ResF ('v');
+  }
 
-   if(FlagS(a))
-     SetF('s');
+  if (FlagS (a))
+    SetF ('s');
 
-   if(!a)
-     SetF('z');
-   else
-     ResF('z');
+  if (!a)
+    SetF ('z');
+  else
+    ResF ('z');
 
-   ResF('n');
+  ResF ('n');
 
-   if(((r & 0x0f)+(reg_a & 0x0f)) > 0x0f)
-     SetF('h');
-   else
-     ResF('h');
+  if (((r & 0x0f) + (reg_a & 0x0f)) > 0x0f)
+    SetF ('h');
+  else
+    ResF ('h');
 
-   reg_a = a;
+  reg_a = a;
 }
 
-void AddA(byte r)
+void AddA (byte r)
 {
-  ResF('c');
-  AddAC(r);
+  ResF ('c');
+  AddAC (r);
 }
 
-void AddHL(word pare)
+void AddHL (word pare)
 {
   word hl1, hl;
 
@@ -878,159 +878,155 @@ void AddHL(word pare)
   hl = hl1 + pare;
   reg_l = (hl & 0xff);
   reg_h = ((hl >> 8) & 0xff);
-  ResF('n');
+  ResF ('n');
 
-  if(hl1 > hl)
-    SetF('c');
+  if (hl1 > hl)
+    SetF ('c');
   else
-    ResF('c');
+    ResF ('c');
 }
 
-void AndA(byte r)
+void AndA (byte r)
 {
   byte a;
 
   a = (reg_a & r);
-  ResF('n');
-  ResF('c');
-  SetF('h');
+  ResF ('n');
+  ResF ('c');
+  SetF ('h');
 
-  if(FlagP(a))
-    SetF('p');
+  if (FlagP (a))
+    SetF ('p');
   else
-    ResF('p');
+    ResF ('p');
 
-  if(FlagS(a))
-    SetF('s');
+  if (FlagS (a))
+    SetF ('s');
   else
-    ResF('s');
+    ResF ('s');
 
-  if(!a)
-    SetF('z');
+  if (!a)
+    SetF ('z');
   else
-    ResF('z');
+    ResF ('z');
 
   reg_a = a;
 }
 
-void Call(byte f)
+void Call (byte f)
 {
   byte h, l;
 
-  l = gcmd();
-  h = gcmd();
+  l = gcmd ();
+  h = gcmd ();
 
-  if(f)
+  if (f)
   {
-    PutMem(reg_sp - 1, (reg_pc >> 8) & 0xff);
-    PutMem(reg_sp - 2, (reg_pc & 0xff));
+    PutMem (reg_sp - 1, (reg_pc >> 8) & 0xff);
+    PutMem (reg_sp - 2, (reg_pc & 0xff));
     reg_sp = reg_sp - 2;
     reg_pc = l + h * 256;
   }
 }
 
-void CpA(byte r)
+void CpA (byte r)
 {
   byte a;
 
   a = reg_a;
-  SubA(r);
-  ResF('n');
+  SubA (r);
+  ResF ('n');
   reg_a = a;
 }
 
-void Daa(void)
+void Daa (void)
 {
-  byte b,c;
+  byte b, c;
 
   c = reg_a;
-  if(WhatF('n'))
+  if (WhatF ('n'))
   {
-     if(WhatF('h'))
-       c -= 0x06;
-     else 
-       if((c & 0x0f) > 0x09)
-         c -= 0x06;
+    if (WhatF ('h'))
+      c -= 0x06;
+    else if ((c & 0x0f) > 0x09)
+      c -= 0x06;
 
-     if((c & 0xf0) != (reg_a & 0xf0))
-       SetF('h');
-     else
-       ResF('h');
+    if ((c & 0xf0) != (reg_a & 0xf0))
+      SetF ('h');
+    else
+      ResF ('h');
 
-     if((c & 0xf0) > (reg_a & 0xf0))
-       SetF('c');
-     else
-       ResF('c');
+    if ((c & 0xf0) > (reg_a & 0xf0))
+      SetF ('c');
+    else
+      ResF ('c');
 
-     b = c;
-     if(WhatF('c'))
-       c -= 0x60;
-     else 
-       if((c & 0xf0) > 0x90)
-         c -= 0x60;
+    b = c;
+    if (WhatF ('c'))
+      c -= 0x60;
+    else if ((c & 0xf0) > 0x90)
+      c -= 0x60;
 
-     if((c & 0xf0) > (b & 0xf0))
-       SetF('c');
+    if ((c & 0xf0) > (b & 0xf0))
+      SetF ('c');
   }
-  else 
+  else
   {
-     if(WhatF('h'))
-       c += 0x06;
-     else
-       if((c & 0x0f) > 0x09)
-         c += 0x06;
+    if (WhatF ('h'))
+      c += 0x06;
+    else if ((c & 0x0f) > 0x09)
+      c += 0x06;
 
-     if((c & 0xf0) != (reg_a & 0xf0))
-       SetF('h');
-     else
-       ResF('h');
+    if ((c & 0xf0) != (reg_a & 0xf0))
+      SetF ('h');
+    else
+      ResF ('h');
 
-     if((c & 0xf0)<(reg_a & 0xf0))
-       SetF('c');
-     else
-       ResF('c');
+    if ((c & 0xf0) < (reg_a & 0xf0))
+      SetF ('c');
+    else
+      ResF ('c');
 
-     b = c;
-     if(WhatF('c'))
-       c += 0x60;
-     else
-       if((c & 0xf0) > 0x90)
-         c += 0x60;
+    b = c;
+    if (WhatF ('c'))
+      c += 0x60;
+    else if ((c & 0xf0) > 0x90)
+      c += 0x60;
 
-     if((c & 0xf0) < (b & 0xf0))
-       SetF('c');
+    if ((c & 0xf0) < (b & 0xf0))
+      SetF ('c');
   }
 
-  if(!c)
-    SetF('z');
+  if (!c)
+    SetF ('z');
   else
-    ResF('z');
+    ResF ('z');
 
-  if(FlagP(c))
-    SetF('p');
+  if (FlagP (c))
+    SetF ('p');
   else
-    ResF('p');
+    ResF ('p');
 
-  if(FlagS(c))
-    SetF('s');
+  if (FlagS (c))
+    SetF ('s');
   else
-    ResF('s');
+    ResF ('s');
 
   reg_a = c;
 }
 
-void DecR(byte *r)
+void DecR (byte * r)
 {
   byte a;
 
   a = reg_a;
   reg_a = *r;
-  SubA(0x01);
+  SubA (0x01);
   *r = reg_a;
   reg_a = a;
 }
 
-void ExB(byte *a, byte *b)
+void ExB (byte * a, byte * b)
 {
   byte c;
 
@@ -1039,290 +1035,317 @@ void ExB(byte *a, byte *b)
   *b = c;
 }
 
-int FlagP(byte a)
+int FlagP (byte a)
 {
   byte b, c, i;
 
   b = 1;
   c = a;
-  for(i = 0; i < 8; i++)
+  for (i = 0; i < 8; i++)
   {
-    if((c & 1) != 0)
+    if ((c & 1) != 0)
       b = !b;
     c = c >> 1;
   }
   return b;
 }
 
-int FlagS(byte a)
+int FlagS (byte a)
 {
   return (a & 0x80);
 }
 
-byte GetMem(word a)
+byte GetMem (word a)
 {
   return memory[a];
 }
 
-void InB(byte p)
+void InB (byte p)
 {
   reg_a = p;
 }
 
-void IncR(byte *r)
+void IncR (byte * r)
 {
   byte a;
 
   a = reg_a;
   reg_a = *r;
-  AddA(0x01);
+  AddA (0x01);
   *r = reg_a;
   reg_a = a;
 }
 
-void Jmp(byte f)
+void Jmp (byte f)
 {
   byte h, l;
 
-  l = gcmd();
-  h = gcmd();
-  if(f)
-    reg_pc = l+h*256;
-}   
-
-void LfShC(void)
-{
-   byte c;
-
-   c = reg_a;
-   reg_a = (c << 1);
-   if(WhatF('c'))
-     reg_a |= 0x01;
-
-   if((c & 0x80))
-     SetF('c');
-   else
-     ResF('c');
+  l = gcmd ();
+  h = gcmd ();
+  if (f)
+    reg_pc = l + h * 256;
 }
 
-void LfSh(void)
+void LfShC (void)
+{
+  byte c;
+
+  c = reg_a;
+  reg_a = (c << 1);
+  if (WhatF ('c'))
+    reg_a |= 0x01;
+
+  if ((c & 0x80))
+    SetF ('c');
+  else
+    ResF ('c');
+}
+
+void LfSh (void)
 {
   byte c;
 
   c = reg_a;
   reg_a = (c << 1) | (c >> 7);
 
-  if((c & 0x80))
-    SetF('c');
+  if ((c & 0x80))
+    SetF ('c');
   else
-    ResF('c');
+    ResF ('c');
 }
 
-void OrA(byte r)
+void OrA (byte r)
 {
   byte a;
 
   a = (reg_a | r);
-  ResF('n');
-  ResF('c');
-  SetF('h');
+  ResF ('n');
+  ResF ('c');
+  SetF ('h');
 
-  if(FlagP(a))
-    SetF('p');
+  if (FlagP (a))
+    SetF ('p');
   else
-    ResF('p');
+    ResF ('p');
 
-  if(FlagS(a))
-    SetF('s');
+  if (FlagS (a))
+    SetF ('s');
   else
-    ResF('s');
+    ResF ('s');
 
-  if(!a)
-    SetF('z');
+  if (!a)
+    SetF ('z');
   else
-    ResF('z');
+    ResF ('z');
 
   reg_a = a;
 }
 
-void OutB(byte p)
+void OutB (byte p)
 {
   p++;
 }
 
-void Pop(byte *h, byte *l)
+void Pop (byte * h, byte * l)
 {
-  *h = GetMem(reg_sp+1);
-  *l = GetMem(reg_sp);
+  *h = GetMem (reg_sp + 1);
+  *l = GetMem (reg_sp);
   reg_sp += 2;
 }
 
-void Push(byte h, byte l)
+void Push (byte h, byte l)
 {
-  PutMem(reg_sp-1, h);
-  PutMem(reg_sp-2, l);
+  PutMem (reg_sp - 1, h);
+  PutMem (reg_sp - 2, l);
   reg_sp -= 2;
 }
 
-void PutMem(word a, byte c)
+void PutMem (word a, byte c)
 {
   memory[a] = c;
 }
 
-void ResF(char a)
+void ResF (char a)
 {
-  switch(a)
+  switch (a)
   {
-    case 'c': reg_f &= 0x01 ^ 0xff; break;
-    case 'n': reg_f &= 0x02 ^ 0xff; break;
-    case 'p': reg_f &= 0x04 ^ 0xff; break;
-    case 'h': reg_f &= 0x10 ^ 0xff; break;
-    case 'z': reg_f &= 0x40 ^ 0xff; break;
-    case 's': reg_f &= 0x80 ^ 0xff; break;
+      case 'c':reg_f &= 0x01 ^ 0xff;
+      break;
+    case 'n':
+      reg_f &= 0x02 ^ 0xff;
+      break;
+    case 'p':
+      reg_f &= 0x04 ^ 0xff;
+      break;
+    case 'h':
+      reg_f &= 0x10 ^ 0xff;
+      break;
+    case 'z':
+      reg_f &= 0x40 ^ 0xff;
+      break;
+    case 's':
+      reg_f &= 0x80 ^ 0xff;
+      break;
   }
 }
 
-void Ret(byte f)
+void Ret (byte f)
 {
   byte h, l;
 
-  if(f)
+  if (f)
   {
-    l = GetMem(reg_sp);
-    h = GetMem(reg_sp+1);
+    l = GetMem (reg_sp);
+    h = GetMem (reg_sp + 1);
     reg_sp += 2;
     reg_pc = l + h * 256;
   }
 }
 
-void RgShC(void)
+void RgShC (void)
 {
   byte c;
 
   c = reg_a;
   reg_a = (c << 1);
-  if(WhatF('c'))
+  if (WhatF ('c'))
     reg_a |= 0x80;
 
-  if(c & 0x01)
-    SetF('c');
+  if (c & 0x01)
+    SetF ('c');
   else
-    ResF('c');
+    ResF ('c');
 }
 
-void RgSh(void)
+void RgSh (void)
 {
   byte c;
 
   c = reg_a;
   reg_a = (c >> 1) | (c << 7);
 
-  if(c & 0x01)
-    SetF('c');
+  if (c & 0x01)
+    SetF ('c');
   else
-    ResF('c');
+    ResF ('c');
 }
 
-void Rst(word a)
+void Rst (word a)
 {
-  PutMem(reg_sp-1, (reg_pc >> 8) & 0xff);
-  PutMem(reg_sp-2, reg_pc & 0xff);
+  PutMem (reg_sp - 1, (reg_pc >> 8) & 0xff);
+  PutMem (reg_sp - 2, reg_pc & 0xff);
   reg_sp -= 2;
   reg_pc = a;
 }
 
-void SetF(char a)
+void SetF (char a)
 {
-  switch(a)
+  switch (a)
   {
-    case 'c': reg_f |= 0x01; break;
-    case 'n': reg_f |= 0x02; break;
-    case 'p': reg_f |= 0x04; break;
-    case 'h': reg_f |= 0x10; break;
-    case 'z': reg_f |= 0x40; break;
-    case 's': reg_f |= 0x80; break;
+      case 'c':reg_f |= 0x01;
+      break;
+    case 'n':
+      reg_f |= 0x02;
+      break;
+    case 'p':
+      reg_f |= 0x04;
+      break;
+    case 'h':
+      reg_f |= 0x10;
+      break;
+    case 'z':
+      reg_f |= 0x40;
+      break;
+    case 's':
+      reg_f |= 0x80;
+      break;
   }
 }
 
-void SubAC(byte r)
+void SubAC (byte r)
 {
   byte a;
 
-  a = reg_a-r;
-  if(WhatF('c'))
-    dec(a);
+  a = reg_a - r;
+  if (WhatF ('c'))
+    dec (a);
 
-  if(a>r)
+  if (a > r)
   {
-    SetF('c');
-    SetF('v');
+    SetF ('c');
+    SetF ('v');
   }
   else
   {
-    ResF('c');
-    ResF('v');
+    ResF ('c');
+    ResF ('v');
   }
 
-  if(FlagS(a))
-    SetF('s');
+  if (FlagS (a))
+    SetF ('s');
 
-  if(!a)
-    SetF('z');
+  if (!a)
+    SetF ('z');
   else
-    ResF('z');
+    ResF ('z');
 
-  SetF('n');
-  if((reg_a & 0x0f) < (r & 0x0f))
-    SetF('h');
+  SetF ('n');
+  if ((reg_a & 0x0f) < (r & 0x0f))
+    SetF ('h');
   else
-    ResF('h');
+    ResF ('h');
 
   reg_a = a;
 }
 
-void SubA(byte r)
+void SubA (byte r)
 {
-  ResF('c');
-  SubAC(r);
+  ResF ('c');
+  SubAC (r);
 }
 
-int WhatF(char a)
+int WhatF (char a)
 {
-  switch(a)
+  switch (a)
   {
-    case 'c': return reg_f & 0x01;
-    case 'n': return reg_f & 0x02;
-    case 'p': return reg_f & 0x04;
-    case 'h': return reg_f & 0x10;
-    case 'z': return reg_f & 0x40;
-    case 's': return reg_f & 0x80;
+      case 'c':return reg_f & 0x01;
+    case 'n':
+      return reg_f & 0x02;
+    case 'p':
+      return reg_f & 0x04;
+    case 'h':
+      return reg_f & 0x10;
+    case 'z':
+      return reg_f & 0x40;
+    case 's':
+      return reg_f & 0x80;
   }
   return reg_f;
 }
 
-void XorA(byte r)
+void XorA (byte r)
 {
   byte a;
 
   a = (reg_a ^ r);
-  ResF('n');
-  ResF('c');
-  SetF('h');
+  ResF ('n');
+  ResF ('c');
+  SetF ('h');
 
-  if(FlagP(a))
-    SetF('p');
+  if (FlagP (a))
+    SetF ('p');
   else
-    ResF('p');
+    ResF ('p');
 
-  if(FlagS(a))
-    SetF('s');
+  if (FlagS (a))
+    SetF ('s');
   else
-    ResF('s');
+    ResF ('s');
 
-  if(!a)
-    SetF('z');
+  if (!a)
+    SetF ('z');
   else
-    ResF('z');
+    ResF ('z');
 
   reg_a = a;
 }

@@ -1,12 +1,13 @@
 /*
- * $Id: efile.c,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: efile.c,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: efile.c,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
  * 
  */
 
@@ -32,12 +33,9 @@
  * specified on the command line as an argument. The command in $readhook is
  * called after the buffer is set up and before it is read.
  */
-
-readin(fname, lockfl)
-
-char fname[];			  /* name of file to read */
-int lockfl;			  /* check for file locks? */
-
+int readin (char *fname, int lockfl)
+/* char fname[];		  /* name of file to read */
+/* int lockfl;			  /* check for file locks? */
 {
   register LINE *lp1;
   register LINE *lp2;
@@ -51,77 +49,77 @@ int lockfl;			  /* check for file locks? */
   char mesg[NSTRING];
 
   bp = curbp;			  /* Cheap.		 */
-  if ((s = bclear(bp)) != TRUE)	  /* Might be old.	 */
+  if ((s = bclear (bp)) != TRUE)  /* Might be old.	 */
     return (s);
   bp->b_flag &= ~(BFINVS | BFCHG);
-  strcpy(bp->b_fname, fname);
+  strcpy (bp->b_fname, fname);
 
   /* turn off ALL keyboard translation in case we get a dos error */
-  TTkclose();
+  TTkclose ();
 
-  if ((s = ffropen(fname)) == FIOERR)	/* Hard file open.	 */
+  if ((s = ffropen (fname)) == FIOERR)	/* Hard file open.	 */
     goto out;
 
   if (s == FIOFNF)
   {				  /* File not found.	 */
-    mlwrite(TEXT138);
+    mlwrite (TEXT138);
     /* "[New file]" */
     goto out;
   }
 
   /* read the file in */
-  mlwrite(TEXT139);
+  mlwrite (TEXT139);
   /* "[Reading file]" */
   nline = 0;
-  while ((s = ffgetline()) == FIOSUC)
+  while ((s = ffgetline ()) == FIOSUC)
   {
-    nbytes = strlen(fline);
-    if ((lp1 = lalloc(nbytes)) == (LINE *) NULL)
+    nbytes = strlen (fline);
+    if ((lp1 = lalloc (nbytes)) == (LINE *) NULL)
     {
       s = FIOMEM;		  /* Keep message on the	 */
       break;			  /* display.		 */
     }
-    lp2 = lback(curbp->b_linep);
+    lp2 = lback (curbp->b_linep);
     lp2->l_fp = lp1;
     lp1->l_fp = curbp->b_linep;
     lp1->l_bp = lp2;
     curbp->b_linep->l_bp = lp1;
     for (i = 0; i < nbytes; ++i)
-      lputc(lp1, i, fline[i]);
+      lputc (lp1, i, fline[i]);
     ++nline;
   }
-  ffclose();			  /* Ignore errors.       */
-  strcpy(mesg, "[");
+  ffclose ();			  /* Ignore errors.       */
+  strcpy (mesg, "[");
   if (s == FIOERR)
   {
-    strcat(mesg, TEXT141);
+    strcat (mesg, TEXT141);
     /* "I/O ERROR, " */
     curbp->b_flag |= BFTRUNC;
   }
   if (s == FIOMEM)
   {
-    strcat(mesg, TEXT142);
+    strcat (mesg, TEXT142);
     /* "OUT OF MEMORY, " */
     curbp->b_flag |= BFTRUNC;
   }
-  strcat(mesg, TEXT140);
+  strcat (mesg, TEXT140);
   /* "Read " */
-  strcat(mesg, int_asc(nline));
-  strcat(mesg, TEXT143);
+  strcat (mesg, int_asc (nline));
+  strcat (mesg, TEXT143);
   /* " line" */
   if (nline > 1)
-    strcat(mesg, "s");
-  strcat(mesg, "]");
-  mlwrite(mesg);
+    strcat (mesg, "s");
+  strcat (mesg, "]");
+  mlwrite (mesg);
 
 out:
-  TTkopen();			  /* open the keyboard again */
+  TTkopen ();			  /* open the keyboard again */
   for (wp = wheadp; wp != (WINDOW *) NULL; wp = wp->w_wndp)
   {
     if (wp->w_bufp == curbp)
     {
-      wp->w_linep = lforw(curbp->b_linep);
-      wp->w_dotp = lforw(curbp->b_linep);
+      wp->w_linep = lforw (curbp->b_linep);
+      wp->w_dotp = lforw (curbp->b_linep);
       wp->w_doto = 0;
       for (cmark = 0; cmark < NMARKS; cmark++)
       {
@@ -143,9 +141,7 @@ out:
  * pointer into fname indicating the end of the file path; i.e., 1 character
  * BEYOND the path name.
  */
-char *makename(bname, fname)
-char bname[];
-char fname[];
+char *makename (char *bname, char *fname)
 {
   register char *cp1;
   register char *cp2;
@@ -168,15 +164,13 @@ char fname[];
   return (pathp);
 }
 
-unqname(name)			  /* make sure a buffer name is unique */
-
-char *name;			  /* name to check on */
-
+void unqname (char *name)	  /* make sure a buffer name is unique */
+/* char *name;			  /* name to check on */
 {
   register char *sp;
 
   /* check to see if it is in the buffer list */
-  while (bfind(name, 0, FALSE) != (BUFFER *) NULL)
+  while (bfind (name, 0, FALSE) != (BUFFER *) NULL)
   {
 
     /* go to the end of the name */
@@ -199,17 +193,17 @@ char *name;			  /* name to check on */
  * is no remembered file name for the buffer. Bound to "C-X C-S". May get
  * called by "C-Z".
  */
-filesave(f, n)
+int filesave (int f, int n)
 {
   register int s;
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
+    return (rdonly ());		  /* we are in read only mode	 */
   if ((curbp->b_flag & BFCHG) == 0)	/* Return, no changes.	 */
     return (TRUE);
   if (curbp->b_fname[0] == 0)
   {				  /* Must have a name.    */
-    mlwrite(TEXT145);
+    mlwrite (TEXT145);
     /* "No file name" */
     return (FALSE);
   }
@@ -217,10 +211,10 @@ filesave(f, n)
   /* complain about truncated files */
   if ((curbp->b_flag & BFTRUNC) != 0)
   {
-    if (mlyesno(TEXT146) == FALSE)
+    if (mlyesno (TEXT146) == FALSE)
     {
       /* "Truncated file..write it out" */
-      mlwrite(TEXT8);
+      mlwrite (TEXT8);
       /* "[Aborted]" */
       return (FALSE);
     }
@@ -229,20 +223,20 @@ filesave(f, n)
   /* complain about narrowed buffers */
   if ((curbp->b_flag & BFNAROW) != 0)
   {
-    if (mlyesno(TEXT147) == FALSE)
+    if (mlyesno (TEXT147) == FALSE)
     {
       /* "Narrowed Buffer..write it out" */
-      mlwrite(TEXT8);
+      mlwrite (TEXT8);
       /* "[Aborted]" */
       return (FALSE);
     }
   }
 
-  if ((s = writeout(curbp->b_fname)) == TRUE)
+  if ((s = writeout (curbp->b_fname)) == TRUE)
   {
     curbp->b_flag &= ~BFCHG;
     /* Update mode lines.	 */
-    upmode();
+    upmode ();
   }
   return (s);
 }
@@ -256,11 +250,7 @@ filesave(f, n)
  * renamed to the original name.  Before the file is written, a user
  * specifyable routine (in $writehook) can be run.
  */
-
-writeout(fn)
-
-char *fn;			  /* name of file to write current buffer to */
-
+int writeout (char *fn)
 {
   register LINE *lp;		  /* line to scan while writing */
   register char *sp;		  /* temporary string pointer */
@@ -272,107 +262,129 @@ char *fn;			  /* name of file to write current buffer to */
 
   /* determine if we will use the save method */
   sflag = FALSE;
-  if (ssave && fexist(fn))
+  if (ssave && fexist (fn))
     sflag = TRUE;
 
   /* turn off ALL keyboard translation in case we get a dos error */
-  TTkclose();
+  TTkclose ();
 
   /* Perform Safe Save..... */
   if (sflag)
   {
     /* duplicate original file name, and find where to trunc it */
-    sp = tname + (makename(tname, fn) - fn) + 1;
-    strcpy(tname, fn);
+    sp = tname + (makename (tname, fn) - fn) + 1;
+    strcpy (tname, fn);
 
     /* create a unique name, using random numbers */
     do
     {
       *sp = 0;
-      strcat(tname, int_asc(ernd()));
-    } while (fexist(tname));
+      strcat (tname, int_asc (ernd ()));
+    } while (fexist (tname));
 
     /* open the temporary file */
-    status = ffwopen(tname);
+    status = ffwopen (tname);
   }
   else
-    status = ffwopen(fn);
+    status = ffwopen (fn);
 
   /* if the open failed.. clean up and abort */
   if (status != FIOSUC)
   {
-    TTkopen();
+    TTkopen ();
     return (FALSE);
   }
 
   /* write the current buffer's lines to the open disk file */
-  mlwrite(TEXT148);		  /* tell us that we're writing */
+  mlwrite (TEXT148);		  /* tell us that we're writing */
   /* "[Writing...]" */
-  lp = lforw(curbp->b_linep);	  /* start at the first line.     */
+  lp = lforw (curbp->b_linep);	  /* start at the first line.     */
   nline = 0;			  /* track the Number of lines	 */
   while (lp != curbp->b_linep)
   {
-    if ((status = ffputline(&lp->l_text[0], llength(lp))) != FIOSUC)
+    if ((status = ffputline (&lp->l_text[0], llength (lp))) != FIOSUC)
       break;
     ++nline;
-    lp = lforw(lp);
+    lp = lforw (lp);
   }
 
 
   /* report on status of file write */
   *buf = 0;
-  status |= ffclose();
+  status |= ffclose ();
   if (status == FIOSUC)
   {
     /* report on success (or lack therof) */
-    strcpy(buf, TEXT149);
+    strcpy (buf, TEXT149);
     /* "[Wrote " */
-    strcat(buf, int_asc(nline));
-    strcat(buf, TEXT143);
+    strcat (buf, int_asc (nline));
+    strcat (buf, TEXT143);
     /* " line" */
     if (nline > 1)
-      strcat(buf, "s");
+      strcat (buf, "s");
 
     if (sflag)
     {
       /* erase original file */
       /* rename temporary file to original name */
-      if (unlink(fn) == 0 && rename1(tname, fn) == 0)
+      if (unlink (fn) == 0 && rename1 (tname, fn) == 0)
 	;
       else
       {
-	strcat(buf, TEXT150);
+	strcat (buf, TEXT150);
 	/* ", saved as " */
-	strcat(buf, tname);
+	strcat (buf, tname);
 	status = FIODEL;	  /* failed */
       }
     }
-    strcat(buf, "]");
-    mlwrite(buf);
+    strcat (buf, "]");
+    mlwrite (buf);
   }
 
   /* reopen the keyboard, and return our status */
-  TTkopen();
+  TTkopen ();
   return (status == FIOSUC);
 }
 
 /*
- * Read a file into the current
- * buffer. This is really easy; all you do is
- * find the name of the file, and call the standard
- * "read a file into the current buffer" code.
- * Bound to "C-X C-R".
+ * Read a file into the current buffer. This is really easy; all you do is
+ * find the name of the file, and call the standard "read a file into the
+ * current buffer" code. Bound to "C-X C-R".
  */
-fileread(f, n)
-
-int f, n;	/* defualt and numeric arguments (unused) */
-
+int fileread (int f, int n)
 {
-	register int s;	/* status return */
-	char *fname;	/* file name to read */
+  register int s;		  /* status return */
+  char *fname;			  /* file name to read */
 
-	if ((fname = gtfilename(TEXT131)) == (char *)NULL)
-/*                              "Read file" */
-		return(FALSE);
-	return(readin(fname, TRUE));
+  if ((fname = gtfilename (TEXT131)) == (char *) NULL)
+    /* "Read file" */
+    return (FALSE);
+  return (readin (fname, TRUE));
+}
+
+/*
+ * Ask for a file name, and write the contents of the current buffer to that
+ * file. Update the remembered file name and clear the buffer changed flag.
+ * This handling of file names is different from the earlier versions, and is
+ * more compatable with Gosling EMACS than with ITS EMACS. Bound to "C-X C-W"
+ * for writing and ^X^A for appending.
+ */
+filewrite (int f, int n)	  /* emacs arguments */
+{
+  register int s;
+  char *fname;
+
+  if (restflag)			  /* don't allow this command if restricted */
+    return (resterr ());
+  if ((fname = gtfilename (TEXT144)) == (char *) NULL)
+    /* "Write file: " */
+    return (s);
+  if ((s = writeout (fname)) == TRUE)
+  {
+    strcpy (curbp->b_fname, fname);
+    curbp->b_flag &= ~BFCHG;
+    /* Update mode lines.	 */
+    upmode ();
+  }
+  return (s);
 }

@@ -1,12 +1,13 @@
 /*
- * $Id: einput.c,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: einput.c,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: einput.c,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
  * 
  */
 
@@ -53,11 +54,7 @@
  * or ABORT. The ABORT status is returned if the user bumps out of the
  * question with a ^G. Used any time a confirmation is required.
  */
-
-mlyesno(prompt)
-
-char *prompt;
-
+int mlyesno (char *prompt)
 {
   int c;			  /* input character */
   char buf[NPAT];		  /* prompt to user */
@@ -65,17 +62,17 @@ char *prompt;
   for (;;)
   {
     /* build and prompt the user */
-    strcpy(buf, prompt);
-    strcat(buf, TEXT162);
+    strcpy (buf, prompt);
+    strcat (buf, TEXT162);
     /* " [y/n]? " */
-    mlwrite(buf);
+    mlwrite (buf);
 
     /* get the response */
-    c = getcmd();		  /* getcmd() lets us check for anything that
+    c = getcmd ();		  /* getcmd() lets us check for anything that
 				   * might */
     /* generate a 'y' or 'Y' in case use screws up */
 
-    if (c == ectoc(abortc))	  /* Bail out! */
+    if (c == ectoc (abortc))	  /* Bail out! */
       return (ABORT);
 
     if ((c == 'n') || (c == 'N')
@@ -93,11 +90,7 @@ char *prompt;
  * ectoc:	expanded character to character collapse the CTRL and SPEC
  * flags back into an ascii code
  */
-
-ectoc(c)
-
-int c;
-
+int ectoc (int c)
 {
   if (c & CTRL)
     c = c & ~(CTRL | 0x40);
@@ -110,9 +103,7 @@ int c;
  * tgetc:	Get a key from the terminal driver, resolve any keyboard
  * macro action
  */
-
-int tgetc()
-
+int tgetc (void)
 {
   int c;			  /* fetched character */
 
@@ -129,7 +120,7 @@ int tgetc()
     {
       kbdmode = STOP;
       /* force a screen update after all is done */
-      update(FALSE);
+      update (FALSE);
     }
     else
     {
@@ -141,7 +132,7 @@ int tgetc()
   }
 
   /* fetch a character from the terminal driver */
-  c = TTgetc();
+  c = TTgetc ();
 
   /* record it for $lastkey */
   lastkey = c;
@@ -156,7 +147,7 @@ int tgetc()
     if (kbdptr == &kbdm[NKBDM - 1])
     {
       kbdmode = STOP;
-      TTbeep();
+      TTbeep ();
     }
   }
 
@@ -168,33 +159,31 @@ int tgetc()
  * getkey: Get one keystroke. The only prefixs legal here are the SPEC and
  * CTRL prefixes.
  */
-
-getkey()
-
+int getkey (void)
 {
   int c;			  /* next input character */
   int upper;			  /* upper byte of the extended sequence */
 
   /* get a keystroke */
-  c = tgetc();
+  c = tgetc ();
 
   /* if it exists, process an escape sequence */
   if (c == 0)
   {
 
     /* get the event type */
-    upper = tgetc();
+    upper = tgetc ();
 
     /* mouse events need us to read in the row/col */
     if (upper & (MOUS >> 8))
     {
       /* grab the x/y position of the mouse */
-      xpos = tgetc();
-      ypos = tgetc();
+      xpos = tgetc ();
+      ypos = tgetc ();
     }
 
     /* get the event code */
-    c = tgetc();
+    c = tgetc ();
 
     /* if it is a function key... map it */
     c = (upper << 8) | c;
@@ -213,29 +202,28 @@ getkey()
  * GETCMD: Get a command from the keyboard. Process all applicable prefix
  * keys
  */
-getcmd()
-
+int getcmd (void)
 {
   int c;			  /* fetched keystroke */
   KEYTAB *key;			  /* ptr to a key entry */
 
   /* get initial character */
-  c = getkey();
-  key = getbind(c);
+  c = getkey ();
+  key = getbind (c);
 
   /* resolve META and CTLX prefixes */
   if (key)
   {
     if (key->k_ptr.fp == meta)
     {
-      c = getkey();
-      c = upperc(c) | (c & ~255); /* Force to upper */
+      c = getkey ();
+      c = upperc (c) | (c & ~255);/* Force to upper */
       c |= META;
     }
     else if (key->k_ptr.fp == cex)
     {
-      c = getkey();
-      c = upperc(c) | (c & ~255); /* Force to upper */
+      c = getkey ();
+      c = upperc (c) | (c & ~255);/* Force to upper */
       c |= CTLX;
     }
   }
@@ -249,12 +237,7 @@ getcmd()
  * the proper terminator. If the terminator is not a return('\r'), return
  * will echo as "<NL>"
  */
-getstring(prompt, buf, nbuf, eolchar)
-
-char *prompt;
-char *buf;
-int eolchar;
-
+int getstring (char *prompt, char *buf, int nbuf, int eolchar)
 {
   register int cpos;		  /* current character position in string */
   register int c;		  /* current input character */
@@ -265,14 +248,14 @@ int eolchar;
 
   /* prompt the user for the input string */
   if (discmd)
-    mlwrite(prompt);
+    mlwrite (prompt);
   else
-    movecursor(term.t_nrow, 0);
+    movecursor (term.t_nrow, 0);
 
   for (;;)
   {
     /* get a character from the user */
-    c = getkey();
+    c = getkey ();
 
     /* if they hit the line terminate, wrap it up */
     if (c == eolchar && quotef == FALSE)
@@ -280,8 +263,8 @@ int eolchar;
       buf[cpos++] = 0;
 
       /* clear the message line */
-      mlwrite("");
-      TTflush();
+      mlwrite ("");
+      TTflush ();
 
       /* if we default the buffer, return FALSE */
       if (buf[0] == 0)
@@ -291,13 +274,13 @@ int eolchar;
     }
 
     /* change from command form back to character form */
-    c = ectoc(c);
+    c = ectoc (c);
 
-    if (c == ectoc(abortc) && quotef == FALSE)
+    if (c == ectoc (abortc) && quotef == FALSE)
     {
       /* Abort the input? */
-      ctrlg(FALSE, 0);
-      TTflush();
+      ctrlg (FALSE, 0);
+      TTflush ();
       return (ABORT);
     }
     else if ((c == 0x7F || c == 0x08) && quotef == FALSE)
@@ -305,21 +288,21 @@ int eolchar;
       /* rubout/erase */
       if (cpos != 0)
       {
-	outstring("\b \b");
+	outstring ("\b \b");
 	--ttcol;
 
 	if (buf[--cpos] < 0x20)
 	{
-	  outstring("\b \b");
+	  outstring ("\b \b");
 	  --ttcol;
 	}
 
 	if (buf[cpos] == '\r')
 	{
-	  outstring("\b\b  \b\b");
+	  outstring ("\b\b  \b\b");
 	  ttcol -= 2;
 	}
-	TTflush();
+	TTflush ();
       }
 
     }
@@ -328,16 +311,16 @@ int eolchar;
       /* C-U, kill */
       while (cpos != 0)
       {
-	outstring("\b \b");
+	outstring ("\b \b");
 	--ttcol;
 
 	if (buf[--cpos] < 0x20)
 	{
-	  outstring("\b \b");
+	  outstring ("\b \b");
 	  --ttcol;
 	}
       }
-      TTflush();
+      TTflush ();
 
     }
     else if (c == quotec && quotef == FALSE)
@@ -353,202 +336,120 @@ int eolchar;
 
 	if ((c < ' ') && (c != '\r'))
 	{
-	  outstring("^");
+	  outstring ("^");
 	  ++ttcol;
 	  c ^= 0x40;
 	}
 
 	if (c != '\r')
-	  mlout(c);
+	  mlout (c);
 	else
 	{			  /* put out <NL> for <ret> */
-	  outstring("<NL>");
+	  outstring ("<NL>");
 	  ttcol += 3;
 	}
 	++ttcol;
-	TTflush();
+	TTflush ();
       }
     }
   }
 }
 
-outstring(s)			  /* output a string of input characters */
-
-char *s;			  /* string to output */
-
+void outstring (char *s)	  /* output a string of input characters */
 {
   while (*s)
-    mlout(*s++);
+    mlout (*s++);
 }
 
-char *gtfilename(prompt)
-
-char *prompt;		/* prompt to user on command line */
-
+char *gtfilename (char *prompt)	  /* prompt to user on command line */
 {
-	char *sp;	/* ptr to the returned string */
+  char *sp;			  /* ptr to the returned string */
 
-	sp = complete(prompt, NULL, NFILEN);
-	if (sp == NULL)
-		return(NULL);
+  sp = complete (prompt, NULL, NFILEN);
+  if (sp == NULL)
+    return (NULL);
 
-	return(sp);
+  return (sp);
 }
 
-char *complete(prompt, defval, maxlen)
-
-char *prompt;		/* prompt to user on command line */
-char *defval;		/* default value to display to user */
-int maxlen;		/* maximum length of input field */
-
+char *complete (char *prompt, char *defval, int maxlen)
+/* prompt;		/* prompt to user on command line */
+/* defval;		/* default value to display to user */
+/* maxlen;		/* maximum length of input field */
 {
-	register int c;		/* current input character */
-	register int ec;	/* extended input character */
-	int cpos;		/* current column on screen output */
-	static char buf[NSTRING];/* buffer to hold tentative name */
+  register int c;		  /* current input character */
+  register int ec;		  /* extended input character */
+  int cpos;			  /* current column on screen output */
+  static char buf[NSTRING];	  /* buffer to hold tentative name */
 
-	/* starting at the beginning of the string buffer */
-	cpos = 0;
+  /* starting at the beginning of the string buffer */
+  cpos = 0;
 
-	/* if it exists, prompt the user for a buffer name */
-	if (prompt)
-		mlwrite("%s: ", prompt);
+  /* if it exists, prompt the user for a buffer name */
+  if (prompt)
+    mlwrite ("%s: ", prompt);
 
-	/* build a name string from the keyboard */
-	while (TRUE) {
+  /* build a name string from the keyboard */
+  while (TRUE)
+  {
 
-		/* get the keystroke and decode it */
-		ec = getkey();
-		c = ectoc(ec);		
+    /* get the keystroke and decode it */
+    ec = getkey ();
+    c = ectoc (ec);
 
-		/* if we are at the end, just match it */
-		if (c == '\n'  ||  c == '\r') {
-			if (defval && cpos==0)
-				return(defval);
-			else {
-				buf[cpos] = 0;
-				return(buf);
-			}
+    /* if we are at the end, just match it */
+    if (c == '\n' || c == '\r')
+    {
+      if (defval && cpos == 0)
+	return (defval);
+      else
+      {
+	buf[cpos] = 0;
+	return (buf);
+      }
 
-		} else if (ec == abortc) {	/* Bell, abort */
-			ctrlg(FALSE, 0);
-			TTflush();
-			return(NULL);
+    }
+    else if (ec == abortc)
+    {				  /* Bell, abort */
+      ctrlg (FALSE, 0);
+      TTflush ();
+      return (NULL);
 
-		} else if (c == 0x7F || c == 0x08) {	/* rubout/erase */
-			if (cpos != 0) {
-				mlout('\b');
-				mlout(' ');
-				mlout('\b');
-				--ttcol;
-				--cpos;
-				TTflush();
-			}
+    }
+    else if (c == 0x7F || c == 0x08)
+    {				  /* rubout/erase */
+      if (cpos != 0)
+      {
+	mlout ('\b');
+	mlout (' ');
+	mlout ('\b');
+	--ttcol;
+	--cpos;
+	TTflush ();
+      }
 
-		} else if (c == 0x15) {	/* C-U, kill */
-			while (cpos != 0) {
-				mlout('\b');
-				mlout(' ');
-				mlout('\b');
-				--cpos;
-				--ttcol;
-			}
-			TTflush();
-
-		} else if ((c == ' ') || (ec == sterm) || (c == '\t')) {	
-			/* attempt a completion */
-			comp_file(buf, &cpos);
-
-			TTflush();
-			if (buf[cpos - 1] == 0)
-				return(buf);
-		} else {
-			if (cpos < maxlen && c > ' ') {
-				buf[cpos++] = c;
-				mlout(c);
-				++ttcol;
-				TTflush();
-			}
-		}
-	}
+    }
+    else if (c == 0x15)
+    {				  /* C-U, kill */
+      while (cpos != 0)
+      {
+	mlout ('\b');
+	mlout (' ');
+	mlout ('\b');
+	--cpos;
+	--ttcol;
+      }
+      TTflush ();
+    }
+    else
+    {
+      if (cpos < maxlen && c > ' ')
+      {
+	buf[cpos++] = c;
+	mlout (c);
+	++ttcol;
+	TTflush ();
+      }
+    }
+  }
 }
-
-/*	comp_file:	Attempt a completion on a file name	*/
-
-comp_file(name, cpos)
-
-char *name;	/* file containing the current name to complete */
-int *cpos;	/* ptr to position of next character to insert */
-
-{
-	register char *fname;	/* trial file to complete */
-	register int index;	/* index into strings to compare */
-
-	register int matches;	/* number of matches for name */
-	char longestmatch[NSTRING]; /* temp buffer for longest match */
-	int longestlen; 	/* length of longest match (always > *cpos) */
-
-	/* everything (or nothing) matches an empty string */
-	if (*cpos == 0)
-		return;
-
-	/* first, we start at the first file and scan the list */
-	matches = 0;
-	name[*cpos] = 0;
-	fname = getffile(name);
-	while (fname) {
-
-		/* is this a match? */
-		if (strncmp(name,fname,*cpos) == 0) {
-
-			/* count the number of matches */
-			matches++;
-
-			/* if this is the first match, simply record it */
-			if (matches == 1) {
-				strcpy(longestmatch,fname);
-				longestlen = strlen(longestmatch);
-			} else {
-
-				/* if there's a difference, stop here */
-				if (longestmatch[*cpos] != fname[*cpos])
-					return;
-
-				for (index = (*cpos) + 1; index < longestlen; index++)
-					if (longestmatch[index] != fname[index]) {
-						longestlen = index;
-						longestmatch[longestlen] = 0;
-					}
-			}
-		}
-
-		/* on to the next file */
-		fname = getnfile();
-	}
-
-	/* beep if we never matched */
-	if (matches == 0) {
-		TTbeep();
-		return;
-	}
-
-	/* the longestmatch array contains the longest match so copy and print it */
-	for ( ; (*cpos < (NSTRING-1)) && (*cpos < longestlen); (*cpos)++) {
-		name[*cpos] = longestmatch[*cpos];
-		TTputc(name[*cpos]);
-	}
-
-	name[*cpos] = 0;
-
-	/* if only one file matched then increment cpos to signal complete() */
-	/* that this was a complete match.  If a directory was matched then */
-	/* last character will be the DIRSEPCHAR.  In this case we do NOT *
-	/* want to signal a complete match. */
-	if ((matches == 1) && (name[(*cpos)-1] != '/'))
-		(*cpos)++;
-
-	TTflush();
-
-	return;
-}
-

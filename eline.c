@@ -1,12 +1,13 @@
 /*
- * $Id: eline.c,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: eline.c,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: eline.c,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
  * 
  */
 
@@ -38,17 +39,13 @@
  * if there isn't any memory left. Print a message in the message line if no
  * space.
  */
-
-LINE *lalloc(used)
-
-register int used;
-
+LINE *lalloc (int used)
 {
   register LINE *lp;
 
-  if ((lp = (LINE *) malloc(sizeof(LINE) + used)) == (LINE *) NULL)
+  if ((lp = (LINE *) malloc (sizeof (LINE) + used)) == (LINE *) NULL)
   {
-    mlwrite(TEXT99);
+    mlwrite (TEXT99);
     /* "[OUT OF MEMORY]" */
     return ((LINE *) NULL);
   }
@@ -63,8 +60,7 @@ register int used;
  * it might be in. Release the memory. The buffers are updated too; the magic
  * conditions described in the above comments don't hold here.
  */
-lfree(lp)
-register LINE *lp;
+void lfree (LINE * lp)
 {
   register BUFFER *bp;
   register WINDOW *wp;
@@ -113,7 +109,7 @@ register LINE *lp;
   }
   lp->l_bp->l_fp = lp->l_fp;
   lp->l_fp->l_bp = lp->l_bp;
-  free((char *) lp);
+  free ((char *) lp);
 }
 
 /*
@@ -123,8 +119,7 @@ register LINE *lp;
  * being displayed in more than 1 window we change EDIT t HARD. Set MODE if
  * the mode line needs to be updated (the "*" has to be set).
  */
-lchange(flag)
-register int flag;
+void lchange (int flag)
 {
   register WINDOW *wp;
 
@@ -146,31 +141,26 @@ register int flag;
   }
 }
 
-insspace(f, n)			  /* insert spaces forward into text */
-
-int f, n;			  /* default flag and numeric argument */
-
+int insspace (int f, int n)	  /* insert spaces forward into text */
 {
-  linsert(n, ' ');
-  backchar(f, n);
+  linsert (n, ' ');
+  backchar (f, n);
 }
 
 /* linstr -- Insert a string at the current point */
-
-linstr(instr)
-char *instr;
+int linstr (char *instr)
 {
   register int status = TRUE;
 
   if (instr != (char *) NULL)
     while (*instr && status == TRUE)
     {
-      status = ((*instr == '\r') ? lnewline() : linsert(1, *instr));
+      status = ((*instr == '\r') ? lnewline () : linsert (1, *instr));
 
       /* Insertion error? */
       if (status != TRUE)
       {
-	mlwrite(TEXT168);
+	mlwrite (TEXT168);
 	/* "%%Can not insert string" */
 	break;
       }
@@ -188,10 +178,7 @@ char *instr;
  * greater than the place where you did the insert. Return TRUE if all is
  * well, and FALSE on errors.
  */
-
-linsert(n, c)
-int n;
-char c;
+int linsert (int n, char c)
 {
   register char *cp1;
   register char *cp2;
@@ -204,18 +191,18 @@ char c;
   int cmark;			  /* current mark */
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
-  lchange(WFEDIT);
+    return (rdonly ());		  /* we are in read only mode	 */
+  lchange (WFEDIT);
   lp1 = curwp->w_dotp;		  /* Current line	       */
   if (lp1 == curbp->b_linep)
   {				  /* At the end: special	 */
     if (curwp->w_doto != 0)
     {
-      mlwrite(TEXT170);
+      mlwrite (TEXT170);
       /* "bug: linsert" */
       return (FALSE);
     }
-    if ((lp2 = lalloc(BSIZE(n))) == (LINE *) NULL)	/* Allocate new line    */
+    if ((lp2 = lalloc (BSIZE (n))) == (LINE *) NULL)	/* Allocate new line    */
       return (FALSE);
     lp2->l_used = n;
     lp3 = lp1->l_bp;		  /* Previous line	      */
@@ -232,7 +219,7 @@ char c;
   doto = curwp->w_doto;		  /* Save for later.      */
   if (lp1->l_used + n > lp1->l_size)
   {				  /* Hard: reallocate	 */
-    if ((lp2 = lalloc(BSIZE(lp1->l_used + n))) == (LINE *) NULL)
+    if ((lp2 = lalloc (BSIZE (lp1->l_used + n))) == (LINE *) NULL)
       return (FALSE);
     lp2->l_used = lp1->l_used + n;
     cp1 = &lp1->l_text[0];
@@ -246,7 +233,7 @@ char c;
     lp2->l_fp = lp1->l_fp;
     lp1->l_fp->l_bp = lp2;
     lp2->l_bp = lp1->l_bp;
-    free((char *) lp1);
+    free ((char *) lp1);
   }
   else
   {				  /* Easy: in place	     */
@@ -292,7 +279,7 @@ char c;
  * update of dot and mark is a bit easier then in the above case, because the
  * split forces more updating.
  */
-lnewline()
+int lnewline (void)
 {
   register char *cp1;
   register char *cp2;
@@ -303,11 +290,11 @@ lnewline()
   int cmark;			  /* current mark */
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
-  lchange(WFHARD);
+    return (rdonly ());		  /* we are in read only mode	 */
+  lchange (WFHARD);
   lp1 = curwp->w_dotp;		  /* Get the address and  */
   doto = curwp->w_doto;		  /* offset of "."	 */
-  if ((lp2 = lalloc(doto)) == (LINE *) NULL)	/* New first half line	 */
+  if ((lp2 = lalloc (doto)) == (LINE *) NULL)	/* New first half line	 */
     return (FALSE);
   cp1 = &lp1->l_text[0];	  /* Shuffle text around  */
   cp2 = &lp2->l_text[0];
@@ -354,11 +341,9 @@ lnewline()
  * deleted, and FALSE if they were not (because dot ran into the end of the
  * buffer. The "kflag" is TRUE if the text should be put in the kill buffer.
  */
-ldelete(n, kflag)
-
-long n;				  /* # of chars to delete */
-int kflag;			  /* put killed text in kill buffer flag */
-
+int ldelete (long n, int kflag)
+/* long n;				  /* # of chars to delete */
+/* int kflag;			  /* put killed text in kill buffer flag */
 {
   register char *cp1;
   register char *cp2;
@@ -369,7 +354,7 @@ int kflag;			  /* put killed text in kill buffer flag */
   int cmark;			  /* current mark */
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
+    return (rdonly ());		  /* we are in read only mode	 */
   while (n != 0)
   {
     dotp = curwp->w_dotp;
@@ -381,21 +366,21 @@ int kflag;			  /* put killed text in kill buffer flag */
       chunk = n;
     if (chunk == 0)
     {				  /* End of line, merge.  */
-      lchange(WFHARD);
-      if (ldelnewline() == FALSE
-	  || (kflag != FALSE && kinsert('\r') == FALSE))
+      lchange (WFHARD);
+      if (ldelnewline () == FALSE
+	  || (kflag != FALSE && kinsert ('\r') == FALSE))
 	return (FALSE);
       --n;
       continue;
     }
-    lchange(WFEDIT);
+    lchange (WFEDIT);
     cp1 = &dotp->l_text[doto];	  /* Scrunch text.	      */
     cp2 = cp1 + chunk;
     if (kflag != FALSE)
     {				  /* Kill?		      */
       while (cp1 != cp2)
       {
-	if (kinsert(*cp1) == FALSE)
+	if (kinsert (*cp1) == FALSE)
 	  return (FALSE);
 	++cp1;
       }
@@ -438,7 +423,7 @@ int kflag;			  /* put killed text in kill buffer flag */
  * require that lines be moved about in memory. Return FALSE on error and
  * TRUE if all looks ok. Called by "ldelete" only.
  */
-ldelnewline()
+int ldelnewline (void)
 {
   register char *cp1;
   register char *cp2;
@@ -449,13 +434,13 @@ ldelnewline()
   int cmark;			  /* current mark */
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
+    return (rdonly ());		  /* we are in read only mode	 */
   lp1 = curwp->w_dotp;
   lp2 = lp1->l_fp;
   if (lp2 == curbp->b_linep)
   {				  /* At the buffer end.   */
     if (lp1->l_used == 0)	  /* Blank line.		 */
-      lfree(lp1);
+      lfree (lp1);
     return (TRUE);
   }
   if (lp2->l_used <= lp1->l_size - lp1->l_used)
@@ -487,10 +472,10 @@ ldelnewline()
     lp1->l_used += lp2->l_used;
     lp1->l_fp = lp2->l_fp;
     lp2->l_fp->l_bp = lp1;
-    free((char *) lp2);
+    free ((char *) lp2);
     return (TRUE);
   }
-  if ((lp3 = lalloc(lp1->l_used + lp2->l_used)) == (LINE *) NULL)
+  if ((lp3 = lalloc (lp1->l_used + lp2->l_used)) == (LINE *) NULL)
     return (FALSE);
   cp1 = &lp1->l_text[0];
   cp2 = &lp3->l_text[0];
@@ -527,8 +512,8 @@ ldelnewline()
     }
     wp = wp->w_wndp;
   }
-  free((char *) lp1);
-  free((char *) lp2);
+  free ((char *) lp1);
+  free ((char *) lp2);
   return (TRUE);
 }
 
@@ -537,7 +522,7 @@ ldelnewline()
  * new kill context is being created. The kill buffer array is released, just
  * in case the buffer has grown to immense size. No errors.
  */
-kdelete()
+void kdelete (void)
 {
   KILL *kp;			  /* ptr to scan kill buffer chunk list */
 
@@ -549,7 +534,7 @@ kdelete()
     while (kbufp != (KILL *) NULL)
     {
       kp = kbufp->d_next;
-      free(kbufp);
+      free (kbufp);
       kbufp = kp;
     }
 
@@ -563,18 +548,14 @@ kdelete()
  * Insert a character to the kill buffer, allocating new chunks as needed.
  * Return TRUE if all is well, and FALSE on errors.
  */
-
-kinsert(c)
-
-char c;				  /* character to insert in the kill buffer */
-
+int kinsert (char c)
 {
   KILL *nchunk;			  /* ptr to newly malloced chunk */
 
   /* check to see if we need a new chunk */
   if (kused >= KBLOCK)
   {
-    if ((nchunk = (KILL *) malloc(sizeof(KILL))) == (KILL *) NULL)
+    if ((nchunk = (KILL *) malloc (sizeof (KILL))) == (KILL *) NULL)
       return (FALSE);
     if (kbufh == (KILL *) NULL)	  /* set head ptr if first time */
       kbufh = nchunk;
@@ -595,7 +576,7 @@ char c;				  /* character to insert in the kill buffer */
  * is done by the standard insert routines. All you do is run the loop, and
  * check for errors. Bound to "C-Y".
  */
-yank(f, n)
+int yank (int f, int n)
 {
   register int c;
   register int i;
@@ -603,7 +584,7 @@ yank(f, n)
   KILL *kp;			  /* pointer into kill buffer */
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
+    return (rdonly ());		  /* we are in read only mode	 */
   if (n < 0)
     return (FALSE);
   /* make sure there is something to yank */
@@ -625,12 +606,12 @@ yank(f, n)
       {
 	if ((c = *sp++) == '\r')
 	{
-	  if (lnewline() == FALSE)
+	  if (lnewline () == FALSE)
 	    return (FALSE);
 	}
 	else
 	{
-	  if (linsert(1, c) == FALSE)
+	  if (linsert (1, c) == FALSE)
 	    return (FALSE);
 	}
       }

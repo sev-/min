@@ -1,16 +1,16 @@
 /*
- * $Id: ebind.h,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: ebind.h,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: ebind.h,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
- * Revision 1.4  1994/08/15  21:27:30  sev
- * i'm sorry, but this indent IMHO more better ;-)
- * Revision 1.3  1994/08/15  20:42:11  sev Indented Revision
- * 1.2  1994/06/24  17:22:21  sev Added mainmenu key
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
+ * Revision 1.4  1994/08/15  21:27:30  sev i'm sorry, but this indent IMHO more
+ * better ;-) Revision 1.3  1994/08/15  20:42:11  sev Indented Revision 1.2
+ * 1994/06/24  17:22:21  sev Added mainmenu key
  * 
  * Revision 1.1  1994/06/24  14:17:12  sev Initial revision
  * 
@@ -57,6 +57,7 @@ KEYTAB keytab[NBINDS] =
   {CTLX | CTRL | 'C', BINDFNC, quit},
   {CTLX | CTRL | 'R', BINDFNC, fileread},
   {CTLX | CTRL | 'S', BINDFNC, filesave},
+  {CTLX | CTRL | 'W', BINDFNC, filewrite},
   {CTLX | '(', BINDFNC, ctlxlp},
   {CTLX | ')', BINDFNC, ctlxrp},
   {CTLX | 'C', BINDFNC, spawncli},

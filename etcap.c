@@ -1,12 +1,13 @@
 /*
- * $Id: etcap.c,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: etcap.c,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: etcap.c,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
  * 
  */
 
@@ -93,27 +94,6 @@ TBIND ttable[] =
 
 #define NTBINDS sizeof(ttable)/sizeof(TBIND)
 
-extern int ttopen();
-extern int ttgetc();
-extern int ttputc();
-extern int tgetnum();
-extern int ttflush();
-extern int ttclose();
-extern int tcapkopen();
-extern int tcapkclose();
-extern int tcapgetc();
-extern int tcapmove();
-extern int tcapeeol();
-extern int tcapeeop();
-extern int tcapbeep();
-extern int tcaprev();
-extern int tcapcres();
-extern int tcapopen();
-extern int tcapclose();
-extern int tput();
-extern char *tgoto();
-extern int ttputs();
-
 #define TCAPSLEN 1024
 char tcapbuf[TCAPSLEN];
 char *UP, PC, *CM, *CE, *CL, *SO, *SE, *IS, *KS, *KE;
@@ -149,14 +129,12 @@ unsigned char in_buf[IBUFSIZE];	  /* input character buffer */
 int in_next = 0;		  /* pos to retrieve next input character */
 int in_last = 0;		  /* pos to place most recent input character */
 
-in_init()			  /* initialize the input buffer */
-
+void in_init (void)		  /* initialize the input buffer */
 {
   in_next = in_last = 0;
 }
 
-in_check()			  /* is the input buffer non-empty? */
-
+int in_check (void)		  /* is the input buffer non-empty? */
 {
   if (in_next == in_last)
     return (FALSE);
@@ -164,17 +142,14 @@ in_check()			  /* is the input buffer non-empty? */
     return (TRUE);
 }
 
-in_put(event)
-
-int event;			  /* event to enter into the input buffer */
-
+in_put (int event)
+/* int event;			  event to enter into the input buffer */
 {
   in_buf[in_last++] = event;
   in_last &= (IBUFSIZE - 1);
 }
 
-int in_get()			  /* get an event from the input buffer */
-
+int in_get (void)		  /* get an event from the input buffer */
 {
   register int event;		  /* event to return */
 
@@ -187,142 +162,140 @@ int in_get()			  /* get an event from the input buffer */
  * Open the terminal put it in RA mode learn about the screen size read
  * TERMCAP strings for function keys
  */
-
-tcapopen()
-
+int tcapopen (void)
 {
   register int index;		  /* general index */
   char *t, *p;
   char tcbuf[1024];
   char *tv_stype;
   char err_str[72];
-  char *getenv();
-  char *tgetstr();
+  char *getenv ();
+  char *tgetstr ();
 
-  if ((tv_stype = getenv("TERM")) == (char *) NULL)
+  if ((tv_stype = getenv ("TERM")) == (char *) NULL)
   {
-    puts(TEXT182);
+    puts (TEXT182);
     /* "Environment variable TERM not defined!" */
-    meexit(1);
+    meexit (1);
   }
 
-  if ((tgetent(tcbuf, tv_stype)) != 1)
+  if ((tgetent (tcbuf, tv_stype)) != 1)
   {
-    sprintf(err_str, TEXT183, tv_stype);
+    sprintf (err_str, TEXT183, tv_stype);
     /* "Unknown terminal type %s!" */
-    puts(err_str);
-    meexit(1);
+    puts (err_str);
+    meexit (1);
   }
 
 
-  if ((term.t_nrow = (short) tgetnum("li") - 2) == -1)
+  if ((term.t_nrow = (short) tgetnum ("li") - 2) == -1)
   {
-    puts(TEXT184);
+    puts (TEXT184);
     /* "termcap entry incomplete (lines)" */
-    meexit(1);
+    meexit (1);
   }
   term.t_mrow = term.t_nrow;
 
-  if ((term.t_ncol = (short) tgetnum("co")) == -1)
+  if ((term.t_ncol = (short) tgetnum ("co")) == -1)
   {
-    puts(TEXT185);
+    puts (TEXT185);
     /* "Termcap entry incomplete (columns)" */
-    meexit(1);
+    meexit (1);
   }
   term.t_mcol = term.t_ncol;
 
   p = tcapbuf;
-  t = tgetstr("pc", &p);
+  t = tgetstr ("pc", &p);
   if (t)
     PC = *t;
 
-  CL = tgetstr("cl", &p);
-  CM = tgetstr("cm", &p);
-  CE = tgetstr("ce", &p);
-  UP = tgetstr("up", &p);
-  SE = tgetstr("se", &p);
-  SO = tgetstr("so", &p);
+  CL = tgetstr ("cl", &p);
+  CM = tgetstr ("cm", &p);
+  CE = tgetstr ("ce", &p);
+  UP = tgetstr ("up", &p);
+  SE = tgetstr ("se", &p);
+  SO = tgetstr ("so", &p);
   if (SO != (char *) NULL)
     revexist = TRUE;
 
   if (CL == (char *) NULL || CM == (char *) NULL || UP == (char *) NULL)
   {
-    puts(TEXT186);
+    puts (TEXT186);
     /* "Incomplete termcap entry\n" */
-    meexit(1);
+    meexit (1);
   }
 
   if (CE == (char *) NULL)	  /* will we be able to use clear to EOL? */
     eolexist = FALSE;
 
-  IS = tgetstr("is", &p);	  /* extract init string */
-  KS = tgetstr("ks", &p);	  /* extract keypad transmit string */
-  KE = tgetstr("ke", &p);	  /* extract keypad transmit end string */
+  IS = tgetstr ("is", &p);	  /* extract init string */
+  KS = tgetstr ("ks", &p);	  /* extract keypad transmit string */
+  KE = tgetstr ("ke", &p);	  /* extract keypad transmit end string */
 
   /* read definitions of various function keys into ttable */
   for (index = 0; index < NTBINDS; index++)
   {
-    strcpy(ttable[index].p_seq,
-	   fixnull(tgetstr(ttable[index].p_name, &p)));
+    strcpy (ttable[index].p_seq,
+	    fixnull (tgetstr (ttable[index].p_name, &p)));
   }
 
   /* tell unix we are goint to use the terminal */
-  ttopen();
+  ttopen ();
 
   /* make sure we don't over run the buffer (TOO LATE I THINK) */
   if (p >= &tcapbuf[TCAPSLEN])
   {
-    puts(TEXT187);
+    puts (TEXT187);
     /* "Terminal description too big!\n" */
-    meexit(1);
+    meexit (1);
   }
 
   /* send init strings if defined */
   if (IS != (char *) NULL)
-    putpad(IS);
+    putpad (IS);
 
   if (KS != (char *) NULL)
-    putpad(KS);
+    putpad (KS);
 
   /* initialize the input buffer */
-  in_init();
+  in_init ();
+  return 0;
 }
 
-tcapclose()
+int tcapclose (void)
 {
   /* send end-of-keypad-transmit string if defined */
   if (KE != (char *) NULL)
-    putpad(KE);
-  ttclose();
+    putpad (KE);
+  ttclose ();
+  return 0;
 }
 
-tcapkopen()
-
+int tcapkopen (void)
 {
-  strcpy(sres, "NORMAL");
+  strcpy (sres, "NORMAL");
+  return 0;
 }
 
-tcapkclose()
-
+int tcapkclose (void)
 {
+  return 0;
 }
 
 /*
  * TCAPGETC:	Get on character.  Resolve and setup all the appropriate
  * keystroke escapes as defined in the comments at the beginning of input.c
  */
-
-int tcapgetc()
-
+int tcapgetc (void)
 {
   int c;			  /* current extended keystroke */
 
   /* if there are already keys waiting.... send them */
-  if (in_check())
-    return (in_get());
+  if (in_check ())
+    return (in_get ());
 
   /* otherwise... get the char for now */
-  c = get1key();
+  c = get1key ();
 
   /* unfold the control bit back into the character */
   if (CTRL & c)
@@ -331,10 +304,10 @@ int tcapgetc()
   /* fold the event type into the input stream as an escape seq */
   if ((c & ~255) != 0)
   {
-    in_put(0);			  /* keyboard escape prefix */
-    in_put(c >> 8);		  /* event type */
-    in_put(c & 255);		  /* event code */
-    return (tcapgetc());
+    in_put (0);			  /* keyboard escape prefix */
+    in_put (c >> 8);		  /* event type */
+    in_put (c & 255);		  /* event code */
+    return (tcapgetc ());
   }
 
   return (c);
@@ -357,9 +330,7 @@ int tcapgetc()
  * another char in 1/30 of a second (think 300 baud) then it is a user input,
  * otherwise it was generated by an escape sequence and should be SPECed.
  */
-
-int get1key()
-
+int get1key (void)
 {
   register int c;
   register int index;		  /* index into termcap binding table */
@@ -368,7 +339,7 @@ int get1key()
   struct timeval timeout;
   char cseq[10];		  /* current sequence being parsed */
 
-  c = ttgetc();
+  c = ttgetc ();
 
   /* if it is not an escape character */
   if (c != 27)
@@ -382,7 +353,7 @@ int get1key()
 
   /* check to see if things are pending soon */
   if (kbdmode != PLAY &&
-      select(1, &fdset, (int *) NULL, (int *) NULL, &timeout) == 0)
+      select (1, &fdset, (int *) NULL, (int *) NULL, &timeout) == 0)
     return (CTRL | '[');
 
   /* a key is pending within 1/30 of a sec... its an escape sequence */
@@ -390,65 +361,66 @@ int get1key()
   sp = &cseq[1];
   while (sp < &cseq[6])
   {
-    c = ttgetc();
+    c = ttgetc ();
     *sp++ = c;
     *sp = 0;
     for (index = 0; index < NTBINDS; index++)
     {
-      if (strcmp(cseq, ttable[index].p_seq) == 0)
+      if (strcmp (cseq, ttable[index].p_seq) == 0)
 	return (ttable[index].p_code);
     }
   }
   return (SPEC | 0);
 }
 
-tcapmove(row, col)
-register int row, col;
+int tcapmove (int row, int col)
 {
-  putpad(tgoto(CM, col, row + 1));
+  putpad (tgoto (CM, col, row + 1));
+  return 0;
 }
 
-tcapeeol()
+int tcapeeol (void)
 {
-  putpad(CE);
+  putpad (CE);
+  return 0;
 }
 
-tcapeeop()
+int tcapeeop (void)
 {
-  putpad(CL);
-  tcapmove(0, 0);
+  putpad (CL);
+  tcapmove (0, 0);
+  return 0;
 }
 
-tcaprev(state)			  /* change reverse video status */
+int tcaprev (int state)		  /* change reverse video status */
 
-int state;			  /* FALSE = normal video, TRUE = reverse
-				   * video */
-
+/*
+ * int state;			   FALSE = normal video, TRUE = reverse video
+ */
 {
   /* static int revstate = FALSE; */
 
   if (state)
   {
     if (SO != (char *) NULL)
-      putpad(SO);
+      putpad (SO);
   }
   else if (SE != (char *) NULL)
-    putpad(SE);
+    putpad (SE);
 }
 
-tcapcres()			  /* change screen resolution */
-
+int tcapcres (void)		  /* change screen resolution */
 {
   return (TRUE);
 }
 
-tcapbeep()
+int tcapbeep (void)
 {
-  ttputc(BEL);
+  ttputc (BEL);
+  return 0;
 }
 
-putpad(str)
-char *str;
+void putpad (char *str)
 {
-  tputs(str, 1, ttputc);
+  tputs (str, 1, ttputc);
 }

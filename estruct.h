@@ -1,16 +1,16 @@
 /*
- * $Id: estruct.h,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: estruct.h,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: estruct.h,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
- * Revision 1.4  1994/08/15  21:27:30  sev
- * i'm sorry, but this indent IMHO more better ;-)
- * Revision 1.3  1994/08/15  20:42:11  sev Indented Revision
- * 1.2  1994/06/24  17:22:21  sev Added ttputs into tcap structure
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
+ * Revision 1.4  1994/08/15  21:27:30  sev i'm sorry, but this indent IMHO more
+ * better ;-) Revision 1.3  1994/08/15  20:42:11  sev Indented Revision 1.2
+ * 1994/06/24  17:22:21  sev Added ttputs into tcap structure
  * 
  * Revision 1.1  1994/06/24  14:17:12  sev Initial revision
  * 
@@ -40,9 +40,12 @@
 /* Configuration options	 */
 
 #define TYPEAH	1		  /* type ahead causes update to be skipped	 */
-#define	CLEAN	0		  /* de-alloc memory on exit			 */
-/* #define	CALLED	0		  /* is emacs a called subroutine? or stand
-				   * alone */
+#define	CLEAN	1		  /* de-alloc memory on exit			 */
+
+/*
+ * #define	CALLED	0		  /* is emacs a called subroutine? or
+ * stand alone
+ */
 
 /* handle constant and voids properly */
 
@@ -355,15 +358,8 @@ typedef struct VDESC
 /* HICHAR - 1 is the largest character we will deal with. */
 #define HICHAR		256
 
-/*
- * This is the message which should be added to any "About MicroEMACS" boxes
- * on any of the machines with window managers.
- * 
- * 
- * ------------------------------------------ | |	 MicroEMACS v3.xx |
- * or the ............ |					 | | Text
- * Editor and Corrector |					 | | written
- * by Daniel M. Lawrence |    [based on code by Dave Conroy]	 | | |
- * Send inquiries and donations to:	 | |    617 New York St | Lafayette,
- * IN 47901		 | | ------------------------------------------
- */
+typedef struct VIDEO
+{
+  int v_flag;			  /* Flags */
+  char v_text[1];		  /* Screen data. */
+} VIDEO;

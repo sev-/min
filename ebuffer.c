@@ -1,12 +1,13 @@
 /*
- * $Id: ebuffer.c,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: ebuffer.c,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: ebuffer.c,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
  * 
  */
 
@@ -23,10 +24,8 @@
 #include	"edef.h"
 #include	"english.h"
 
-nextbuffer(f, n)		  /* switch to the next buffer in the buffer
+nextbuffer (int f, int n)	  /* switch to the next buffer in the buffer
 				   * list */
-
-int f, n;			  /* default flag, numeric argument */
 {
   register BUFFER *bp;		  /* current eligable buffer */
   register int status;
@@ -40,20 +39,17 @@ int f, n;			  /* default flag, numeric argument */
   /* cycle thru buffers until n runs out */
   while (n-- > 0)
   {
-    bp = getdefb();
+    bp = getdefb ();
     if (bp == (BUFFER *) NULL)
       return (FALSE);
-    status = swbuffer(bp);
+    status = swbuffer (bp);
     if (status != TRUE)
       return (status);
   }
   return (status);
 }
 
-swbuffer(bp)			  /* make buffer BP current */
-
-BUFFER *bp;
-
+int swbuffer (BUFFER * bp)	  /* make buffer BP current */
 {
   register WINDOW *wp;
   register int cmark;		  /* current mark */
@@ -73,8 +69,8 @@ BUFFER *bp;
   if (curbp->b_active != TRUE)
   {				  /* buffer not active yet */
     /* read it in and activate it */
-    readin(curbp->b_fname, TRUE);
-    curbp->b_dotp = lforw(curbp->b_linep);
+    readin (curbp->b_fname, TRUE);
+    curbp->b_dotp = lforw (curbp->b_linep);
     curbp->b_doto = 0;
     curbp->b_active = TRUE;
   }
@@ -116,8 +112,7 @@ BUFFER *bp;
   return (TRUE);
 }
 
-BUFFER *getdefb()		  /* get the default buffer for a use or kill */
-
+BUFFER *getdefb (void)		  /* get the default buffer for a use or kill */
 {
   BUFFER *bp;			  /* default buffer */
 
@@ -142,10 +137,7 @@ BUFFER *getdefb()		  /* get the default buffer for a use or kill */
   return (bp);
 }
 
-zotbuf(bp)			  /* kill the buffer pointed to by bp */
-
-register BUFFER *bp;
-
+zotbuf (BUFFER * bp)		  /* kill the buffer pointed to by bp */
 {
   register BUFFER *bp1;
   register BUFFER *bp2;
@@ -153,13 +145,13 @@ register BUFFER *bp;
 
   if (bp->b_nwnd != 0)
   {				  /* Error if on screen.	 */
-    mlwrite(TEXT28);
+    mlwrite (TEXT28);
     /* "Buffer is being displayed" */
     return (FALSE);
   }
-  if ((s = bclear(bp)) != TRUE)	  /* Blow text away.      */
+  if ((s = bclear (bp)) != TRUE)  /* Blow text away.      */
     return (s);
-  free((char *) bp->b_linep);	  /* Release header line. */
+  free ((char *) bp->b_linep);	  /* Release header line. */
   bp1 = (BUFFER *) NULL;	  /* Find the header.	 */
   bp2 = bheadp;
   while (bp2 != bp)
@@ -172,7 +164,7 @@ register BUFFER *bp;
     bheadp = bp2;
   else
     bp1->b_bufp = bp2;
-  free((char *) bp);		  /* Release buffer block */
+  free ((char *) bp);		  /* Release buffer block */
   return (TRUE);
 }
 
@@ -182,7 +174,7 @@ register BUFFER *bp;
  * cares if the list of buffer names is hacked. Return FALSE if no buffers
  * have been changed.
  */
-anycb()
+int anycb (void)
 {
   register BUFFER *bp;
 
@@ -201,12 +193,10 @@ anycb()
  * associated with it. If the buffer is not found and the "cflag" is TRUE,
  * create it. The "bflag" is the settings for the flags in in buffer.
  */
-BUFFER *bfind(bname, cflag, bflag)
-
-register char *bname;		  /* name of buffer to find */
-int cflag;			  /* create it if not found? */
-int bflag;			  /* bit settings for a new buffer */
-
+BUFFER *bfind (char *bname, int cflag, int bflag)
+/* register char *bname;	  /* name of buffer to find */
+/* int cflag;			  /* create it if not found? */
+/* int bflag;			  /* bit settings for a new buffer */
 {
   register BUFFER *bp;
   register BUFFER *sb;		  /* buffer to insert after */
@@ -216,21 +206,21 @@ int bflag;			  /* bit settings for a new buffer */
   bp = bheadp;
   while (bp != (BUFFER *) NULL)
   {
-    if (strcmp(bname, bp->b_bname) == 0)
+    if (strcmp (bname, bp->b_bname) == 0)
       return (bp);
     bp = bp->b_bufp;
   }
   if (cflag != FALSE)
   {
-    if ((bp = (BUFFER *) malloc(sizeof(BUFFER))) == (BUFFER *) NULL)
+    if ((bp = (BUFFER *) malloc (sizeof (BUFFER))) == (BUFFER *) NULL)
       return ((BUFFER *) NULL);
-    if ((lp = lalloc(0)) == (LINE *) NULL)
+    if ((lp = lalloc (0)) == (LINE *) NULL)
     {
-      free((char *) bp);
+      free ((char *) bp);
       return ((BUFFER *) NULL);
     }
     /* find the place in the list to insert this buffer */
-    if (bheadp == (BUFFER *) NULL || strcmp(bheadp->b_bname, bname) > 0)
+    if (bheadp == (BUFFER *) NULL || strcmp (bheadp->b_bname, bname) > 0)
     {
       /* insert at the beginning */
       bp->b_bufp = bheadp;
@@ -241,7 +231,7 @@ int bflag;			  /* bit settings for a new buffer */
       sb = bheadp;
       while (sb->b_bufp != (BUFFER *) NULL)
       {
-	if (strcmp(sb->b_bufp->b_bname, bname) > 0)
+	if (strcmp (sb->b_bufp->b_bname, bname) > 0)
 	  break;
 	sb = sb->b_bufp;
       }
@@ -267,8 +257,8 @@ int bflag;			  /* bit settings for a new buffer */
     bp->b_mode = gmode;
     bp->b_nwnd = 0;
     bp->b_linep = lp;
-    strcpy(bp->b_fname, "");
-    strcpy(bp->b_bname, bname);
+    strcpy (bp->b_fname, "");
+    strcpy (bp->b_bname, bname);
     lp->l_fp = lp;
     lp->l_bp = lp;
   }
@@ -282,8 +272,7 @@ int bflag;			  /* bit settings for a new buffer */
  * if this gets called; the caller must arrange for the updates that are
  * required. Return TRUE if everything looks good.
  */
-bclear(bp)
-register BUFFER *bp;
+bclear (BUFFER * bp)
 {
   register LINE *lp;
   register int s;
@@ -291,12 +280,12 @@ register BUFFER *bp;
 
   if ((bp->b_flag & BFINVS) == 0  /* Not scratch buffer.	 */
       && (bp->b_flag & BFCHG) != 0/* Something changed	 */
-      && (s = mlyesno(TEXT32)) != TRUE)
+      && (s = mlyesno (TEXT32)) != TRUE)
     /* "Discard changes" */
     return (s);
   bp->b_flag &= ~BFCHG;		  /* Not changed	       */
-  while ((lp = lforw(bp->b_linep)) != bp->b_linep)
-    lfree(lp);
+  while ((lp = lforw (bp->b_linep)) != bp->b_linep)
+    lfree (lp);
   bp->b_dotp = bp->b_linep;	  /* Fix "."	       */
   bp->b_doto = 0;
   for (cmark = 0; cmark < NMARKS; cmark++)

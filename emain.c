@@ -1,12 +1,13 @@
 /*
- * $Id: emain.c,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: emain.c,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: emain.c,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
  * 
  */
 
@@ -57,38 +58,37 @@
  */
 
 #if	CALLED
-emacs(argc, argv)
+emacs (argc, argv)
 #else
-main(argc, argv)
+main (argc, argv)
 #endif
 
 int argc;			  /* # of arguments */
 char *argv[];			  /* argument strings */
-
 {
   register int status;
 
   /* Initialize the editor */
   eexitflag = FALSE;
-  vtinit();			  /* Terminal */
+  vtinit ();			  /* Terminal */
   if (eexitflag)
     goto abortrun;
-  edinit("main");		  /* Buffers, windows */
-  initchars();			  /* character set definitions */
-  initmenus();
+  edinit ("main");		  /* Buffers, windows */
+  initchars ();			  /* character set definitions */
+  initmenus ();
 
   /* Process the command line and let the user edit */
-  dcline(argc, argv);
-  status = editloop();
+  dcline (argc, argv);
+  status = editloop ();
 abortrun:
-  vttidy();
+  vttidy ();
 #if	CLEAN
-  clean();
+  clean ();
 #endif
 #if	CALLED
   return (status);
 #else
-  exit(status);
+  exit (status);
 #endif
 }
 
@@ -99,8 +99,7 @@ abortrun:
  * subprogram to a larger project, emacs needs to de-alloc its own used
  * memory, otherwise we just exit.
  */
-
-clean()
+void clean (void)
 {
   register BUFFER *bp;		  /* buffer list pointer */
   register WINDOW *wp;		  /* window list pointer */
@@ -111,7 +110,7 @@ clean()
   while (wp)
   {
     tp = wp->w_wndp;
-    free(wp);
+    free (wp);
     wp = tp;
   }
   wheadp = NULL;
@@ -123,33 +122,28 @@ clean()
     bp->b_nwnd = 0;
     bp->b_flag = 0;		  /* don't say anything about a changed
 				   * buffer! */
-    zotbuf(bp);
+    zotbuf (bp);
     bp = bheadp;
   }
 
   /* and the kill buffer */
-  kdelete();
+  kdelete ();
 
   /* clear some search variables */
   if (patmatch != NULL)
   {
-    free(patmatch);
+    free (patmatch);
     patmatch = NULL;
   }
 
   /* and the video buffers */
-  vtfree();
+  vtfree ();
 }
 
 #endif
 
 /* Process a command line.   May be called any time.	 */
-
-dcline(argc, argv)
-
-int argc;
-char *argv[];
-
+dcline (int argc, char **argv)
 {
   register BUFFER *bp;		  /* temp buffer pointer */
   register int firstfile;	  /* first file flag */
@@ -185,8 +179,8 @@ char *argv[];
 	case 's':		  /* -s for initial search string */
 	case 'S':
 	  searchflag = TRUE;
-	  bytecopy(pat, &argv[carg][2], NPAT);
-	  setjtable(pat);
+	  bytecopy (pat, &argv[carg][2], NPAT);
+	  setjtable (pat);
 	  break;
 	case 'v':		  /* -v for View File */
 	case 'V':
@@ -208,12 +202,12 @@ char *argv[];
       /* Process an input file */
 
       /* set up a buffer for this file */
-      makename(bname, argv[carg]);
-      unqname(bname);
+      makename (bname, argv[carg]);
+      unqname (bname);
 
       /* set this to inactive */
-      bp = bfind(bname, TRUE, 0);
-      strcpy(bp->b_fname, argv[carg]);
+      bp = bfind (bname, TRUE, 0);
+      strcpy (bp->b_fname, argv[carg]);
       bp->b_active = FALSE;
       if (firstfile)
       {
@@ -228,14 +222,14 @@ char *argv[];
   }
 
   /* if there are any files to read, read the first one! */
-  bp = bfind("main", FALSE, 0);
+  bp = bfind ("main", FALSE, 0);
   if (firstfile == FALSE && (gflags & GFREAD))
   {
-    swbuffer(firstbp);
+    swbuffer (firstbp);
     curbp->b_mode |= gmode;
-    update(TRUE);
-    mlwrite(lastmesg);
-    zotbuf(bp);
+    update (TRUE);
+    mlwrite (lastmesg);
+    zotbuf (bp);
   }
   else
     bp->b_mode |= gmode;
@@ -243,14 +237,14 @@ char *argv[];
   /* Deal with startup gotos and searches */
   if (gotoflag && searchflag)
   {
-    update(FALSE);
-    mlwrite(TEXT101);
+    update (FALSE);
+    mlwrite (TEXT101);
     /* "[Can not search and goto at the same time!]" */
   }
   else if (searchflag)
   {
-    if (forwhunt(FALSE, 0) == FALSE)
-      update(FALSE);
+    if (forwhunt (FALSE, 0) == FALSE)
+      update (FALSE);
   }
 
 }
@@ -260,9 +254,7 @@ char *argv[];
  * arrange to be able to call this from a macro, you will have invented the
  * "recursive-edit" function.
  */
-
-editloop()
-
+int editloop (void)
 {
   register int c;		  /* command character */
   register int f;		  /* default flag */
@@ -281,27 +273,27 @@ loop:
 
   /* execute the "command" macro...normally null */
   oldflag = lastflag;		  /* preserve lastflag through this */
-  execkey(&cmdhook, FALSE, 1);
+  execkey (&cmdhook, FALSE, 1);
   lastflag = oldflag;
 
   /* Fix up the screen	 */
-  update(FALSE);
+  update (FALSE);
 
   /* get the next command from the keyboard */
-  c = getkey();
+  c = getkey ();
 
   /* if there is something on the command line, clear it */
   if (mpresf != FALSE)
   {
-    mlerase();
-    update(FALSE);
+    mlerase ();
+    update (FALSE);
   }
 
   /* override the arguments if prefixed */
   if (prefix)
   {
-    if (islower(c & 255))
-      c = (c & ~255) | upperc(c & 255);
+    if (islower (c & 255))
+      c = (c & ~255) | upperc (c & 255);
     c |= prefix;
     f = predef;
     n = prenum;
@@ -317,7 +309,7 @@ loop:
 
   basec = c & ~META;		  /* strip meta char off if there */
   if ((c & META) && ((basec >= '0' && basec <= '9') || basec == '-') &&
-      (getbind(c) == (KEYTAB *) NULL))
+      (getbind (c) == (KEYTAB *) NULL))
   {
     f = TRUE;			  /* there is a # arg */
     n = 0;			  /* start with a zero default */
@@ -337,11 +329,11 @@ loop:
 	n = n * 10 + (c - '0');
       }
       if ((n == 0) && (mflag == -1))	/* lonely - */
-	mlwrite("Arg:");
+	mlwrite ("Arg:");
       else
-	mlwrite("Arg: %d", n * mflag);
+	mlwrite ("Arg: %d", n * mflag);
 
-      c = getkey();		  /* get the next key */
+      c = getkey ();		  /* get the next key */
     }
     n = n * mflag;		  /* figure in the sign */
   }
@@ -353,8 +345,8 @@ loop:
     f = TRUE;
     n = 4;			  /* with argument of 4 */
     mflag = 0;			  /* that can be discarded. */
-    mlwrite("Arg: 4");
-    while ((c = getkey()) >= '0' && c <= '9' || c == reptc || c == '-')
+    mlwrite ("Arg: 4", "");
+    while ((c = getkey ()) >= '0' && c <= '9' || c == reptc || c == '-')
     {
       if (c == reptc)
 	if ((n > 0) == ((n * 4) > 0))
@@ -387,7 +379,7 @@ loop:
 	}
 	n = 10 * n + c - '0';
       }
-      mlwrite("Arg: %d", (mflag >= 0) ? n : (n ? -n : -1));
+      mlwrite ("Arg: %d", (mflag >= 0) ? n : (n ? -n : -1));
     }
 
     /*
@@ -403,7 +395,7 @@ loop:
   }
 
   /* and execute the command */
-  execute(c, f, n);
+  execute (c, f, n);
   goto loop;
 }
 
@@ -412,11 +404,7 @@ loop:
  * as an argument, because the main routine may have been told to read in a
  * file by default, and we want the buffer name to be right.
  */
-
-edinit(bname)
-
-char bname[];			  /* name of buffer to initialize */
-
+void edinit (char *bname)
 {
   register BUFFER *bp;
   register WINDOW *wp;
@@ -436,11 +424,11 @@ char bname[];			  /* name of buffer to initialize */
   exbhook.k_ptr.fp = nullproc;
   exbhook.k_type = BINDFNC;
 
-  bp = bfind(bname, TRUE, 0);	  /* First buffer 	 */
-  blistp = bfind("[List]", TRUE, BFINVS);	/* Buffer list buffer	 */
-  wp = (WINDOW *) malloc(sizeof(WINDOW));	/* First window 	 */
+  bp = bfind (bname, TRUE, 0);	  /* First buffer 	 */
+  blistp = bfind ("[List]", TRUE, BFINVS);	/* Buffer list buffer	 */
+  wp = (WINDOW *) malloc (sizeof (WINDOW));	/* First window 	 */
   if (bp == (BUFFER *) NULL || wp == (WINDOW *) NULL || blistp == (BUFFER *) NULL)
-    meexit(1);
+    meexit (1);
   curbp = bp;			  /* Make this current	  */
   wheadp = wp;
   curwp = wp;
@@ -468,18 +456,17 @@ char bname[];			  /* name of buffer to initialize */
  * and arranges to move it to the "lastflag", so that the next command can
  * look at it. Return the status of command.
  */
-execute(c, f, n)
-
+int execute (int c, int f, int n)
 {
   register int status;
   KEYTAB *key;			  /* key entry to execute */
 
   /* if the keystroke is a bound function...do it */
-  key = getbind(c);
+  key = getbind (c);
   if (key != (KEYTAB *) NULL)
   {
     thisflag = 0;
-    status = execkey(key, f, n);
+    status = execkey (key, f, n);
     lastflag = thisflag;
     return (status);
   }
@@ -504,11 +491,11 @@ execute(c, f, n)
      */
     if (curwp->w_bufp->b_mode & MDOVER &&
 	curwp->w_doto < curwp->w_dotp->l_used &&
-	(lgetc(curwp->w_dotp, curwp->w_doto) != '\t' ||
+	(lgetc (curwp->w_dotp, curwp->w_doto) != '\t' ||
 	 (curwp->w_doto) % tabsize == (tabsize - 1)))
-      ldelete(1L, FALSE);
+      ldelete (1L, FALSE);
 
-    status = linsert(n, c);
+    status = linsert (n, c);
 
 
     /* check auto-save mode */
@@ -516,16 +503,16 @@ execute(c, f, n)
       if (--gacount == 0)
       {
 	/* and save the file if needed */
-	upscreen(FALSE, 0);
-	filesave(FALSE, 0);
+	upscreen (FALSE, 0);
+	filesave (FALSE, 0);
 	gacount = gasave;
       }
 
     lastflag = thisflag;
     return (status);
   }
-  TTbeep();
-  mlwrite(TEXT19);		  /* complain	       */
+  TTbeep ();
+  mlwrite (TEXT19);		  /* complain	       */
   /* "[Key not bound]" */
   lastflag = 0;			  /* Fake last flags.	 */
   return (FALSE);
@@ -535,9 +522,7 @@ execute(c, f, n)
  * Fancy quit command, as implemented by Norm. If the any buffer has changed
  * do a write on that buffer and exit emacs, otherwise simply exit.
  */
-
-quickexit(f, n)
-
+int quickexit (int f, int n)
 {
   register BUFFER *bp;		  /* scanning pointer to buffers */
   register BUFFER *oldcb;	  /* original current buffer */
@@ -552,10 +537,10 @@ quickexit(f, n)
 	&& (bp->b_flag & BFINVS) == 0)
     {				  /* Real.		 */
       curbp = bp;		  /* make that buffer cur */
-      mlwrite(TEXT103, bp->b_fname);
+      mlwrite (TEXT103, bp->b_fname);
       /* "[Saving %s]" */
-      mlwrite("\n");
-      if ((status = filesave(f, n)) != TRUE)
+      mlwrite ("\n");
+      if ((status = filesave (f, n)) != TRUE)
       {
 	curbp = oldcb;		  /* restore curbp */
 	return (status);
@@ -563,7 +548,7 @@ quickexit(f, n)
     }
     bp = bp->b_bufp;		  /* on to the next buffer */
   }
-  quit(f, n);			  /* conditionally quit   */
+  quit (f, n);			  /* conditionally quit   */
   return (TRUE);
 }
 
@@ -571,28 +556,25 @@ quickexit(f, n)
  * Quit command. If an argument, always quit. Otherwise confirm if a buffer
  * has been changed and not written out. Normally bound to "C-X C-C".
  */
-
-quit(f, n)
-
+int quit (int f, int n)
 {
   register int status;		  /* return status */
 
   if (f != FALSE		  /* Argument forces it.	 */
-      || anycb() == FALSE	  /* All buffers clean or user says it's OK. */
-      || (status = mlyesno(TEXT104)) == TRUE)
+      || anycb () == FALSE	  /* All buffers clean or user says it's OK. */
+      || (status = mlyesno (TEXT104)) == TRUE)
   {
     /* "Modified buffers exist. Leave anyway" */
     if (f)
-      status = meexit(n);
+      status = meexit (n);
     else
-      status = meexit(GOOD);
+      status = meexit (GOOD);
   }
-  mlerase();
+  mlerase ();
   return (status);
 }
 
-meexit(status)
-int status;			  /* return status of emacs */
+int meexit (int status)
 {
   eexitflag = TRUE;		  /* flag a program exit */
   eexitval = status;
@@ -605,17 +587,15 @@ int status;			  /* return status of emacs */
  * Begin a keyboard macro. Error if not at the top level in keyboard
  * processing. Set up variables and return.
  */
-
-ctlxlp(f, n)
-
+int ctlxlp (int f, int n)
 {
   if (kbdmode != STOP)
   {
-    mlwrite(TEXT105);
+    mlwrite (TEXT105);
     /* "%%Macro already active" */
     return (FALSE);
   }
-  mlwrite(TEXT106);
+  mlwrite (TEXT106);
   /* "[Start macro]" */
   kbdptr = &kbdm[0];
   kbdend = kbdptr;
@@ -627,19 +607,17 @@ ctlxlp(f, n)
  * End keyboard macro. Check for the same limit conditions as the above
  * routine. Set up the variables and return to the caller.
  */
-
-ctlxrp(f, n)
-
+int ctlxrp (int f, int n)
 {
   if (kbdmode == STOP)
   {
-    mlwrite(TEXT107);
+    mlwrite (TEXT107);
     /* "%%Macro not active" */
     return (FALSE);
   }
   if (kbdmode == RECORD)
   {
-    mlwrite(TEXT108);
+    mlwrite (TEXT108);
     /* "[End macro]" */
     kbdmode = STOP;
   }
@@ -650,13 +628,11 @@ ctlxrp(f, n)
  * Execute a macro. The command argument is the number of times to loop. Quit
  * as soon as a command gets an error. Return TRUE if all ok, else FALSE.
  */
-
-ctlxe(f, n)
-
+int ctlxe (int f, int n)
 {
   if (kbdmode != STOP)
   {
-    mlwrite(TEXT105);
+    mlwrite (TEXT105);
     /* "%%Macro already active" */
     return (FALSE);
   }
@@ -672,13 +648,11 @@ ctlxe(f, n)
  * Abort. Beep the beeper. Kill off any keyboard macro, etc., that is in
  * progress. Sometimes called as a routine, to do general aborting of stuff.
  */
-
-ctrlg(f, n)
-
+int ctrlg (int f, int n)
 {
-  TTbeep();
+  TTbeep ();
   kbdmode = STOP;
-  mlwrite(TEXT8);
+  mlwrite (TEXT8);
   /* "[Aborted]" */
   return (ABORT);
 }
@@ -687,35 +661,27 @@ ctrlg(f, n)
  * tell the user that this command is illegal while we are in VIEW
  * (read-only) mode
  */
-
-rdonly()
-
+int rdonly ()
 {
-  TTbeep();
-  mlwrite(TEXT109);
+  TTbeep ();
+  mlwrite (TEXT109);
   /* "[Key illegal in VIEW mode]" */
   return (FALSE);
 }
 
-resterr()
-
+int resterr (void)
 {
-  TTbeep();
-  mlwrite(TEXT110);
+  TTbeep ();
+  mlwrite (TEXT110);
   /* "[That command is RESTRICTED]" */
   return (FALSE);
 }
 
-nullproc(f, n)			  /* user function that does NOTHING */
-
-int n, f;			  /* yes, these are default and never used..
-				   * but MUST be here */
-
+int nullproc (int f, int n)	  /* user function that does NOTHING */
 {
 }
 
-meta(f, n)			  /* set META prefixing pending */
-
+int meta (int f, int n)		  /* set META prefixing pending */
 {
   prefix |= META;
   prenum = n;
@@ -723,8 +689,7 @@ meta(f, n)			  /* set META prefixing pending */
   return (TRUE);
 }
 
-cex(f, n)			  /* set ^X prefixing pending */
-
+int cex (int f, int n)		  /* set ^X prefixing pending */
 {
   prefix |= CTLX;
   prenum = n;
@@ -736,13 +701,10 @@ cex(f, n)			  /* set ^X prefixing pending */
  * bytecopy:	copy a string...with length restrictions ALWAYS null
  * terminate
  */
-
-char *bytecopy(dst, src, maxlen)
-
-char *dst;			  /* destination of copied string */
-char *src;			  /* source */
-int maxlen;			  /* maximum length */
-
+char *bytecopy (char *dst, char *src, int maxlen)
+/* char *dst;			  /* destination of copied string */
+/* char *src;			  /* source */
+/* int maxlen;			  /* maximum length */
 {
   char *dptr;			  /* ptr into dst */
 

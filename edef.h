@@ -1,16 +1,16 @@
 /*
- * $Id: edef.h,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: edef.h,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: edef.h,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
- * Revision 1.3  1994/08/15  21:27:30  sev
- * i'm sorry, but this indent IMHO more better ;-)
- * Revision 1.2  1994/08/15  20:42:11  sev Indented Revision
- * 1.1  1994/06/24  14:17:12  sev Initial revision
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
+ * Revision 1.3  1994/08/15  21:27:30  sev i'm sorry, but this indent IMHO more
+ * better ;-) Revision 1.2  1994/08/15  20:42:11  sev Indented Revision 1.1
+ * 1994/06/24  14:17:12  sev Initial revision
  * 
  * 
  */
@@ -137,7 +137,7 @@ int matchoff = 0;
 extern short kbdm[];		  /* Holds kayboard macro data	 */
 extern int eolexist;		  /* does clear to EOL exist?	 */
 extern int revexist;		  /* does reverse video exist?	 */
-CONST extern char *modename[];	  /* text names of modes		 */
+extern CONST char *modename[];	  /* text names of modes		 */
 extern KEYTAB keytab[];		  /* key bind to functions table	 */
 extern int gmode;		  /* global editor mode		 */
 extern int gflags;		  /* global control flag		 */

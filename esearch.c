@@ -1,12 +1,13 @@
 /*
- * $Id: esearch.c,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: esearch.c,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: esearch.c,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
  * 
  */
 
@@ -25,8 +26,7 @@ static int lastchfjump, lastchbjump;
  * search for the string.	If found, reset the "." to be just after the
  * match string, and (perhaps) repaint the display.
  */
-forwsearch(f, n)
-int f, n;			  /* default flag / numeric argument */
+int forwsearch (int f, int n)
 {
   register int status = TRUE;
 
@@ -35,24 +35,24 @@ int f, n;			  /* default flag / numeric argument */
    * search string.
    */
   if (n < 0)
-    return (backsearch(f, -n));
+    return (backsearch (f, -n));
 
   /*
    * Ask the user for the text of a pattern.  If the response is TRUE
    * (responses other than FALSE are possible), search for the pattern for as
    * long as n is positive (n == 0 will go through once, which is just fine).
    */
-  if ((status = readpattern(TEXT78, &pat[0], TRUE)) == TRUE)
+  if ((status = readpattern (TEXT78, &pat[0], TRUE)) == TRUE)
   {
     /* "Search" */
     do
     {
-      status = scanner(&pat[0], FORWARD, PTEND);
+      status = scanner (&pat[0], FORWARD, PTEND);
     } while ((--n > 0) && status);
 
     /* Save away the match, or complain if not there. */
     if (status != TRUE)
-      mlwrite(TEXT79);
+      mlwrite (TEXT79);
     /* "Not found" */
   }
   return (status);
@@ -63,14 +63,12 @@ int f, n;			  /* default flag / numeric argument */
  * found, reset the "." to be just after the match string, and (perhaps)
  * repaint the display.
  */
-
-forwhunt(f, n)
-int f, n;			  /* default flag / numeric argument */
+forwhunt (int f, int n)
 {
   register int status = TRUE;
 
   if (n < 0)			  /* search backwards */
-    return (backhunt(f, -n));
+    return (backhunt (f, -n));
 
   /*
    * Make sure a pattern exists, or that we didn't switch into MAGIC mode
@@ -78,7 +76,7 @@ int f, n;			  /* default flag / numeric argument */
    */
   if (pat[0] == '\0')
   {
-    mlwrite(TEXT80);
+    mlwrite (TEXT80);
     /* "No pattern set" */
     return FALSE;
   }
@@ -89,12 +87,12 @@ int f, n;			  /* default flag / numeric argument */
    */
   do
   {
-    status = scanner(&pat[0], FORWARD, PTEND);
+    status = scanner (&pat[0], FORWARD, PTEND);
   } while ((--n > 0) && status);
 
   /* Save away the match, or complain if not there. */
   if (status != TRUE)
-    mlwrite(TEXT79);
+    mlwrite (TEXT79);
   /* "Not found" */
 
   return (status);
@@ -106,8 +104,7 @@ int f, n;			  /* default flag / numeric argument */
  * found "." is left pointing at the first character of the pattern (the last
  * character that was matched).
  */
-backsearch(f, n)
-int f, n;			  /* default flag / numeric argument */
+int backsearch (int f, int n)
 {
   register int status = TRUE;
 
@@ -116,24 +113,24 @@ int f, n;			  /* default flag / numeric argument */
    * search string.
    */
   if (n < 0)
-    return (forwsearch(f, -n));
+    return (forwsearch (f, -n));
 
   /*
    * Ask the user for the text of a pattern.  If the response is TRUE
    * (responses other than FALSE are possible), search for the pattern for as
    * long as n is positive (n == 0 will go through once, which is just fine).
    */
-  if ((status = readpattern(TEXT81, &pat[0], TRUE)) == TRUE)
+  if ((status = readpattern (TEXT81, &pat[0], TRUE)) == TRUE)
   {
     /* "Reverse search" */
     do
     {
-      status = scanner(&tap[0], REVERSE, PTBEG);
+      status = scanner (&tap[0], REVERSE, PTBEG);
     } while ((--n > 0) && status);
 
     /* Save away the match, or complain if not there. */
     if (status != TRUE)
-      mlwrite(TEXT79);
+      mlwrite (TEXT79);
     /* "Not found" */
   }
   return (status);
@@ -145,13 +142,12 @@ int f, n;			  /* default flag / numeric argument */
  * "." is left pointing at the first character of the pattern (the last
  * character that was matched).
  */
-backhunt(f, n)
-int f, n;			  /* default flag / numeric argument */
+int backhunt (int f, int n)
 {
   register int status = TRUE;
 
   if (n < 0)
-    return (forwhunt(f, -n));
+    return (forwhunt (f, -n));
 
   /*
    * Make sure a pattern exists, or that we didn't switch into MAGIC mode
@@ -159,7 +155,7 @@ int f, n;			  /* default flag / numeric argument */
    */
   if (tap[0] == '\0')
   {
-    mlwrite(TEXT80);
+    mlwrite (TEXT80);
     /* "No pattern set" */
     return FALSE;
   }
@@ -170,12 +166,12 @@ int f, n;			  /* default flag / numeric argument */
    */
   do
   {
-    status = scanner(&tap[0], REVERSE, PTBEG);
+    status = scanner (&tap[0], REVERSE, PTBEG);
   } while ((--n > 0) && status);
 
   /* Save away the match, or complain if not there. */
   if (status != TRUE)
-    mlwrite(TEXT79);
+    mlwrite (TEXT79);
   /* "Not found" */
 
   return (status);
@@ -188,11 +184,14 @@ int f, n;			  /* default flag / numeric argument */
  * repaint the display. Fast version using simplified version of Boyer and
  * Moore Software-Practice and Experience, vol 10, 501-506 (1980)
  */
-int scanner(patrn, direct, beg_or_end)
-char *patrn;			  /* string to scan for */
-int direct;			  /* which way to go. */
-int beg_or_end;			  /* put point at beginning or end of
-				   * pattern. */
+int scanner (char *patrn, int direct, int beg_or_end)
+/* char *patrn;			  /* string to scan for */
+/* int direct;			  /* which way to go. */
+
+/*
+ * int beg_or_end;		  /* put point at beginning or end of
+ * pattern.
+ */
 {
   register int c;		  /* character at current position */
   register char *patptr;	  /* pointer into pattern */
@@ -219,7 +218,7 @@ int beg_or_end;			  /* put point at beginning or end of
    */
   jump = patlenadd;
 
-  while (!fbound(jump, &curline, &curoff, direct))
+  while (!fbound (jump, &curline, &curoff, direct))
   {
 
     /*
@@ -236,7 +235,7 @@ int beg_or_end;			  /* put point at beginning or end of
 
     /* Scan through the pattern for a match. */
     while ((c = *patptr++) != '\0')
-      if (!eq((int) c, nextch(&scanline, &scanoff, direct)))
+      if (!eq ((int) c, nextch (&scanline, &scanoff, direct)))
       {
 	jump = (direct == FORWARD)
 	     ? lastchfjump
@@ -258,7 +257,7 @@ int beg_or_end;			  /* put point at beginning or end of
     }
 
     curwp->w_flag |= WFMOVE;	  /* Flag that we have moved. */
-    savematch();
+    savematch ();
     return TRUE;
 
   fail:;			  /* continue to search */
@@ -272,9 +271,7 @@ int beg_or_end;			  /* put point at beginning or end of
  * (and may therefore search no further) or if a trailing character of the
  * search string has been found.  See boundry() for search restrictions.
  */
-int fbound(jump, pcurline, pcuroff, dir)
-LINE **pcurline;
-int *pcuroff, dir, jump;
+int fbound (int jump, LINE ** pcurline, int *pcuroff, int dir)
 {
   register int spare, curoff;
   register LINE *curline;
@@ -287,13 +284,13 @@ int *pcuroff, dir, jump;
     while (jump != 0)
     {
       curoff += jump;
-      spare = curoff - llength(curline);
+      spare = curoff - llength (curline);
 
       while (spare > 0)
       {
-	curline = lforw(curline); /* skip to next line */
+	curline = lforw (curline);/* skip to next line */
 	curoff = spare - 1;
-	spare = curoff - llength(curline);
+	spare = curoff - llength (curline);
 	if (curline == curbp->b_linep)
 	  return TRUE;		  /* hit end of buffer */
       }
@@ -301,7 +298,7 @@ int *pcuroff, dir, jump;
       if (spare == 0)
 	jump = deltaf[(int) '\r'];
       else
-	jump = deltaf[(int) lgetc(curline, curoff)];
+	jump = deltaf[(int) lgetc (curline, curoff)];
     }
 
     /* The last character matches, so back up to start of possible match. */
@@ -309,8 +306,8 @@ int *pcuroff, dir, jump;
 
     while (curoff < 0)
     {
-      curline = lback(curline);	  /* skip back a line */
-      curoff += llength(curline) + 1;
+      curline = lback (curline);  /* skip back a line */
+      curoff += llength (curline) + 1;
     }
 
   }
@@ -323,26 +320,26 @@ int *pcuroff, dir, jump;
       curoff -= jump;
       while (curoff < 0)
       {
-	curline = lback(curline); /* skip back a line */
-	curoff += llength(curline) + 1;
+	curline = lback (curline);/* skip back a line */
+	curoff += llength (curline) + 1;
 	if (curline == curbp->b_linep)
 	  return TRUE;		  /* hit end of buffer */
       }
 
-      if (curoff == llength(curline))
+      if (curoff == llength (curline))
 	jump = deltab[(int) '\r'];
       else
-	jump = deltab[(int) lgetc(curline, curoff)];
+	jump = deltab[(int) lgetc (curline, curoff)];
     }
 
     /* The last character matches, so back up to start of possible match. */
     curoff += matchlen;
-    spare = curoff - llength(curline);
+    spare = curoff - llength (curline);
     while (spare > 0)
     {
-      curline = lforw(curline);	  /* skip back a line */
+      curline = lforw (curline);  /* skip back a line */
       curoff = spare - 1;
-      spare = curoff - llength(curline);
+      spare = curoff - llength (curline);
     }
   }
 
@@ -357,14 +354,12 @@ int *pcuroff, dir, jump;
  * initialization and for substitution purposes.  The default for any
  * character to jump is the pattern length.
  */
-
-setjtable(apat)
-char apat[];
+void setjtable (char *apat)
 {
   int i;
 
-  rvstrcpy(tap, apat);
-  patlenadd = (mlenold = matchlen = strlen(apat)) - 1;
+  rvstrcpy (tap, apat);
+  patlenadd = (mlenold = matchlen = strlen (apat)) - 1;
 
   for (i = 0; i < HICHAR; i++)
   {
@@ -375,13 +370,13 @@ char apat[];
   /* Now put in the characters contained in the pattern, duplicating the CASE */
   for (i = 0; i < patlenadd; i++)
   {
-    if (isletter(apat[i]))
-      deltaf[(unsigned int) CHCASE((unsigned int) apat[i])]
+    if (isletter (apat[i]))
+      deltaf[(unsigned int) CHCASE ((unsigned int) apat[i])]
 	   = patlenadd - i;
     deltaf[(unsigned int) apat[i]] = patlenadd - i;
 
-    if (isletter(tap[i]))
-      deltab[(unsigned int) CHCASE((unsigned int) tap[i])]
+    if (isletter (tap[i]))
+      deltab[(unsigned int) CHCASE ((unsigned int) tap[i])]
 	   = patlenadd - i;
     deltab[(unsigned int) tap[i]] = patlenadd - i;
   }
@@ -394,12 +389,12 @@ char apat[];
   lastchfjump = patlenadd + deltaf[(unsigned int) apat[patlenadd]];
   lastchbjump = patlenadd + deltab[(unsigned int) apat[0]];
 
-  if (isletter(apat[patlenadd]))
-    deltaf[(unsigned int) CHCASE(apat[patlenadd])] = 0;
+  if (isletter (apat[patlenadd]))
+    deltaf[(unsigned int) CHCASE (apat[patlenadd])] = 0;
   deltaf[(int) apat[patlenadd]] = 0;
 
-  if (isletter(apat[0]))
-    deltab[(unsigned int) CHCASE(apat[0])] = 0;
+  if (isletter (apat[0]))
+    deltab[(unsigned int) CHCASE (apat[0])] = 0;
   deltab[(int) apat[0]] = 0;
 
 }
@@ -408,17 +403,15 @@ char apat[];
  * eq -- Compare two characters.  The "bc" comes from the buffer, "pc" from
  * the pattern.  If we are not in EXACT mode, fold out the case.
  */
-int eq(bc, pc)
-register int bc;
-register int pc;
+int eq (int bc, int pc)
 {
   if ((curwp->w_bufp->b_mode & MDEXACT) == 0)
   {
-    if (islower(bc))
-      bc = CHCASE(bc);
+    if (islower (bc))
+      bc = CHCASE (bc);
 
-    if (islower(pc))
-      pc = CHCASE(pc);
+    if (islower (pc))
+      pc = CHCASE (pc);
 
   }
 
@@ -435,18 +428,15 @@ register int pc;
  * using <META> to delimit the end-of-pattern to allow <NL>s in the search
  * string.
  */
-int readpattern(prompt, apat, srch)
-char *prompt;
-char apat[];
-int srch;
+int readpattern (char *prompt, char *apat, int srch)
 {
   int status;
   char tpat[NPAT + 20];
 
-  strcpy(tpat, prompt);		  /* copy prompt to output string */
-  strcat(tpat, " [");		  /* build new prompt string */
-  expandp(&apat[0], &tpat[strlen(tpat)], NPAT / 2);	/* add old pattern */
-  strcat(tpat, "]<META>: ");
+  strcpy (tpat, prompt);	  /* copy prompt to output string */
+  strcat (tpat, " [");		  /* build new prompt string */
+  expandp (&apat[0], &tpat[strlen (tpat)], NPAT / 2);	/* add old pattern */
+  strcat (tpat, "]<META>: ");
 
   /*
    * Read a pattern.  Either we get one, or we just get the META charater,
@@ -454,13 +444,13 @@ int srch;
    * reversed pattern. *Then*, make the meta-pattern, if we are defined that
    * way.
    */
-  if ((status = getstring(tpat, tpat, NPAT, sterm)) == TRUE)
+  if ((status = getstring (tpat, tpat, NPAT, sterm)) == TRUE)
   {
-    strcpy(apat, tpat);
+    strcpy (apat, tpat);
 
     /* If we are doing the search string set the delta tables. */
     if (srch)
-      setjtable(apat);
+      setjtable (apat);
 
   }
   else if (status == FALSE && apat[0] != 0)	/* Old one */
@@ -470,7 +460,7 @@ int srch;
 }
 
 /* savematch -- We found the pattern?  Let's save it away. */
-savematch()
+void savematch (void)
 {
   register char *ptr;		  /* pointer to last match string */
   register int j;
@@ -479,9 +469,9 @@ savematch()
 
   /* Free any existing match string, then attempt to allocate a new one. */
   if (patmatch != (char *) NULL)
-    free(patmatch);
+    free (patmatch);
 
-  ptr = patmatch = (char *) malloc(matchlen + 1);
+  ptr = patmatch = (char *) malloc (matchlen + 1);
 
   if (ptr != (char *) NULL)
   {
@@ -489,19 +479,18 @@ savematch()
     curline = matchline;
 
     for (j = 0; j < matchlen; j++)
-      *ptr++ = nextch(&curline, &curoff, FORWARD);
+      *ptr++ = nextch (&curline, &curoff, FORWARD);
 
     *ptr = '\0';
   }
 }
 
 /* rvstrcpy -- Reverse string copy. */
-rvstrcpy(rvstr, str)
-register char *rvstr, *str;
+void rvstrcpy (char *rvstr, char *str)
 {
   register int i;
 
-  str += (i = strlen(str));
+  str += (i = strlen (str));
 
   while (i-- > 0)
     *rvstr++ = *--str;
@@ -510,29 +499,25 @@ register char *rvstr, *str;
 }
 
 /* sreplace -- Search and replace. */
-sreplace(f, n)
-int f;				  /* default flag */
-int n;				  /* # of repetitions wanted */
+int sreplace (int f, int n)
 {
-  return (replaces(FALSE, f, n));
+  return (replaces (FALSE, f, n));
 }
 
 /* qreplace -- search and replace with query. */
-qreplace(f, n)
-int f;				  /* default flag */
-int n;				  /* # of repetitions wanted */
+int qreplace (int f, int n)
 {
-  return (replaces(TRUE, f, n));
+  return (replaces (TRUE, f, n));
 }
 
 /*
  * replaces -- Search for a string and replace it with another string.  Query
  * might be enabled (according to kind).
  */
-int replaces(kind, f, n)
-int kind;			  /* Query enabled flag */
-int f;				  /* default flag */
-int n;				  /* # of repetitions wanted */
+int replaces (int kind, int f, int n)
+/* int kind;			  /* Query enabled flag */
+/* int f;			  /* default flag */
+/* int n;			  /* # of repetitions wanted */
 {
   register int status;		  /* success flag on pattern inputs */
   register int rlength;		  /* length of replacement string */
@@ -548,26 +533,26 @@ int n;				  /* # of repetitions wanted */
   int lastoff;			  /* offset (for 'u' query option) */
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
+    return (rdonly ());		  /* we are in read only mode	 */
 
   /* Check for negative repetitions. */
   if (f && n < 0)
     return (FALSE);
 
   /* Ask the user for the text of a pattern. */
-  if ((status = readpattern(
+  if ((status = readpattern (
 		 (kind == FALSE ? TEXT84 : TEXT85), &pat[0], TRUE)) != TRUE)
     /* "Replace" */
     /* "Query replace" */
     return (status);
 
   /* Ask for the replacement string. */
-  if ((status = readpattern(TEXT86, &rpat[0], FALSE)) == ABORT)
+  if ((status = readpattern (TEXT86, &rpat[0], FALSE)) == ABORT)
     /* "with" */
     return (status);
 
   /* Find the length of the replacement string. */
-  rlength = strlen(&rpat[0]);
+  rlength = strlen (&rpat[0]);
 
   /*
    * Set up flags so we can make sure not to do a recursive replace on the
@@ -579,13 +564,13 @@ int n;				  /* # of repetitions wanted */
   if (kind)
   {
     /* Build query replace question string. */
-    strcpy(tpat, TEXT87);
+    strcpy (tpat, TEXT87);
     /* "Replace '" */
-    expandp(&pat[0], &tpat[strlen(tpat)], NPAT / 3);
-    strcat(tpat, TEXT88);
+    expandp (&pat[0], &tpat[strlen (tpat)], NPAT / 3);
+    strcat (tpat, TEXT88);
     /* "' with '" */
-    expandp(&rpat[0], &tpat[strlen(tpat)], NPAT / 3);
-    strcat(tpat, "'? ");
+    expandp (&rpat[0], &tpat[strlen (tpat)], NPAT / 3);
+    strcat (tpat, "'? ");
 
     /* Initialize last replaced pointers. */
     lastline = (LINE *) NULL;
@@ -609,23 +594,23 @@ int n;				  /* # of repetitions wanted */
      * Search for the pattern. If we search with a regular expression,
      * matchlen is reset to the true length of the matched string.
      */
-    if (!scanner(&pat[0], FORWARD, PTBEG))
+    if (!scanner (&pat[0], FORWARD, PTBEG))
       break;			  /* all done */
 
     ++nummatch;			  /* Increment # of matches */
 
     /* Check if we are on the last line. */
-    nlrepl = (lforw(curwp->w_dotp) == curwp->w_bufp->b_linep);
+    nlrepl = (lforw (curwp->w_dotp) == curwp->w_bufp->b_linep);
 
     /* Check for query. */
     if (kind)
     {
       /* Get the query. */
-    pprompt:mlwrite(&tpat[0], &pat[0], &rpat[0]);
+    pprompt:mlwrite (&tpat[0], &pat[0], &rpat[0]);
     qprompt:
-      update(TRUE);		  /* show the proposed place to change */
-      c = tgetc();		  /* and input */
-      mlwrite("");		  /* and clear it */
+      update (TRUE);		  /* show the proposed place to change */
+      c = tgetc ();		  /* and input */
+      mlwrite ("");		  /* and clear it */
 
       /* And respond appropriately. */
       switch (c)
@@ -637,7 +622,7 @@ int n;				  /* # of repetitions wanted */
 
 	case 'n':		  /* no, onword */
 	case 'N':
-	  forwchar(FALSE, 1);
+	  forwchar (FALSE, 1);
 	  continue;
 
 	case '!':		  /* yes/stop asking */
@@ -650,7 +635,7 @@ int n;				  /* # of repetitions wanted */
 	  if (lastline == (LINE *) NULL)
 	  {
 	    /* There is nothing to undo. */
-	    TTbeep();
+	    TTbeep ();
 	    goto pprompt;
 	  }
 	  curwp->w_dotp = lastline;
@@ -659,8 +644,8 @@ int n;				  /* # of repetitions wanted */
 	  lastoff = 0;
 
 	  /* Delete the new string. */
-	  backchar(FALSE, rlength);
-	  status = delins(rlength, patmatch, FALSE);
+	  backchar (FALSE, rlength);
+	  status = delins (rlength, patmatch, FALSE);
 	  if (status != TRUE)
 	    return (status);
 
@@ -669,7 +654,7 @@ int n;				  /* # of repetitions wanted */
 	   * reprompt.
 	   */
 	  --numsub;
-	  backchar(FALSE, mlenold);
+	  backchar (FALSE, mlenold);
 	  matchline = curwp->w_dotp;
 	  matchoff = curwp->w_doto;
 	  goto pprompt;
@@ -681,15 +666,15 @@ int n;				  /* # of repetitions wanted */
 	  curwp->w_flag |= WFMOVE;
 
 	case BELL:		  /* abort! and stay */
-	  mlwrite(TEXT89);
+	  mlwrite (TEXT89);
 	  /* "Aborted!" */
 	  return (FALSE);
 
 	default:		  /* bitch and beep */
-	  TTbeep();
+	  TTbeep ();
 
 	case '?':		  /* help me */
-	  mlwrite(TEXT90);
+	  mlwrite (TEXT90);
 
 	  /*
 	   * "(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back,
@@ -708,7 +693,7 @@ int n;				  /* # of repetitions wanted */
     }
 
     /* Delete the sucker, and insert its replacement. */
-    status = delins(matchlen, &rpat[0], TRUE);
+    status = delins (matchlen, &rpat[0], TRUE);
     if (origline == (LINE *) NULL)
     {
       origline = lastline->l_fp;
@@ -730,7 +715,7 @@ int n;				  /* # of repetitions wanted */
     }
     else if (matchlen == 0)
     {
-      mlwrite(TEXT91);
+      mlwrite (TEXT91);
       /* "Empty string replaced, stopping." */
       return (FALSE);
     }
@@ -739,7 +724,7 @@ int n;				  /* # of repetitions wanted */
   }
 
   /* And report the results. */
-  mlwrite(TEXT92, numsub);
+  mlwrite (TEXT92, numsub);
   /* "%d substitutions" */
   return (TRUE);
 }
@@ -748,28 +733,32 @@ int n;				  /* # of repetitions wanted */
  * delins -- Delete a specified length from the current point then either
  * insert the string directly, or make use of replacement meta-array.
  */
-delins(dlength, instr, use_meta)
-int dlength;
-char *instr;
-int use_meta;
+int delins (int dlength, char *instr, int use_meta)
+
+/*
+ * int dlength; char *instr; int use_meta;
+ */
 {
   int status;
 
   /* Zap what we gotta, and insert its replacement. */
-  if ((status = ldelete((long) dlength, FALSE)) != TRUE)
-    mlwrite(TEXT93);
+  if ((status = ldelete ((long) dlength, FALSE)) != TRUE)
+    mlwrite (TEXT93);
   /* "%%ERROR while deleting" */
   else
-    status = linstr(instr);
+    status = linstr (instr);
 
   return (status);
 }
 
 /* expandp -- Expand control key sequences for output. */
-expandp(srcstr, deststr, maxlength)
-char *srcstr;			  /* string to expand */
-char *deststr;			  /* destination of expanded string */
-int maxlength;			  /* maximum chars in destination */
+int expandp (char *srcstr, char *deststr, int maxlength)
+
+/*
+ * char *srcstr;			   string to expand char *deststr;
+ * destination of expanded string int maxlength;
+ * maximum chars in destination
+ */
 {
   unsigned char c;		  /* current char to translate */
 
@@ -822,10 +811,11 @@ int maxlength;			  /* maximum chars in destination */
  * the current character and move, reverse searches move and look at the
  * character.
  */
-int nextch(pcurline, pcuroff, dir)
-LINE **pcurline;
-int *pcuroff;
-int dir;
+int nextch (LINE ** pcurline, int *pcuroff, int dir)
+
+/*
+ * LINE **pcurline; int *pcuroff; int dir;
+ */
 {
   register LINE *curline;
   register int curoff;
@@ -836,26 +826,26 @@ int dir;
 
   if (dir == FORWARD)
   {
-    if (curoff == llength(curline))	/* if at EOL */
+    if (curoff == llength (curline))	/* if at EOL */
     {
-      curline = lforw(curline);	  /* skip to next line */
+      curline = lforw (curline);  /* skip to next line */
       curoff = 0;
       c = '\r';			  /* and return a <NL> */
     }
     else
-      c = lgetc(curline, curoff++);	/* get the char */
+      c = lgetc (curline, curoff++);	/* get the char */
   }
   else
     /* Reverse. */
   {
     if (curoff == 0)
     {
-      curline = lback(curline);
-      curoff = llength(curline);
+      curline = lback (curline);
+      curoff = llength (curline);
       c = '\r';
     }
     else
-      c = lgetc(curline, --curoff);
+      c = lgetc (curline, --curoff);
 
   }
   *pcurline = curline;

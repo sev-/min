@@ -1,12 +1,13 @@
 /*
- * $Id: erandom.c,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: erandom.c,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: erandom.c,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
  * 
  */
 
@@ -21,14 +22,13 @@
 #include	"edef.h"
 #include	"english.h"
 
-getcline()			  /* get the current line number */
-
+int getcline (void)		  /* get the current line number */
 {
   register LINE *lp;		  /* current line */
   register int numlines;	  /* # of lines before point */
 
   /* starting at the beginning of the buffer */
-  lp = lforw(curbp->b_linep);
+  lp = lforw (curbp->b_linep);
 
   /* start counting lines */
   numlines = 0;
@@ -38,7 +38,7 @@ getcline()			  /* get the current line number */
     if (lp == curwp->w_dotp)
       break;
     ++numlines;
-    lp = lforw(lp);
+    lp = lforw (lp);
   }
 
   /* and return the resulting count */
@@ -46,7 +46,7 @@ getcline()			  /* get the current line number */
 }
 
 /* Return current column.  Stop at first non-blank given TRUE argument. */
-getccol(bflg)
+int getccol (bflg)
 int bflg;
 {
   register int c, i, col;
@@ -54,7 +54,7 @@ int bflg;
   col = 0;
   for (i = 0; i < curwp->w_doto; ++i)
   {
-    c = lgetc(curwp->w_dotp, i);
+    c = lgetc (curwp->w_dotp, i);
     if (c != ' ' && c != '\t' && bflg)
       break;
     if (c == '\t')
@@ -72,20 +72,18 @@ int bflg;
  * have its line splitting meaning. The character is always read, even if it
  * is inserted 0 times, for regularity. Bound to "C-Q"
  */
-
-quote(f, n)
-
+int quote (int f, int n)
 {
   register int c;
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
-  c = tgetc();
+    return (rdonly ());		  /* we are in read only mode	 */
+  c = tgetc ();
   if (n < 0)
     return (FALSE);
   if (n == 0)
     return (TRUE);
-  return (linsert(n, c));
+  return (linsert (n, c));
 }
 
 /*
@@ -95,7 +93,7 @@ quote(f, n)
  * in this slightly funny way because the tab (in ASCII) has been turned into
  * "C-I" (in 10 bit code) already. Bound to "C-I".
  */
-tab(f, n)
+int tab (int f, int n)
 {
   if (n < 0)
     return (FALSE);
@@ -105,8 +103,8 @@ tab(f, n)
     return (TRUE);
   }
   if (!stabsize)
-    return (linsert(1, '\t'));
-  return (linsert(stabsize - (getccol(FALSE) % stabsize), ' '));
+    return (linsert (1, '\t'));
+  return (linsert (stabsize - (getccol (FALSE) % stabsize), ' '));
 }
 
 
@@ -114,31 +112,30 @@ tab(f, n)
  * Insert a newline. Bound to "C-M". If we are in CMODE, do automatic
  * indentation as specified.
  */
-newline(f, n)
+int newline (int f, int n)
 {
   register int s;
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
+    return (rdonly ());		  /* we are in read only mode	 */
   if (n < 0)
     return (FALSE);
 
   /* if we are in C mode and this is a default <NL> */
   if (n == 1 && (curbp->b_mode & MDCMOD) &&
       curwp->w_dotp != curbp->b_linep)
-    return (cinsert());
+    return (cinsert ());
 
   /* insert some lines */
   while (n--)
   {
-    if ((s = lnewline()) != TRUE)
+    if ((s = lnewline ()) != TRUE)
       return (s);
   }
   return (TRUE);
 }
 
-cinsert()			  /* insert a newline and indentation for C */
-
+int cinsert (void)		  /* insert a newline and indentation for C */
 {
   register char *cptr;		  /* string pointer into text to copy */
   register int i;		  /* index into line to copy indent from */
@@ -152,18 +149,18 @@ cinsert()			  /* insert a newline and indentation for C */
   lp = curwp->w_dotp;
   offset = curwp->w_doto;
   while (offset > 0 &&
-	 lgetc(lp, offset - 1) == ' ' ||
-	 lgetc(lp, offset - 1) == '\t')
+	 lgetc (lp, offset - 1) == ' ' ||
+	 lgetc (lp, offset - 1) == '\t')
   {
-    backdel(FALSE, 1);
+    backdel (FALSE, 1);
     offset--;
   }
 
   /* check for a brace */
-  bracef = (offset > 0 && lgetc(lp, offset - 1) == '{');
+  bracef = (offset > 0 && lgetc (lp, offset - 1) == '{');
 
   /* put in the newline */
-  if (lnewline() == FALSE)
+  if (lnewline () == FALSE)
     return (FALSE);
 
   /* if the new line is not blank... don't indent it! */
@@ -190,11 +187,11 @@ cinsert()			  /* insert a newline and indentation for C */
   ichar[i] = 0;			  /* terminate it */
 
   /* insert this saved indentation */
-  linstr(ichar);
+  linstr (ichar);
 
   /* and one more tab for a brace */
   if (bracef)
-    tab(FALSE, 1);
+    tab (FALSE, 1);
 
   return (TRUE);
 }
@@ -207,31 +204,31 @@ cinsert()			  /* insert a newline and indentation for C */
  * right number of tabs and spaces. Return TRUE if all ok. Return FALSE if
  * one of the subcomands failed. Normally bound to "C-J".
  */
-indent(f, n)
+int indent (int f, int n)
 {
   register int nicol;
   register int c;
   register int i;
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
+    return (rdonly ());		  /* we are in read only mode	 */
   if (n < 0)
     return (FALSE);
   while (n--)
   {
     nicol = 0;
-    for (i = 0; i < llength(curwp->w_dotp); ++i)
+    for (i = 0; i < llength (curwp->w_dotp); ++i)
     {
-      c = lgetc(curwp->w_dotp, i);
+      c = lgetc (curwp->w_dotp, i);
       if (c != ' ' && c != '\t')
 	break;
       if (c == '\t')
 	nicol += -(nicol % tabsize) + (tabsize - 1);
       ++nicol;
     }
-    if (lnewline() == FALSE
-	|| ((i = nicol / tabsize) != 0 && linsert(i, '\t') == FALSE)
-	|| ((i = nicol % tabsize) != 0 && linsert(i, ' ') == FALSE))
+    if (lnewline () == FALSE
+	|| ((i = nicol / tabsize) != 0 && linsert (i, '\t') == FALSE)
+	|| ((i = nicol % tabsize) != 0 && linsert (i, ' ') == FALSE))
       return (FALSE);
   }
   return (TRUE);
@@ -243,19 +240,19 @@ indent(f, n)
  * If any argument is present, it kills rather than deletes, to prevent loss
  * of text if typed with a big argument. Normally bound to "C-D".
  */
-forwdel(f, n)
+int forwdel (int f, int n)
 {
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
+    return (rdonly ());		  /* we are in read only mode	 */
   if (n < 0)
-    return (backdel(f, -n));
+    return (backdel (f, -n));
   if (f != FALSE)
   {				  /* Really a kill.	 */
     if ((lastflag & CFKILL) == 0)
-      kdelete();
+      kdelete ();
     thisflag |= CFKILL;
   }
-  return (ldelete((long) n, f));
+  return (ldelete ((long) n, f));
 }
 
 /*
@@ -264,22 +261,22 @@ forwdel(f, n)
  * forward, this actually does a kill if presented with an argument. Bound to
  * both "RUBOUT" and "C-H".
  */
-backdel(f, n)
+int backdel (int f, int n)
 {
   register int s;
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
+    return (rdonly ());		  /* we are in read only mode	 */
   if (n < 0)
-    return (forwdel(f, -n));
+    return (forwdel (f, -n));
   if (f != FALSE)
   {				  /* Really a kill.	 */
     if ((lastflag & CFKILL) == 0)
-      kdelete();
+      kdelete ();
     thisflag |= CFKILL;
   }
-  if ((s = backchar(f, n)) == TRUE)
-    s = ldelete((long) n, f);
+  if ((s = backchar (f, n)) == TRUE)
+    s = ldelete ((long) n, f);
   return (s);
 }
 
@@ -291,19 +288,19 @@ backdel(f, n)
  * that number of newlines. If called with a negative argument it kills
  * backwards that number of newlines. Normally bound to "C-K".
  */
-killtext(f, n)
+int killtext (int f, int n)
 {
   register LINE *nextp;
   long chunk;
 
   if (curbp->b_mode & MDVIEW)	  /* don't allow this command if	 */
-    return (rdonly());		  /* we are in read only mode	 */
+    return (rdonly ());		  /* we are in read only mode	 */
   if ((lastflag & CFKILL) == 0)	  /* Clear kill buffer if */
-    kdelete();			  /* last wasn't a kill.	 */
+    kdelete ();			  /* last wasn't a kill.	 */
   thisflag |= CFKILL;
   if (f == FALSE)
   {
-    chunk = llength(curwp->w_dotp) - curwp->w_doto;
+    chunk = llength (curwp->w_dotp) - curwp->w_doto;
     if (chunk == 0)
       chunk = 1;
   }
@@ -314,30 +311,30 @@ killtext(f, n)
   }
   else if (n > 0)
   {
-    chunk = llength(curwp->w_dotp) - curwp->w_doto + 1;
-    nextp = lforw(curwp->w_dotp);
+    chunk = llength (curwp->w_dotp) - curwp->w_doto + 1;
+    nextp = lforw (curwp->w_dotp);
     while (--n)
     {
       if (nextp == curbp->b_linep)
 	return (FALSE);
-      chunk += llength(nextp) + 1;
-      nextp = lforw(nextp);
+      chunk += llength (nextp) + 1;
+      nextp = lforw (nextp);
     }
   }
   else
   {
-    mlwrite(TEXT61);
+    mlwrite (TEXT61);
     /* "%%Negative argumet to kill is illegal" */
     return (FALSE);
   }
-  return (ldelete(chunk, TRUE));
+  return (ldelete (chunk, TRUE));
 }
 
 /*
  * Refresh the screen. With no argument, it just does the refresh. With an
  * argument it recenters "." in the current window. Bound to "C-L".
  */
-refresh(f, n)
+int refresh (int f, int n)
 {
   if (f == FALSE)
     sgarbf = TRUE;
@@ -350,10 +347,7 @@ refresh(f, n)
   return (TRUE);
 }
 
-char *fixnull(s)		  /* Don't return NULL pointers! */
-
-char *s;
-
+char *fixnull (char *s)		  /* Don't return NULL pointers! */
 {
   if (s == (char *) NULL)
     return ("");
@@ -365,11 +359,7 @@ char *s;
  * int_asc:	integer to ascii string.......... This is too inconsistant to
  * use the system's
  */
-
-char *int_asc(i)
-
-int i;				  /* integer to translate to a string */
-
+char *int_asc (int i)
 {
   register int digit;		  /* current digit being used */
   register char *sp;		  /* pointer into result */
@@ -403,26 +393,21 @@ int i;				  /* integer to translate to a string */
   return (sp);
 }
 
-int absv(x)			  /* take the absolute value of an integer */
-
-int x;
-
+int absv (int x)		  /* take the absolute value of an integer */
 {
   return (x < 0 ? -x : x);
 }
 
-int ernd()			  /* returns a random integer */
-
+int ernd (void)			  /* returns a random integer */
 {
-  seed = absv(seed * 1721 + 10007);
+  seed = absv (seed * 1721 + 10007);
   return (seed);
 }
 
-int execkey(key, f, n)		  /* execute a function bound to a key */
-
-KEYTAB *key;			  /* key to execute */
-int f, n;			  /* agruments to C function */
-
+int execkey (KEYTAB * key, int f, int n)	/* execute a function bound
+						 * to a key */
+/* KEYTAB *key;			  /* key to execute */
+/* int f, n;			  /* agruments to C function */
 {
   register int status;		  /* error return */
 
@@ -432,11 +417,7 @@ int f, n;			  /* agruments to C function */
 }
 
 /* This function looks a key binding up in the binding table	 */
-
-KEYTAB *getbind(c)
-
-int c;				  /* key to find what is bound to it */
-
+KEYTAB *getbind (int c)
 {
   register KEYTAB *ktp;
 

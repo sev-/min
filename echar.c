@@ -1,12 +1,13 @@
 /*
- * $Id: echar.c,v 1.1 1995/01/06 21:45:10 sev Exp $
+ * $Id: echar.c,v 1.2 1995/01/07 20:03:14 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: echar.c,v $
- * Revision 1.1  1995/01/06 21:45:10  sev
- * Initial revision
- *
+ * Revision 1.2  1995/01/07 20:03:14  sev
+ * Maked indent and some editor changes
+ * Revision 1.1  1995/01/06  21:45:10  sev Initial revision
+ * 
  * 
  */
 
@@ -28,22 +29,16 @@
  * isletter() Is the character a letter?  We presume a letter must be either
  * in the upper or lower case tables (even if it gets translated to itself).
  */
-
-int isletter(ch)
-
-register unsigned int ch;
-
+int isletter (unsigned int ch)
 {
-  return (isupper(ch) || islower(ch));
+  return (isupper (ch) || islower (ch));
 }
 
 /*
  * islower() Is the character a lower case letter?  This looks in the lower
  * to uppercase translation table.
  */
-
-int islower(ch)
-register unsigned int ch;
+int islower (unsigned int ch)
 {
   return (lowcase[ch] != 0);
 }
@@ -52,9 +47,7 @@ register unsigned int ch;
  * isupper() Is the character a upper case letter?  This looks in the upper
  * to lowercase translation table.
  */
-
-int isupper(ch)
-register unsigned int ch;
+int isupper (unsigned int ch)
 {
   return (upcase[ch] != 0);
 }
@@ -65,37 +58,32 @@ register unsigned int ch;
  * Change the case of the current character. First check lower and then upper.
  * If it is not a letter, it gets returned unchanged.
  */
-
-unsigned int chcase(ch)
-register unsigned int ch;
+unsigned int chcase (unsigned int ch)
 {
   /* translate lowercase */
-  if (islower(ch))
+  if (islower (ch))
     return (lowcase[ch]);
 
   /* translate uppercase */
-  if (isupper(ch))
+  if (isupper (ch))
     return (upcase[ch]);
 
   /* let the rest pass */
   return (ch);
 }
 
-char upperc(ch)			  /* return the upper case equivalant of a
+char upperc (char ch)		  /* return the upper case equivalant of a
 				   * character */
-
-char ch;			  /* character to get uppercase euivalant of */
-
+/* char ch;			  /* character to get uppercase euivalant of */
 {
-  if (islower(ch))
+  if (islower (ch))
     return (lowcase[ch]);
   else
     return (ch);
 }
 
-initchars()			  /* initialize the character upper/lower
+void initchars (void)		  /* initialize the character upper/lower
 				   * case tables */
-
 {
   register int index;		  /* index into tables */
 
