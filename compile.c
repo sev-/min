@@ -1,10 +1,13 @@
 /*
- * $Id: compile.c,v 1.4 1995/01/17 12:33:59 sev Exp $
+ * $Id: compile.c,v 1.5 1995/01/21 15:19:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: compile.c,v $
- * Revision 1.4  1995/01/17 12:33:59  sev
+ * Revision 1.5  1995/01/21 15:19:59  sev
+ * Now Run works, Ports and regs change, list creates
+ *
+ * Revision 1.4  1995/01/17  12:33:59  sev
  * Now run screen is done
  * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
  * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
@@ -26,6 +29,7 @@ enum
   TCOMMENT, TCOMMAND, TLABEL, TERROR, TWORD, TBYTE, TREG, TORG
 };
 
+BUFFER *bfind (char *, int, int);
 int gettoken (char *, char *, int *, int);
 void getdigit (char *, char *, int *, int);
 int tokentype (char *);
@@ -39,11 +43,15 @@ int parseword (char *, int);
 byte parsebyte (char *);
 void clearlabeltable (void);
 int strcasecmp (char *s1, char *s2);
+void tomemory (char *, word, byte);
+void clearlistbuffer (void);
+void addlistline (char *liststr, char *, int);
 
 int comp (int f, int n)
 {
   clearerrorbuffer ();
   clearlabeltable ();
+  clearlistbuffer ();
   compileprogram (1);
   gotobob (1, 1);
   onlywind (1, 1);
@@ -66,6 +74,7 @@ void compileprogram (int pass)
   char tmp1[TMPSTRLEN];
   word curraddr = 0;
   char *s;
+  char liststr[TMPSTRLEN];
 
   sprintf (tmp1, "PASS %d", pass);
   addmessage ((LINE *) 0, tmp1, 0);
@@ -76,6 +85,8 @@ void compileprogram (int pass)
   {
     lpos = 0;
     s = curline->l_text;
+    sprintf (liststr, "%04x  ", curraddr);
+
     while (gettoken (tmp, s, &lpos, llength (curline)))
     {
       switch (tokentype (tmp))
@@ -83,12 +94,18 @@ void compileprogram (int pass)
 	case TORG:
 	  gettoken (tmp, s, &lpos, llength (curline));
 	  if (tokentype (tmp) != TWORD && tokentype (tmp) != TBYTE)
-	  {
 	    if (pass == 1)
-	      adderror (curline, "directive: word expected");
-	    break;
+	    {
+	      adderror (curline, "directive: number expected");
+	      break;
+	    }
+	  if (parseword (tmp, 0) == -1)
+	  {
+	    sprintf (tmp1, "undefined label (%s)", tmp);
+	    adderror (curline, "directive: number expected");
 	  }
 	  curraddr = parseword (tmp, 3);
+	  sprintf (liststr, "%04x.    ", curraddr);
 	  break;
 	case TLABEL:
 	  if (pass == 1)
@@ -103,23 +120,34 @@ void compileprogram (int pass)
 	      if (pass == 1)
 		curraddr++;
 	      else
-		PutMem (curraddr++, commandcode (tmp1));
+		tomemory (liststr, curraddr++, commandcode (tmp1));
 	      break;
 	    case BYTE:
 	      gettoken (tmp, s, &lpos, llength (curline));
-	      if (tokentype (tmp) != TBYTE)
+	      if (tokentype (tmp) == TWORD)
 	      {
-		if (pass == 1)
-		  adderror (curline, "byte expected");
-		curraddr += 2;
-		break;
+		if( pass == 1)
+		  addwarning (curline, "word stripped");
 	      }
+	      else
+ 		if (tokentype (tmp) != TBYTE)
+		{
+		  if (pass == 1)
+		    adderror (curline, "byte expected");
+		  curraddr += 2;
+		  break;
+	        }
 	      if (pass == 1)
 		curraddr += 2;
 	      else
 	      {
-		PutMem (curraddr++, commandcode (tmp1));
-		PutMem (curraddr++, parsebyte (tmp));
+		if (parseword (tmp, 0) == -1)
+		{
+		  sprintf (tmp1, "undefined label (%s)", tmp);
+		  adderror (curline, tmp1);
+		}
+		tomemory (liststr, curraddr++, commandcode (tmp1));
+		tomemory (liststr, curraddr++, parsebyte (tmp));
 	      }
 	      break;
 
@@ -137,14 +165,14 @@ void compileprogram (int pass)
 		curraddr += 3;
 	      else
 	      {
-		PutMem (curraddr++, commandcode (tmp1));
+		tomemory (liststr, curraddr++, commandcode (tmp1));
 		if (parseword (tmp, 0) == -1)
 		{
 		  sprintf (tmp1, "undefined label (%s)", tmp);
-		  adderror (curline, "undefined label");
+		  adderror (curline, tmp1);
 		}
-		PutMem (curraddr++, (byte) parseword (tmp, 0));	/* low byte */
-		PutMem (curraddr++, (byte) parseword (tmp, 1));	/* high byte */
+		tomemory (liststr, curraddr++, (byte) parseword (tmp, 0));	/* low byte */
+		tomemory (liststr, curraddr++, (byte) parseword (tmp, 1));	/* high byte */
 	      }
 	      break;
 
@@ -163,7 +191,7 @@ void compileprogram (int pass)
 	      {
 		strcat (tmp1, " ");
 		strcat (tmp1, tmp);
-		PutMem (curraddr++, commandcode (tmp1));
+		tomemory (liststr, curraddr++, commandcode (tmp1));
 	      }
 	      break;
 
@@ -182,7 +210,7 @@ void compileprogram (int pass)
 	      {
 		strcat (tmp1, " ");
 		strcat (tmp1, tmp);
-		PutMem (curraddr++, commandcode (tmp1));
+		tomemory (liststr, curraddr++, commandcode (tmp1));
 	      }
 	      break;
 
@@ -202,30 +230,24 @@ void compileprogram (int pass)
 	      {
 		strcat (tmp1, " ");
 		strcat (tmp1, tmp);
-		PutMem (curraddr++, commandcode (tmp1));
+		tomemory (liststr, curraddr++, commandcode (tmp1));
 	      }
 	      break;
 
 	    case MOV:		  /* reg, reg */
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, "m") && tokentype (tmp) != TREG)
-	      {
 		if (pass == 1)
 		  adderror (curline, "first parameter must be a register");
-		curraddr++;
-		break;
-	      }
+
 	      strcat (tmp1, " ");
 	      strcat (tmp1, tmp);
 
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, ","))
-	      {
 		if (pass == 1)
 		  adderror (curline, "comma expected");
-		curraddr++;
-		break;
-	      }
+
 	      strcat (tmp1, ",");
 
 	      gettoken (tmp, s, &lpos, llength (curline));
@@ -240,39 +262,29 @@ void compileprogram (int pass)
 	      if (pass == 1)
 		curraddr++;
 	      else
-		PutMem (curraddr++, commandcode (tmp1));
+		tomemory (liststr, curraddr++, commandcode (tmp1));
 	      break;
 
 	    case LXI:		  /* [b d h sp], word */
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, "b") && strcmp (tmp, "d") && strcmp (tmp, "h")
 		  && strcmp (tmp, "sp"))
-	      {
 		if (pass == 1)
 		  adderror (curline, "register b, d, h or sp expected");
-		curraddr++;
-		break;
-	      }
-	      if (pass == 1)
-		curraddr++;
-	      else
-	      {
-		strcat (tmp1, " ");
-		strcat (tmp1, tmp);
-	      }
+
+	      strcat (tmp1, " ");
+	      strcat (tmp1, tmp);
 
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, ","))
-	      {
 		if (pass == 1)
 		  adderror (curline, "comma expected");
-		curraddr++;
-		break;
-	      }
+
 	      strcat (tmp1, ",");
 
 	      gettoken (tmp, s, &lpos, llength (curline));
-	      if (tokentype (tmp) != TWORD && tokentype (tmp) != TREG)
+	      if (tokentype (tmp) != TWORD && tokentype (tmp) != TREG
+				&& tokentype (tmp) != TBYTE)
 	      {
 		if (pass == 1)
 		  adderror (curline, "word expected");
@@ -283,53 +295,58 @@ void compileprogram (int pass)
 		curraddr += 3;
 	      else
 	      {
-		PutMem (curraddr++, commandcode (tmp1));
+		tomemory (liststr, curraddr++, commandcode (tmp1));
 		if (parseword (tmp, 0) == -1)
 		{
 		  sprintf (tmp1, "undefined label (%s)", tmp);
-		  adderror (curline, "undefined label");
+		  adderror (curline, tmp1);
 		}
-		PutMem (curraddr++, (byte) parseword (tmp, 0));	/* low byte */
-		PutMem (curraddr++, (byte) parseword (tmp, 1));	/* high byte */
+		tomemory (liststr, curraddr++, (byte) parseword (tmp, 0));	/* low byte */
+		tomemory (liststr, curraddr++, (byte) parseword (tmp, 1));	/* high byte */
 	      }
 	      break;
 
 	    case MVI:		  /* [a b c d e h l m], byte */
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, "m") && tokentype (tmp) != TREG)
-	      {
 		if (pass == 1)
 		  adderror (curline, "first parameter must be a register");
-		curraddr++;
-		break;
-	      }
+
 	      strcat (tmp1, " ");
 	      strcat (tmp1, tmp);
 
 	      gettoken (tmp, s, &lpos, llength (curline));
 	      if (strcmp (tmp, ","))
-	      {
 		if (pass == 1)
 		  adderror (curline, "comma expected");
-		curraddr++;
-		break;
-	      }
+
 	      strcat (tmp1, ",");
 
 	      gettoken (tmp, s, &lpos, llength (curline));
-	      if (tokentype (tmp) != TBYTE)
+	      if (tokentype (tmp) == TWORD)
 	      {
-		if (pass == 1)
-		  adderror (curline, "byte expected");
-		curraddr += 2;
-		break;
+		if( pass == 1)
+		  addwarning (curline, "word stripped");
 	      }
+	      else
+	        if (tokentype (tmp) != TBYTE)
+	        {
+		  if (pass == 1)
+		    adderror (curline, "byte expected");
+		  curraddr += 2;
+		  break;
+	        }
 	      if (pass == 1)
 		curraddr += 2;
 	      else
 	      {
-		PutMem (curraddr++, commandcode (tmp1));
-		PutMem (curraddr++, parsebyte (tmp));
+		if (parseword (tmp, 0) == -1)
+		{
+		  sprintf (tmp1, "undefined label (%s)", tmp);
+		  adderror (curline, tmp1);
+		}
+		tomemory (liststr, curraddr++, commandcode (tmp1));
+		tomemory (liststr, curraddr++, parsebyte (tmp));
 	      }
 	      break;
 
@@ -345,9 +362,9 @@ void compileprogram (int pass)
 	      strcat (tmp1, " ");
 	      strcat (tmp1, &tmp[1]);
 	      if (pass == 1)
-		curraddr += 2;
+		curraddr++;
 	      else
-		PutMem (curraddr++, commandcode (tmp1));
+		tomemory (liststr, curraddr++, commandcode (tmp1));
 	      break;
 
 	    case PUSH:		  /* b d h psw */
@@ -366,12 +383,13 @@ void compileprogram (int pass)
 	      {
 		strcat (tmp1, " ");
 		strcat (tmp1, tmp);
-		PutMem (curraddr++, commandcode (tmp1));
+		tomemory (liststr, curraddr++, commandcode (tmp1));
 	      }
 	      break;
 	    default:
 	      if (pass == 1)
 		adderror (curline, "INTERNAL ERROR");
+	      break;
 	  }			  /* switch commandargs */
 	  break;
 	case TCOMMENT:
@@ -384,6 +402,11 @@ void compileprogram (int pass)
 	  break;
       }				  /* switch tokentype */
     }				  /* while gettoken */
+    if (pass == 2)
+      if (strlen (liststr) < 9)
+        addlistline (" ", curline->l_text, llength (curline));
+      else
+        addlistline (liststr, curline->l_text, llength (curline));
     curline = lforw (curline);
   }				  /* while curline */
 
@@ -407,9 +430,9 @@ int gettoken (char *tmp, char *str, int *lpos, int maxlen)
     s++;
     *lpos = *lpos + 1;
   }
-  if (*lpos < maxlen && isalpha (*s))
+  if ((*lpos < maxlen) && isalpha (*s))
   {
-    while (*lpos < maxlen && isalnum (*s))
+    while (*lpos < maxlen && (isalnum (*s) || *s == '_'))
     {
       *s1++ = *s++;
       *lpos = *lpos + 1;
@@ -607,7 +630,9 @@ int addlabel (char *label, int addr)
     if (!strcmp (tmp, labeltable[i].name))
       return 1;
 
-  labeltable[numlabels].name = (char *) malloc (strlen (tmp));
+  /* to delete starnge bug with malloc (4) there is vvvvvvvvvvvvvvvvvv */
+  labeltable[numlabels].name = (char *) malloc (strlen (tmp) < 16 ? 16
+					: strlen (tmp));
   strcpy (labeltable[numlabels].name, tmp);
   labeltable[numlabels].addr = addr;
   numlabels++;
@@ -705,3 +730,42 @@ int strcasecmp (char *s1, char *s2)
 
   return strcmp (tmp1, s2);
 }
+
+void tomemory (char *list, word a, byte b)
+{
+  char tmp[10];
+
+  sprintf (tmp, "%02x ", b);
+  strcat (list, tmp);
+
+  PutMem (a, b);
+}
+
+void clearlistbuffer (void)
+{
+  BUFFER *listbuf;
+
+  listbuf = bfind (LISTBUFFERNAME, 1, 0);
+  listbuf->b_flag &= ~BFCHG;	  /* Not changed	       */
+  listbuf->b_mode &= ~MDVIEW;
+  bclear (listbuf);
+}
+
+void addlistline (char *liststr, char *s, int len)
+{
+  BUFFER *cbuf;
+  char tmp[TMPSTRLEN];
+
+  strcpy (tmp, liststr);
+  while (strlen (tmp) < 24)
+    strcat (tmp, " ");
+  strncat (tmp, s, len);
+
+  cbuf = curbp;
+  swbuffer (bfind (LISTBUFFERNAME, 1, 0));
+  linstr (tmp);
+  forwline (1, 1);
+  curbp->b_flag &= ~BFCHG;	  /* Not changed	       */
+  swbuffer (cbuf);
+}
+

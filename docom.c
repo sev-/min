@@ -1,10 +1,13 @@
 /*
- * $Id: docom.c,v 1.7 1995/01/17 12:33:59 sev Exp $
+ * $Id: docom.c,v 1.8 1995/01/21 15:19:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: docom.c,v $
- * Revision 1.7  1995/01/17 12:33:59  sev
+ * Revision 1.8  1995/01/21 15:19:59  sev
+ * Now Run works, Ports and regs change, list creates
+ *
+ * Revision 1.7  1995/01/17  12:33:59  sev
  * Now run screen is done
  * Revision 1.6  1995/01/14  15:08:09  sev Menu works right.
  * Compiler also. Revision 1.5  1995/01/07  20:03:14  sev Maked indent and
@@ -30,6 +33,7 @@ void do_command ()
   byte a, h, l, m;
   word hl, bc;
 
+  terminateprogram = 0;
   a = gcmd ();
 
   switch (a)
@@ -418,6 +422,7 @@ void do_command ()
       PutMem (reg_l + reg_h * 256, reg_l);
       break;
     case 0x76:			  /* hlt  */
+      terminateprogram = 1;
       break;
     case 0x77:			  /* mov m,a */
       PutMem (reg_l + reg_h * 256, reg_a);

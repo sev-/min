@@ -1,10 +1,13 @@
 /*
- * $Id: edisplay.c,v 1.4 1995/01/17 12:33:59 sev Exp $
+ * $Id: edisplay.c,v 1.5 1995/01/21 15:19:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: edisplay.c,v $
- * Revision 1.4  1995/01/17 12:33:59  sev
+ * Revision 1.5  1995/01/21 15:19:59  sev
+ * Now Run works, Ports and regs change, list creates
+ *
+ * Revision 1.4  1995/01/17  12:33:59  sev
  * Now run screen is done
  * Revision 1.3  1995/01/14  15:08:09  sev Menu works
  * right. Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent
@@ -1169,7 +1172,7 @@ void updoneline (int i, int from, int to)
   vscreen[i]->v_flag &= ~VFREV;
 #if	MEMMAP == 0
   txt = pscreen[i]->v_text;
-  for (j = from; j < to; ++j)
+  for (j = from; j <= to; ++j)
     txt[j] = 7;			  /* impossible character */
 #endif
 }

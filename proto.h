@@ -1,10 +1,13 @@
 /*
- * $Id: proto.h,v 1.4 1995/01/17 12:33:59 sev Exp $
+ * $Id: proto.h,v 1.5 1995/01/21 15:19:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: proto.h,v $
- * Revision 1.4  1995/01/17 12:33:59  sev
+ * Revision 1.5  1995/01/21 15:19:59  sev
+ * Now Run works, Ports and regs change, list creates
+ *
+ * Revision 1.4  1995/01/17  12:33:59  sev
  * Now run screen is done
  * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
  * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
@@ -57,6 +60,7 @@ void XorA (byte);
 /* warn.c */
 void addmessage (LINE *, char *, int);
 void clearerrorbuffer (void);
+void show_msg (char *);
 
 /* compile.c */
 void compileprogram (int);
@@ -65,3 +69,8 @@ int comp (int f, int n);
 /* run.c */
 int runprogram (int, int);
 void askstartlabel (void);
+
+/* edit_str.c */
+void winopen (int y1, int x1, int y2, int x2, char *title);
+void winclose (int y1, int x1, int y2, int x2);
+

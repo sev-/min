@@ -1,10 +1,13 @@
 /*
- * $Id: edit_str.c,v 1.3 1995/01/17 12:33:59 sev Exp $
+ * $Id: edit_str.c,v 1.4 1995/01/21 15:19:59 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: edit_str.c,v $
- * Revision 1.3  1995/01/17 12:33:59  sev
+ * Revision 1.4  1995/01/21 15:19:59  sev
+ * Now Run works, Ports and regs change, list creates
+ *
+ * Revision 1.3  1995/01/17  12:33:59  sev
  * Now run screen is done
  * Revision 1.2  1995/01/14  15:08:09  sev Menu works
  * right. Compiler also. Revision 1.1  1995/01/07  20:05:08  sev Initial
@@ -474,11 +477,11 @@ void winopen (int y1, int x1, int y2, int x2, char *title)
     TTputc ('═');
   TTputc ('╗');
 
-  for (i = 1; i < y2 - y1 - 1; i++)
+  for (i = 1; i < y2 - y1; i++)
   {
-    TTmove (i + y1 + 1, x1);
+    TTmove (i + y1, x1);
     TTputc ('║');
-    for (j = 2; j < x2 - x1; j++)
+    for (j = 1; j < x2 - x1; j++)
       TTputc (' ');
     TTputc ('║');
   }

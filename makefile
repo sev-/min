@@ -1,5 +1,5 @@
 #
-#  $Id: makefile,v 1.6 1995/01/17 12:33:59 sev Exp $
+#  $Id: makefile,v 1.7 1995/01/21 15:19:59 sev Exp $
 #
 # ----------------------------------------------------------
 #
@@ -7,7 +7,7 @@
 #
 
 CC=gcc
-CFLAGS=
+CFLAGS=-g
 
 OFILES=min.o compile.o docom.o run.o warn.o
 CFILES=min.c compile.c docom.c run.c warn.c
@@ -62,4 +62,4 @@ eunix.o:	estruct.h eproto.h edef.h english.h
 ewindow.o:	estruct.h eproto.h edef.h english.h
 min.o:		hardware.h estruct.h proto.h commands.h
 run.o:		hardware.h commands.h estruct.h proto.h eproto.h edef.h
-warn.o:		estruct.h edef.h eproto.h
+warn.o:		estruct.h edef.h eproto.h hardware.h
