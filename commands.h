@@ -1,11 +1,14 @@
 /*
- *$Id: commands.h,v 1.1 1994/06/29 12:43:01 sev Exp $
+ *$Id: commands.h,v 1.2 1995/01/06 21:45:10 sev Exp $
  *
  *----------------------------------------------------------
  *
  *$Log: commands.h,v $
- *Revision 1.1  1994/06/29 12:43:01  sev
- *Initial revision
+ *Revision 1.2  1995/01/06 21:45:10  sev
+ *It's full emulator IMHO
+ *
+ * Revision 1.1  1994/06/29  12:43:01  sev
+ * Initial revision
  *
  *
  */
@@ -47,7 +50,6 @@ struct COMMAND
 	{0x1d,	"dcr",	"e",	1},
 	{0x1e,	"mvi",	"e,",	2},
 	{0x1f,	"rar",	"",	1},
-	{0x20,	"rim'",	"",	1},
 	{0x21,	"lxi",	"h,",	3},
 	{0x22,	"shld",	"",	3},
 	{0x23,	"inx",	"h",	1},
@@ -62,7 +64,6 @@ struct COMMAND
 	{0x2d,	"dcr",	"l",	1},
 	{0x2e,	"mvi",	"l,",	2},
 	{0x2f,	"cma",	"",	1},
-	{0x30,	"sim'",	"",	1},
 	{0x31,	"lxi",	"sp,",	3},
 	{0x32,	"sta",	"",	3},
 	{0x33,	"inx",	"sp",	1},

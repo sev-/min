@@ -1,24 +1,27 @@
 /*
- *  $Id: min.c,v 1.1 1994/06/29 12:43:01 sev Exp $
+ *  $Id: min.c,v 1.2 1995/01/06 21:45:10 sev Exp $
  *
  * ---------------------------------------------------------- 
  *
  * $Log: min.c,v $
- * Revision 1.1  1994/06/29 12:43:01  sev
+ * Revision 1.2  1995/01/06 21:45:10  sev
+ * I began to do real work
+ *
+ * Revision 1.1  1994/06/29  12:43:01  sev
  * Initial revision
  *
  *
  */
 
+#define MAIN
+ 
 #include <stdio.h>
-#include "commands.h"
+#include "hardware.h"
+#include "proto.h"
 
-main()
+int emacs(int, char **);
+
+main(int argc, char **argv)
 {
-  int i;
-
-  for(i = 0; i < NUMCOMMANDS; i++)
-    printf("\tcase 0x%x:\t/* %s %s%s */\n\t\tbreak;\n",
-	command[i].code, command[i].name, command[i].oper,
-	 command[i].len == 1 ? "" : command[i].len == 2 ? "■" : "■■");
+  emacs(argc, argv);
 }
