@@ -1,10 +1,13 @@
 /*
- * $Id: compile.c,v 1.5 1995/01/21 15:19:59 sev Exp $
+ * $Id: compile.c,v 1.6 1995/01/24 15:40:39 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: compile.c,v $
- * Revision 1.5  1995/01/21 15:19:59  sev
+ * Revision 1.6  1995/01/24 15:40:39  sev
+ * Added inverse line while run; play_error; start label; Labels buffer
+ *
+ * Revision 1.5  1995/01/21  15:19:59  sev
  * Now Run works, Ports and regs change, list creates
  *
  * Revision 1.4  1995/01/17  12:33:59  sev
@@ -46,13 +49,19 @@ int strcasecmp (char *s1, char *s2);
 void tomemory (char *, word, byte);
 void clearlistbuffer (void);
 void addlistline (char *liststr, char *, int);
+void clearlabelbuffer (void);
+void addlabelline (char *label, int addr);
 
 int comp (int f, int n)
 {
+  reset_need_compile ();
+  program_has_errors = 0;
   clearerrorbuffer ();
   clearlabeltable ();
   clearlistbuffer ();
+  clearlabelbuffer ();
   compileprogram (1);
+
   gotobob (1, 1);
   onlywind (1, 1);
   splitwind (TRUE, 1);
@@ -60,10 +69,18 @@ int comp (int f, int n)
   nextwind (0, 0);
   resize (TRUE, 5);
   swbuffer (bfind ("Error", 1, 0));
-  curbp->b_mode |= MDVIEW;
   gotobob (1, 1);
 
+  if (program_has_errors)
+  {
+    set_need_compile ();
+    play_errors();
+  }
+  else
+    reset_need_compile ();
+
   nextwind (0, 0);
+  return 1;
 }
 
 void compileprogram (int pass)
@@ -569,7 +586,6 @@ int tokentype (char *token)
 
 int isconstword (char *token)
 {
-  int i;
   char *s;
 
   for (s = token; *s; s++)
@@ -637,6 +653,8 @@ int addlabel (char *label, int addr)
   labeltable[numlabels].addr = addr;
   numlabels++;
 
+  addlabelline (tmp, addr);
+
   return 0;
 }
 
@@ -678,7 +696,6 @@ byte commandcode (char *comm)
 
 int parseword (char *token, int numbyte)
 {
-  int i;
   int result = 0, digit;
   char *s;
 
@@ -747,7 +764,6 @@ void clearlistbuffer (void)
 
   listbuf = bfind (LISTBUFFERNAME, 1, 0);
   listbuf->b_flag &= ~BFCHG;	  /* Not changed	       */
-  listbuf->b_mode &= ~MDVIEW;
   bclear (listbuf);
 }
 
@@ -769,3 +785,124 @@ void addlistline (char *liststr, char *s, int len)
   swbuffer (cbuf);
 }
 
+void play_errors (void)
+{
+  int c;
+  int quitflag = 0;
+  LINE *linep = (LINE *)NULL;
+  int line_to_go;
+
+  gotobob (1, 1);
+  while (curwp->w_dotp != curbp->b_linep &&
+	strncmp (curwp->w_dotp->l_text, "Error", 5) &&
+		strncmp (curwp->w_dotp->l_text, "Warning", 7))
+    forwline (1, 1);
+
+  while (!quitflag)
+  {
+    if (linep != curwp->w_dotp)
+    {
+      line_to_go = 0;
+      if (!strncmp (curwp->w_dotp->l_text, "Error", 5))
+        sscanf (curwp->w_dotp->l_text, "Error at line %d", &line_to_go);
+      if (!strncmp (curwp->w_dotp->l_text, "Warning", 7))
+        sscanf (curwp->w_dotp->l_text, "Warning at line %d", &line_to_go);
+
+      nextwind (0, 0);
+      gotobob (1, 1);
+      forwline (1, line_to_go-1);
+      curwp->w_markp[5] = curwp->w_dotp;
+      nextwind (0, 0);
+      update (TRUE);
+    }
+
+    linep = curwp->w_dotp;
+    c = getkey ();
+    switch (c)
+    {
+      case CTRL | 'G':		/* Exit */
+      case SPEC | '7':
+	quitflag = 1;
+	break;
+      case CTRL | 'N':		/* Down */
+      case SPEC | 'N':
+        forwline (1, 1);
+	while (curwp->w_dotp != curbp->b_linep &&
+		strncmp (curwp->w_dotp->l_text, "Error", 5) &&
+			strncmp (curwp->w_dotp->l_text, "Warning", 7))
+	  forwline (1, 1);
+	if (curwp->w_dotp == curbp->b_linep)
+	{
+          backline (1, 1);
+	  while (curwp->w_dotp != curbp->b_linep->l_bp &&
+		strncmp (curwp->w_dotp->l_text, "Error", 5) &&
+			strncmp (curwp->w_dotp->l_text, "Warning", 7))
+	    backline (1, 1);
+	}
+	break;
+      case CTRL | 'P':		/* Up */
+      case SPEC | 'P':
+        backline (1, 1);
+	while (curwp->w_dotp != curbp->b_linep->l_bp &&
+		strncmp (curwp->w_dotp->l_text, "Error", 5) &&
+			strncmp (curwp->w_dotp->l_text, "Warning", 7))
+	  backline (1, 1);
+	break;
+      case SPEC | '<':		/* Home */
+      case META | '<':
+	gotobob (1, 1);
+	while (curwp->w_dotp != curbp->b_linep &&
+		strncmp (curwp->w_dotp->l_text, "Error", 5) &&
+			strncmp (curwp->w_dotp->l_text, "Warning", 7))
+	  forwline (1, 1);
+	break;
+      case META | '>':		/* End */
+      case SPEC | '>':
+	gotoeob ();
+	backline (1, 1);
+	while (curwp->w_dotp != curbp->b_linep->l_bp &&
+		strncmp (curwp->w_dotp->l_text, "Error", 5) &&
+			strncmp (curwp->w_dotp->l_text, "Warning", 7))
+	  backline (1, 1);
+	break;
+    }
+  }
+  nextwind (0, 0);
+  curwp->w_markp[5] = (LINE *)NULL;
+  nextwind (0, 0);
+}  
+
+int next_window (int f, int n)
+{
+  nextwind (0, 0);
+  if (!strcmp (curbp->b_bname, ERRORBUFFERNAME))
+  {
+    play_errors ();
+    nextwind (0, 0);
+  }
+  return 1;
+}
+
+void clearlabelbuffer (void)
+{
+  BUFFER *labelbuf;
+
+  labelbuf = bfind (LABELBUFFERNAME, 1, 0);
+  labelbuf->b_flag &= ~BFCHG;	  /* Not changed	       */
+  bclear (labelbuf);
+}
+
+void addlabelline (char *label, int addr)
+{
+  BUFFER *cbuf;
+  char tmp[TMPSTRLEN];
+
+  sprintf (tmp, "%s %04x", label, addr);
+
+  cbuf = curbp;
+  swbuffer (bfind (LABELBUFFERNAME, 1, 0));
+  linstr (tmp);
+  forwline (1, 1);
+  curbp->b_flag &= ~BFCHG;	  /* Not changed	       */
+  swbuffer (cbuf);
+}

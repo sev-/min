@@ -1,10 +1,13 @@
 /*
- * $Id: run.c,v 1.3 1995/01/21 15:19:59 sev Exp $
+ * $Id: run.c,v 1.4 1995/01/24 15:40:39 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: run.c,v $
- * Revision 1.3  1995/01/21 15:19:59  sev
+ * Revision 1.4  1995/01/24 15:40:39  sev
+ * Added inverse line while run; play_error; start label; Labels buffer
+ *
+ * Revision 1.3  1995/01/21  15:19:59  sev
  * Now Run works, Ports and regs change, list creates
  *
  * Revision 1.2  1995/01/17  12:33:59  sev
@@ -15,7 +18,6 @@
  */
 #include <stdio.h>
 #include "hardware.h"
-#include "commands.h"
 #include "estruct.h"
 #include "proto.h"
 #include "eproto.h"
@@ -33,11 +35,30 @@ void edit_regs (void);
 void edit_ports (void);
 void out_edit_ports_help (void);
 void out_edit_regs_help (void);
+int find_start_label (void);
 
 int runprogram (int f, int n)
 {
   BUFFER *runbuf, *cbuf;
   int c, quitflag = 0;
+  char tmp[TMPSTRLEN];
+
+  if (need_compile ())
+    if(!show_msg ("Program not compiled. Recompile it?", 1))
+      return 1;
+    else
+    {
+      comp (1, 1);
+      if (need_compile ())
+        return 1;
+    }
+      
+  if (!find_start_label ())
+  {
+    sprintf (tmp, "Start label %s not found. Set it correct", startlabel);
+    show_msg (tmp, 0);
+    return 1;
+  }
 
   cbuf = curbp;
   swbuffer (bfind (LISTBUFFERNAME, 1, 0));
@@ -46,7 +67,6 @@ int runprogram (int f, int n)
   splitwind (TRUE, 1);
 
   runbuf = bfind (RUNBUFFERNAME, 1, 0);
-  runbuf->b_mode &= ~MDVIEW;
   bclear (runbuf);
   swbuffer (runbuf);
   linstr (" ");
@@ -79,7 +99,7 @@ int runprogram (int f, int n)
 	do_command ();
 	outshape (1);
 	if (terminateprogram)
-	  show_msg ("Program  terminated");
+	  show_msg ("Program  terminated", 0);
 	break;
       case SPEC | '1':		/* Restart */
       case 't':
@@ -103,8 +123,12 @@ int runprogram (int f, int n)
     update (TRUE);
   }
   runbuf->b_flag &= ~BFCHG;	  /* Not changed	       */
-  runbuf->b_mode |= MDVIEW;
   swbuffer (cbuf);
+
+  nextwind (0, 0);
+  curwp->w_markp[5] = (LINE *)NULL;
+  nextwind (0, 0);
+
   onlywind (1, 1);
   modeflag = 1;
   return 1;
@@ -178,8 +202,6 @@ void outregs (void)
 
 void outmem (void)
 {
-  char tmp[TMPSTRLEN];
-
   outmemory ("[sp]", reg_sp, MEMY, MEMX, 1);
   outmemory ("[pc]", reg_pc, MEMY + 1, MEMX, 0);
   outmemory ("[M1]", memoryforout[0], MEMY + 2, MEMX, 0);
@@ -242,22 +264,23 @@ void outprog (void)
 
   nextwind (0, 0);
 
-  if (getccol (FALSE) == 5)
+/*  if (getccol (FALSE) == 5)
   {
     backchar (TRUE, 1);
     lowrite (' ');
-  }
+  } */
   gotobob (1, 1);
 
   sprintf (tmp, "%04x  ", reg_pc);
   setjtable (tmp);
   scanner (tmp, FORWARD, PTEND);
-  if (getccol (FALSE) == 6)
+/*  if (getccol (FALSE) == 6)
   {
     backchar (TRUE, 2);
     lowrite ('>');
   }
   curbp->b_flag &= ~BFCHG;	  /* Not changed	       */
+  curwp->w_markp[5] = curwp->w_dotp;
 
   nextwind (0, 0);
 }
@@ -519,3 +542,40 @@ void out_edit_regs_help (void)
   outtext (HELPY+2, HELPX, "hdigit - change  Left, Right, Up, Down");
 }
 
+void set_need_compile(void)
+{
+  curbp->b_flag |= BFNCOM;
+}
+
+void reset_need_compile(void)
+{
+  curbp->b_flag &= ~BFNCOM;
+}
+
+int need_compile(void)
+{
+  return curbp->b_flag & BFNCOM;
+}
+
+int find_start_label (void)
+{
+  BUFFER *cbuf;
+  char tmp[TMPSTRLEN];
+
+  sprintf (tmp, "%s ", startlabel);
+  cbuf = curbp;
+  swbuffer (bfind (LABELBUFFERNAME, 1, 0));
+  gotobob (1, 1);
+  setjtable (tmp);
+  scanner (tmp, FORWARD, PTEND);
+
+  if(strncmp (curwp->w_dotp->l_text, tmp, strlen (tmp)))
+  {
+    swbuffer (cbuf);
+    return 0;
+  }
+  sscanf (curwp->w_dotp->l_text, "%*s %x", &reg_pc);
+
+  swbuffer (cbuf);
+  return 1;
+}

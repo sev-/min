@@ -1,10 +1,13 @@
 /*
- * $Id: edisplay.c,v 1.5 1995/01/21 15:19:59 sev Exp $
+ * $Id: edisplay.c,v 1.6 1995/01/24 15:40:39 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: edisplay.c,v $
- * Revision 1.5  1995/01/21 15:19:59  sev
+ * Revision 1.6  1995/01/24 15:40:39  sev
+ * Added inverse line while run; play_error; start label; Labels buffer
+ *
+ * Revision 1.5  1995/01/21  15:19:59  sev
  * Now Run works, Ports and regs change, list creates
  *
  * Revision 1.4  1995/01/17  12:33:59  sev
@@ -400,11 +403,14 @@ void updall (WINDOW * wp)	  /* window to update lines in */
   taboff = wp->w_fcol;
   while (sline < wp->w_toprow + nlines)
   {
-
     /* and update the virtual line */
     vscreen[sline]->v_flag |= VFCHG;
     vscreen[sline]->v_flag &= ~VFREQ;
     vtmove (sline, -taboff);
+
+    if (lp == wp->w_markp[5])		/* added by Sev */
+      vscreen[sline]->v_flag |= VFREQ;
+    
     if (lp != wp->w_bufp->b_linep)
     {
       /* if we are not at the end */

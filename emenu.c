@@ -1,10 +1,13 @@
 /*
- * $Id: emenu.c,v 1.4 1995/01/17 12:33:59 sev Exp $
+ * $Id: emenu.c,v 1.5 1995/01/24 15:40:39 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: emenu.c,v $
- * Revision 1.4  1995/01/17 12:33:59  sev
+ * Revision 1.5  1995/01/24 15:40:39  sev
+ * Added inverse line while run; play_error; start label; Labels buffer
+ *
+ * Revision 1.4  1995/01/17  12:33:59  sev
  * Now run screen is done
  * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
  * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
@@ -135,7 +138,7 @@ MENUITEM runmenuitem[] =
 int playmenu (MENU * menu)
 {
   int c;
-  int curr, oldcurr;
+  int oldcurr;
   int need_enter = 0;
   int i, j;
 
@@ -372,7 +375,6 @@ int mainmenu (void)		  /* main menu on top the screen */
 
 int filemenuF (void)
 {
-  int i;
   int ret;
 
   ret = playmenu (filemenu);

@@ -1,10 +1,13 @@
 /*
- * $Id: eline.c,v 1.4 1995/01/17 12:33:59 sev Exp $
+ * $Id: eline.c,v 1.5 1995/01/24 15:40:39 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: eline.c,v $
- * Revision 1.4  1995/01/17 12:33:59  sev
+ * Revision 1.5  1995/01/24 15:40:39  sev
+ * Added inverse line while run; play_error; start label; Labels buffer
+ *
+ * Revision 1.4  1995/01/17  12:33:59  sev
  * Now run screen is done
  * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
  * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
@@ -128,6 +131,7 @@ void lchange (int flag)
 
   if (curbp->b_nwnd != 1)	  /* Ensure hard. 	 */
     flag = WFHARD;
+  set_need_compile ();	/* added by Sev */
   if ((curbp->b_flag & BFCHG) == 0)
   {				  /* First change, so     */
     flag |= WFMODE;		  /* update mode lines.	 */

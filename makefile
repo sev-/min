@@ -1,5 +1,5 @@
 #
-#  $Id: makefile,v 1.7 1995/01/21 15:19:59 sev Exp $
+#  $Id: makefile,v 1.8 1995/01/24 15:40:39 sev Exp $
 #
 # ----------------------------------------------------------
 #
@@ -61,5 +61,5 @@ etcap.o:	estruct.h eproto.h edef.h english.h
 eunix.o:	estruct.h eproto.h edef.h english.h
 ewindow.o:	estruct.h eproto.h edef.h english.h
 min.o:		hardware.h estruct.h proto.h commands.h
-run.o:		hardware.h commands.h estruct.h proto.h eproto.h edef.h
-warn.o:		estruct.h edef.h eproto.h hardware.h
+run.o:		hardware.h estruct.h proto.h eproto.h edef.h
+warn.o:		estruct.h edef.h eproto.h hardware.h proto.h

@@ -1,10 +1,13 @@
 /*
- * $Id: edit_str.c,v 1.4 1995/01/21 15:19:59 sev Exp $
+ * $Id: edit_str.c,v 1.5 1995/01/24 15:40:39 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: edit_str.c,v $
- * Revision 1.4  1995/01/21 15:19:59  sev
+ * Revision 1.5  1995/01/24 15:40:39  sev
+ * Added inverse line while run; play_error; start label; Labels buffer
+ *
+ * Revision 1.4  1995/01/21  15:19:59  sev
  * Now Run works, Ports and regs change, list creates
  *
  * Revision 1.3  1995/01/17  12:33:59  sev
@@ -68,7 +71,6 @@ int edit_string (int row, int start_col, int end_col, int buffersize,
   char *pos_beg;		  /* начало видимой части текста */
   char *cursorpos_s;		  /* указатель на позицию курсора в строке */
   int ret_status;		  /* возвращаемое значение */
-  int wdo;			  /* указатель на окно */
   int mode;			  /* текущий режим ( вставка, замена ) переключение ПТ */
 
   /* зарезервировать буфер для редактирования строки размера buffersize */

@@ -1,10 +1,13 @@
 /*
- * $Id: estruct.h,v 1.4 1995/01/17 12:33:59 sev Exp $
+ * $Id: estruct.h,v 1.5 1995/01/24 15:40:39 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: estruct.h,v $
- * Revision 1.4  1995/01/17 12:33:59  sev
+ * Revision 1.5  1995/01/24 15:40:39  sev
+ * Added inverse line while run; play_error; start label; Labels buffer
+ *
+ * Revision 1.4  1995/01/17  12:33:59  sev
  * Now run screen is done
  * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
  * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
@@ -214,6 +217,7 @@ typedef struct BUFFER
 #define BFCHG	0x02		  /* Changed since last write	 */
 #define	BFTRUNC	0x04		  /* buffer was truncated when read */
 #define	BFNAROW	0x08		  /* buffer has been narrowed	 */
+#define BFNCOM	0x10		  /* buffer haven't compiled */
 
 /* mode flags	 */
 #define	NUMMODES	9	  /* # of defined modes	      */

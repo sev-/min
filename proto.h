@@ -1,10 +1,13 @@
 /*
- * $Id: proto.h,v 1.5 1995/01/21 15:19:59 sev Exp $
+ * $Id: proto.h,v 1.6 1995/01/24 15:40:39 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: proto.h,v $
- * Revision 1.5  1995/01/21 15:19:59  sev
+ * Revision 1.6  1995/01/24 15:40:39  sev
+ * Added inverse line while run; play_error; start label; Labels buffer
+ *
+ * Revision 1.5  1995/01/21  15:19:59  sev
  * Now Run works, Ports and regs change, list creates
  *
  * Revision 1.4  1995/01/17  12:33:59  sev
@@ -60,15 +63,19 @@ void XorA (byte);
 /* warn.c */
 void addmessage (LINE *, char *, int);
 void clearerrorbuffer (void);
-void show_msg (char *);
+int show_msg (char *, int mode);
 
 /* compile.c */
 void compileprogram (int);
 int comp (int f, int n);
-
+void play_errors (void);
+ 
 /* run.c */
 int runprogram (int, int);
 void askstartlabel (void);
+void set_need_compile(void);
+void reset_need_compile(void);
+int need_compile(void);
 
 /* edit_str.c */
 void winopen (int y1, int x1, int y2, int x2, char *title);

@@ -1,10 +1,13 @@
 /*
- * $Id: erandom.c,v 1.5 1995/01/21 15:19:59 sev Exp $
+ * $Id: erandom.c,v 1.6 1995/01/24 15:40:39 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: erandom.c,v $
- * Revision 1.5  1995/01/21 15:19:59  sev
+ * Revision 1.6  1995/01/24 15:40:39  sev
+ * Added inverse line while run; play_error; start label; Labels buffer
+ *
+ * Revision 1.5  1995/01/21  15:19:59  sev
  * Now Run works, Ports and regs change, list creates
  * Revision 1.4  1995/01/17  12:33:59  sev Now run screen is
  * done Revision 1.3  1995/01/14  15:08:09  sev Menu works right. Compiler
@@ -56,8 +59,7 @@ int getlinenum (BUFFER * bp, LINE * sline)	/* get the a line number */
 }
 
 /* Return current column.  Stop at first non-blank given TRUE argument. */
-int getccol (bflg)
-int bflg;
+int getccol (int bflg)
 {
   register int c, i, col;
 

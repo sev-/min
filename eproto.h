@@ -1,10 +1,13 @@
 /*
- * $Id: eproto.h,v 1.4 1995/01/17 12:33:59 sev Exp $
+ * $Id: eproto.h,v 1.5 1995/01/24 15:40:39 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: eproto.h,v $
- * Revision 1.4  1995/01/17 12:33:59  sev
+ * Revision 1.5  1995/01/24 15:40:39  sev
+ * Added inverse line while run; play_error; start label; Labels buffer
+ *
+ * Revision 1.4  1995/01/17  12:33:59  sev
  * Now run screen is done
  * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
  * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
@@ -257,3 +260,9 @@ int comp (int f, int n);
 
 /* run.c */
 int runprogram (int, int);
+
+/* for eline.c  in compile.c */
+void set_need_compile ();
+
+/* for ebind.h in compile.c */
+int next_window (int, int);

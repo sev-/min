@@ -1,10 +1,13 @@
 /*
- * $Id: hardware.h,v 1.5 1995/01/21 15:19:59 sev Exp $
+ * $Id: hardware.h,v 1.6 1995/01/24 15:40:39 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: hardware.h,v $
- * Revision 1.5  1995/01/21 15:19:59  sev
+ * Revision 1.6  1995/01/24 15:40:39  sev
+ * Added inverse line while run; play_error; start label; Labels buffer
+ *
+ * Revision 1.5  1995/01/21  15:19:59  sev
  * Now Run works, Ports and regs change, list creates
  *
  * Revision 1.4  1995/01/17  12:33:59  sev
@@ -37,14 +40,15 @@ byte reg_f, reg_a, reg_b, reg_c, reg_d, reg_e, reg_h, reg_l;
 word reg_sp, reg_pc;
 byte interrupt_state;
 
-byte memory[65536];
-char startlabel[TMPSTRLEN] = "start";
+byte memory[65536];		/* CPU's memory */
+char startlabel[TMPSTRLEN] = "start";	/* name of start program label */
 
-byte memoryforout[3];
-byte outport[3];
-byte inport[3];
+byte memoryforout[3];		/* hooks of browse memory */
+byte outport[3];		/* out ports values */
+byte inport[3];			/* in ports values */
 
-int terminateprogram;
+int terminateprogram;		/* set if need stop executing */
+int program_has_errors;		/* set if program has errors/warnings */
 #else
 
 extern byte reg_f, reg_a, reg_b, reg_c, reg_d, reg_e, reg_h, reg_l;
@@ -59,6 +63,7 @@ extern byte outport[3];
 extern byte inport[3];
 
 extern int terminateprogram;
+extern int program_has_errors;
 #endif
 
 /* type command parameters */
@@ -81,4 +86,5 @@ enum
 #define LISTBUFFERNAME	"List"
 #define RUNBUFFERNAME	"Run"
 #define ERRORBUFFERNAME	"Error"
+#define LABELBUFFERNAME	"Labels"
 
