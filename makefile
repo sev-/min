@@ -1,5 +1,5 @@
 #
-#  $Id: makefile,v 1.9 1995/10/14 15:46:11 sev Exp $
+#  $Id: makefile,v 1.10 1995/10/14 17:08:47 sev Exp $
 #
 # ----------------------------------------------------------
 #
@@ -56,7 +56,7 @@ eline.o : eline.c estruct.h eproto.h edef.h english.h
 emain.o : emain.c estruct.h eproto.h edef.h english.h ebind.h 
 		$(CC) $(CFLAGS) -DCALLED=1 -c emain.c
 
-emenu.o : emenu.c estruct.h eproto.h edef.h 
+emenu.o : emenu.c estruct.h eproto.h edef.h hardware.h
 erandom.o : erandom.c estruct.h eproto.h edef.h english.h 
 eregion.o : eregion.c estruct.h eproto.h edef.h english.h 
 esearch.o : esearch.c estruct.h eproto.h edef.h english.h 
