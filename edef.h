@@ -1,10 +1,13 @@
 /*
- * $Id: edef.h,v 1.4 1995/01/17 12:33:59 sev Exp $
+ * $Id: edef.h,v 1.5 1995/10/14 15:46:11 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: edef.h,v $
- * Revision 1.4  1995/01/17 12:33:59  sev
+ * Revision 1.5  1995/10/14 15:46:11  sev
+ * Program was in MSDOS and done A _LOT OF_ changes
+ *
+ * Revision 1.4  1995/01/17  12:33:59  sev
  * Now run screen is done
  * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
  * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
@@ -36,7 +39,7 @@ int eolexist = TRUE;		  /* does clear to EOL exist?	 */
 int revexist = FALSE;		  /* does reverse video exist?	 */
 CONST char *modename[] =
 {				  /* name of modes		 */
-  "WRAP", "CMODE", "SPELL", "EXACT", "VIEW", "OVER",
+  "WRAP", "ASM", "SPELL", "EXACT", "VIEW", "OVER",
   "MAGIC", "CRYPT", "ASAVE"};
 char mainbuf[] = "main";	  /* name of main buffer		 */
 int gmode = 0;			  /* global editor mode	   */
@@ -131,6 +134,8 @@ unsigned int mlenold = 0;
 char *patmatch = (char *) NULL;
 LINE *matchline = (LINE *) NULL;
 int matchoff = 0;
+
+int needmenubar = 1;
 
 #else
 
@@ -229,6 +234,8 @@ extern unsigned int mlenold;
 extern char *patmatch;
 extern LINE *matchline;
 extern int matchoff;
+
+extern int needmenubar;
 
 #endif
 

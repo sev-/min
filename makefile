@@ -1,5 +1,5 @@
 #
-#  $Id: makefile,v 1.8 1995/01/24 15:40:39 sev Exp $
+#  $Id: makefile,v 1.9 1995/10/14 15:46:11 sev Exp $
 #
 # ----------------------------------------------------------
 #
@@ -32,34 +32,38 @@ emacs1: $(EMOFILES)
 	$(CC) -o emacs1 $(CFLAGS) emain.o $(EMOFILES) -ltermcap
 
 clean:
-	rm -f $(OFILES) core min1 *.b $(EMOFILES)
-	ci $(CFILES) $(HFILES) makefile $(EMHFILES) $(EMCFILES)
+	rm -f $(OFILES) core min1 *.b $(EMOFILES) small.o
+	ci $(CFILES) $(HFILES) makefile $(EMHFILES) $(EMCFILES) small.c
 	co -l makefile
 
-$(CFILES) $(EMCFILES) $(HFILES) $(EMHFILES):
-		co -l $(CFILES) $(EMCFILES) $(HFILES) $(EMHFILES)
+small: small.o
+	$(CC) -o small small.o
 
-compile.o:	estruct.h edef.h hardware.h commands.h proto.h
-docom.o:	hardware.h estruct.h proto.h
-ebasic.o:	estruct.h eproto.h edef.h english.h
-ebuffer.o:	estruct.h eproto.h edef.h english.h
-echar.o:	estruct.h eproto.h edef.h english.h
-edisplay.o:	estruct.h eproto.h edef.h english.h
-edit_str.o:	estruct.h eproto.h
-efile.o:	estruct.h eproto.h edef.h english.h
-efileio.o:	estruct.h eproto.h edef.h english.h
-einput.o:	estruct.h eproto.h edef.h english.h
-eline.o:	estruct.h eproto.h edef.h english.h
-emain.o:	estruct.h eproto.h edef.h english.h ebind.h
+$(CFILES) $(EMCFILES) $(HFILES) $(EMHFILES) small.c:
+	co -l $@,v
+
+compile.o : compile.c estruct.h edef.h hardware.h commands.h proto.h 
+docom.o : docom.c hardware.h estruct.h proto.h 
+ebasic.o : ebasic.c estruct.h eproto.h edef.h english.h 
+ebuffer.o : ebuffer.c estruct.h eproto.h edef.h english.h 
+echar.o : echar.c estruct.h eproto.h edef.h english.h 
+edisplay.o : edisplay.c estruct.h eproto.h edef.h english.h 
+edit_str.o : edit_str.c estruct.h eproto.h edef.h 
+efile.o : efile.c estruct.h eproto.h edef.h english.h 
+efileio.o : efileio.c estruct.h eproto.h edef.h english.h 
+einput.o : einput.c estruct.h eproto.h edef.h english.h 
+eline.o : eline.c estruct.h eproto.h edef.h english.h 
+emain.o : emain.c estruct.h eproto.h edef.h english.h ebind.h 
 		$(CC) $(CFLAGS) -DCALLED=1 -c emain.c
 
-emenu.o:	estruct.h eproto.h edef.h
-erandom.o:	estruct.h eproto.h edef.h english.h
-eregion.o:	estruct.h eproto.h edef.h english.h
-esearch.o:	estruct.h eproto.h edef.h english.h
-etcap.o:	estruct.h eproto.h edef.h english.h
-eunix.o:	estruct.h eproto.h edef.h english.h
-ewindow.o:	estruct.h eproto.h edef.h english.h
-min.o:		hardware.h estruct.h proto.h commands.h
-run.o:		hardware.h estruct.h proto.h eproto.h edef.h
-warn.o:		estruct.h edef.h eproto.h hardware.h proto.h
+emenu.o : emenu.c estruct.h eproto.h edef.h 
+erandom.o : erandom.c estruct.h eproto.h edef.h english.h 
+eregion.o : eregion.c estruct.h eproto.h edef.h english.h 
+esearch.o : esearch.c estruct.h eproto.h edef.h english.h 
+etcap.o : etcap.c estruct.h eproto.h edef.h english.h 
+eunix.o : eunix.c estruct.h eproto.h edef.h english.h 
+ewindow.o : ewindow.c estruct.h eproto.h edef.h english.h 
+min.o : min.c hardware.h estruct.h proto.h commands.h 
+run.o : run.c hardware.h estruct.h proto.h eproto.h edef.h 
+warn.o : warn.c hardware.h estruct.h edef.h eproto.h proto.h 
+

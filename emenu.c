@@ -1,10 +1,13 @@
 /*
- * $Id: emenu.c,v 1.6 1995/01/27 20:52:27 sev Exp $
- * 
+ * $Id: emenu.c,v 1.7 1995/10/14 15:46:11 sev Exp $
+ *
  * ----------------------------------------------------------
  * 
  * $Log: emenu.c,v $
- * Revision 1.6  1995/01/27 20:52:27  sev
+ * Revision 1.7  1995/10/14 15:46:11  sev
+ * Program was in MSDOS and done A _LOT OF_ changes
+ *
+ * Revision 1.6  1995/01/27  20:52:27  sev
  * Added Animate (only for Unix), Step over, Continue
  * Fixed bug with start label
  *
@@ -17,14 +20,16 @@
  * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
  * some editor changes Revision 1.1  1995/01/06  21:45:10  sev Initial
  * revision
- * 
- * 
+ *
+ *
  */
 
 #include	<stdio.h>
 #include	"estruct.h"
 #include	"eproto.h"
 #include	"edef.h"
+
+#include	"hardware.h"
 
 #define LEFT_KEY	(SPEC|'F')
 #define	RIGHT_KEY	(SPEC|'B')
@@ -51,7 +56,7 @@ typedef struct MENUITEM
   char *text;
   char hotkey[5];
   int (*func) (void);
-  int can_go_into;
+  int can_go_into;  	/* stay or not */
 } MENUITEM;
 
 typedef struct MENU
@@ -70,6 +75,7 @@ MENU *filemenu;
 MENU *textmenu;
 MENU *compilemenu;
 MENU *runmenu;
+MENU *keyboardmenu;
 
 int playmenu (MENU * menu);
 MENU *makemenu (int, MENUITEM *, int, int);
@@ -83,6 +89,7 @@ int comp (int f, int n);
 
 /* run.c */
 void askstartlabel (void);
+void askmemory (int);
 
 int filemenuF (void);
 int textmenuF (void);
@@ -93,12 +100,17 @@ int readfileF (void);
 int runF (void);
 int continueF (void);
 int compileprogramF (void);
-int shellF (void);
 int saveasF (void);
 int forwsearchF (void);
 int backsearchF (void);
 int runmenuF (void);
 int startlabelF (void);
+int memory0F (void);
+int memory1F (void);
+int memory2F (void);
+int chkeyboardF (void);
+int keyboard_JCUKEN_F (void);
+int keyboard_QWERTY_F (void);
 
 MENUITEM topmenuitem[] =
 {
@@ -114,8 +126,6 @@ MENUITEM filemenuitem[] =
   {"Read", "Rr", readfileF, NO},
   {"Save", "Ss", savefileF, NO},
   {"save As...", "Aa", saveasF, NO},
-  {"Load", "Ll", NULLFUNC, NO},
-  {"sHell", "Hh", shellF, NO},
   {"Quit", "Qq", quitF, NO},
   {"", ""}
 };
@@ -138,6 +148,17 @@ MENUITEM runmenuitem[] =
   {"Run", "Rr", runF, NO},
   {"Continue", "Cc", continueF, NO},
   {"Start label", "Ss", startlabelF, NO},
+  {"memory0", "0", memory0F, NO},
+  {"memory1", "1", memory1F, NO},
+  {"memory2", "2", memory2F, NO},
+  {"change Keyboard", "kK", chkeyboardF, YES},
+  {"", ""}
+};
+
+MENUITEM keyboardmenuitem[] =
+{
+  {"JCUKEN", "Jj", keyboard_JCUKEN_F, NO},
+  {"QWERTY", "Qq", keyboard_QWERTY_F, NO},
   {"", ""}
 };
 
@@ -359,6 +380,11 @@ void outmenu (MENU * menu)
   TTmove (0, 0);
   TTrev (FALSE);
   TTflush ();
+
+  /* Now playing strange games :-) */
+  if (menu->type == VERT)
+    for (i = menu->y1; i < menu->length + menu->y1; i++)
+      updoneline (i, menu->x1, menu->x1 + menu->width);
 }
 
 void closemenu (MENU * menu)
@@ -367,6 +393,7 @@ void closemenu (MENU * menu)
 
   for (i = menu->y1; i < menu->length + menu->y1; i++)
     updoneline (i, menu->x1, menu->x1 + menu->width);
+
   TTmove (0, 0);
   update (TRUE);
 }
@@ -406,6 +433,7 @@ void initmenus (void)
   textmenu = makemenu (VERT, textmenuitem, topmenu->pos[1], 1);
   compilemenu = makemenu (VERT, compilemenuitem, topmenu->pos[2], 1);
   runmenu = makemenu (VERT, runmenuitem, topmenu->pos[3], 1);
+  keyboardmenu = makemenu (VERT, keyboardmenuitem, topmenu->pos[3]+13, 8);
 }
 
 int compilemenuF (void)
@@ -454,12 +482,6 @@ int compileprogramF (void)
   return LEAVE;
 }
 
-int shellF (void)
-{
-  spawncli (1, 1);
-  return LEAVE;
-}
-
 int saveasF (void)
 {
   filewrite (1, 1);
@@ -493,3 +515,43 @@ int startlabelF (void)
   askstartlabel ();
   return LEAVE;
 }
+
+int memory0F (void)
+{
+  askmemory (0);
+  return LEAVE;
+}
+
+int memory1F (void)
+{
+  askmemory (1);
+  return LEAVE;
+}
+
+int memory2F (void)
+{
+  askmemory (2);
+  return LEAVE;
+}
+
+int chkeyboardF (void)		  /* change keyboard menu from run */
+{
+  int ret;
+
+  ret = playmenu (keyboardmenu);
+  closemenu (keyboardmenu);
+
+  return ret;
+}
+
+int keyboard_JCUKEN_F (void)
+{
+  keyboard_type = JCUKEN;
+  return LEAVE;
+}
+int keyboard_QWERTY_F (void)
+{
+  keyboard_type = QWERTY;
+  return LEAVE;
+}
+

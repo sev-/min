@@ -1,10 +1,13 @@
 /*
- * $Id: estruct.h,v 1.5 1995/01/24 15:40:39 sev Exp $
+ * $Id: estruct.h,v 1.6 1995/10/14 15:46:11 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: estruct.h,v $
- * Revision 1.5  1995/01/24 15:40:39  sev
+ * Revision 1.6  1995/10/14 15:46:11  sev
+ * Program was in MSDOS and done A _LOT OF_ changes
+ *
+ * Revision 1.5  1995/01/24  15:40:39  sev
  * Added inverse line while run; play_error; start label; Labels buffer
  *
  * Revision 1.4  1995/01/17  12:33:59  sev
@@ -19,13 +22,13 @@
  * 1994/06/24  17:22:21  sev Added ttputs into tcap structure
  * 
  * Revision 1.1  1994/06/24  14:17:12  sev Initial revision
- * 
- * 
+ *
+ *
  */
 
 /*
  * ESTRUCT:	Structure and preprocesser defined for MicroEMACS 3.10
- * 
+ *
  * written by Daniel Lawrence based on code by Dave G. Conroy, Steve Wilhite and
  * George Jones
  */
@@ -33,26 +36,26 @@
 
 /*
  * Program Identification.....
- * 
+ *
  * PROGNAME should always be MicroEMACS for a distribution unmodified version.
  * People using MicroEMACS as a shell for other products should change this
  * to reflect their product. Macros can query this via the $progname variable
  */
 
-#define PROGNAME	"MicroEMACS"
-#define	VERSION		"3.10"
+#define PROGNAME	"Mini8080"
+#define	VERSION		"v1.2.0"
 
 
 /* Configuration options	 */
+
+#define MSDOS	0
+#define UNIX	1
 
 #define TYPEAH	1		  /* type ahead causes update to be skipped	 */
 #define	CLEAN	1		  /* de-alloc memory on exit			 */
 #define MEMMAP	0
 
-/*
- * #define	CALLED	0		  /* is emacs a called subroutine? or
- * stand alone
- */
+#define	CALLED	1		  /* is emacs a called subroutine? or stand alone */
 
 /* handle constant and voids properly */
 
@@ -371,3 +374,5 @@ typedef struct VIDEO
   int v_flag;			  /* Flags */
   char v_text[1];		  /* Screen data. */
 } VIDEO;
+
+

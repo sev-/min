@@ -1,10 +1,13 @@
 /*
- * $Id: eproto.h,v 1.6 1995/01/27 20:52:27 sev Exp $
+ * $Id: eproto.h,v 1.7 1995/10/14 15:46:11 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: eproto.h,v $
- * Revision 1.6  1995/01/27 20:52:27  sev
+ * Revision 1.7  1995/10/14 15:46:11  sev
+ * Program was in MSDOS and done A _LOT OF_ changes
+ *
+ * Revision 1.6  1995/01/27  20:52:27  sev
  * Added Animate (only for Unix), Step over, Continue
  * Fixed bug with start label
  *

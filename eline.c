@@ -1,10 +1,13 @@
 /*
- * $Id: eline.c,v 1.5 1995/01/24 15:40:39 sev Exp $
+ * $Id: eline.c,v 1.6 1995/10/14 15:46:11 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: eline.c,v $
- * Revision 1.5  1995/01/24 15:40:39  sev
+ * Revision 1.6  1995/10/14 15:46:11  sev
+ * Program was in MSDOS and done A _LOT OF_ changes
+ *
+ * Revision 1.5  1995/01/24  15:40:39  sev
  * Added inverse line while run; play_error; start label; Labels buffer
  *
  * Revision 1.4  1995/01/17  12:33:59  sev

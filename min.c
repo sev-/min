@@ -1,10 +1,13 @@
 /*
- * $Id: min.c,v 1.7 1995/01/27 20:52:27 sev Exp $
+ * $Id: min.c,v 1.8 1995/10/14 15:46:11 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: min.c,v $
- * Revision 1.7  1995/01/27 20:52:27  sev
+ * Revision 1.8  1995/10/14 15:46:11  sev
+ * Program was in MSDOS and done A _LOT OF_ changes
+ *
+ * Revision 1.7  1995/01/27  20:52:27  sev
  * Added Animate (only for Unix), Step over, Continue
  * Fixed bug with start label
  *
@@ -35,6 +38,12 @@ int emacs (int, char **);
 
 main (int argc, char **argv)
 {
-  reg_sp = 0x07ff;
+  if ((memory = (byte *)malloc (MEMSIZE)) == (byte *)NULL)
+  {
+    printf ("Can not allocate memory \n");
+    exit (1);
+  }
+  reg_sp = MEMSIZE;
   emacs (argc, argv);
 }
+

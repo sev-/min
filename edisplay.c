@@ -1,10 +1,13 @@
 /*
- * $Id: edisplay.c,v 1.6 1995/01/24 15:40:39 sev Exp $
+ * $Id: edisplay.c,v 1.7 1995/10/14 15:46:11 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: edisplay.c,v $
- * Revision 1.6  1995/01/24 15:40:39  sev
+ * Revision 1.7  1995/10/14 15:46:11  sev
+ * Program was in MSDOS and done A _LOT OF_ changes
+ *
+ * Revision 1.6  1995/01/24  15:40:39  sev
  * Added inverse line while run; play_error; start label; Labels buffer
  *
  * Revision 1.5  1995/01/21  15:19:59  sev
@@ -212,6 +215,8 @@ int update (int force)		  /* force update past type ahead? */
   if (force == FALSE && kbdmode == PLAY)
     return (TRUE);
 
+  updmenubar ();
+
   /* update any windows that need refreshing */
   wp = wheadp;
   while (wp != (WINDOW *) NULL)
@@ -386,6 +391,31 @@ void updone (WINDOW * wp)	  /* window to update current line in */
   taboff = 0;
 }
 
+updmenubar ()
+{
+  char helpline[] =
+"F7 - NextWindow                                                  ^X^C - Exit";
+  int i;
+
+  if (needmenubar)
+    newsize (TRUE, term.t_mrow-1);
+  else
+    newsize (TRUE, term.t_mrow);
+
+  vtmove (term.t_nrow+1, 0);
+  for (i = 0; i < strlen (helpline); i++)
+    vtputc (helpline[i]);
+  vteeol ();
+  vscreen[term.t_nrow+1]->v_flag |= VFCHG;
+
+#if  MEMMAP == 0
+  if (sgarbf != FALSE)
+    for (i = 0; i < term.t_ncol; ++i)
+      pscreen[term.t_nrow+1]->v_text[i] = 7;
+#endif
+}
+
+
 /* updall: update all the lines in a window on the virtual screen */
 void updall (WINDOW * wp)	  /* window to update lines in */
 {
@@ -393,6 +423,7 @@ void updall (WINDOW * wp)	  /* window to update lines in */
   register int sline;		  /* physical screen line to update */
   register int i;
   register int nlines;		  /* number of lines in the current window */
+  register int eofline = -1;
 
   /* search down the lines, updating them */
   lp = wp->w_linep;
@@ -410,7 +441,7 @@ void updall (WINDOW * wp)	  /* window to update lines in */
 
     if (lp == wp->w_markp[5])		/* added by Sev */
       vscreen[sline]->v_flag |= VFREQ;
-    
+
     if (lp != wp->w_bufp->b_linep)
     {
       /* if we are not at the end */
@@ -418,6 +449,12 @@ void updall (WINDOW * wp)	  /* window to update lines in */
 	vtputc (lgetc (lp, i));
       lp = lforw (lp);
     }
+    else
+      if (lp == wp->w_bufp->b_linep && eofline == -1)
+	eofline = sline + 1;
+/*    if (eofline == sline)
+      for (i = 0; i < strlen("[EOF]"); i++)
+	vtputc("[EOF]"[i]);
 
     /* make sure we are on screen */
     if (vtcol < 0)
@@ -575,7 +612,6 @@ void updgar (void)
 #if	MEMMAP == 0
   register int j;
   register char *txt;
-
 #endif
 
   for (i = 0; i < term.t_nrow; ++i)
@@ -601,7 +637,7 @@ int updupd (int force)		  /* forced update flag */
   register VIDEO *vp1;
   register int i;
 
-  for (i = 0; i < term.t_nrow; ++i)
+  for (i = 0; i < term.t_mrow; ++i)
   {
     vp1 = vscreen[i];
 
@@ -1203,3 +1239,4 @@ void vtfree (void)
 }
 
 #endif
+

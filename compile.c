@@ -1,10 +1,13 @@
 /*
- * $Id: compile.c,v 1.7 1995/01/27 20:52:27 sev Exp $
+ * $Id: compile.c,v 1.8 1995/10/14 15:46:11 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: compile.c,v $
- * Revision 1.7  1995/01/27 20:52:27  sev
+ * Revision 1.8  1995/10/14 15:46:11  sev
+ * Program was in MSDOS and done A _LOT OF_ changes
+ *
+ * Revision 1.7  1995/01/27  20:52:27  sev
  * Added Animate (only for Unix), Step over, Continue
  * Fixed bug with start label
  *
@@ -74,7 +77,7 @@ int comp (int f, int n)
 
   nextwind (0, 0);
   resize (TRUE, 5);
-  swbuffer (bfind ("Error", 1, 0));
+  swbuffer (bfind (ERRORBUFFERNAME, 1, 0));
   gotobob (1, 1);
 
   if (program_has_errors)
@@ -437,7 +440,10 @@ void compileprogram (int pass)
     compileprogram (2);
   else
   {
-    sprintf (tmp1, "Last address %04xh", curraddr);
+    last_addr_of_program = curraddr;
+    sprintf (tmp1, "First address %04xh", first_addr_of_program);
+    addmessage ((LINE *) 0, tmp1, 0);
+    sprintf (tmp1, "Last address %04xh", last_addr_of_program);
     addmessage ((LINE *) 0, tmp1, 0);
   }
 }
@@ -761,6 +767,8 @@ void tomemory (char *list, word a, byte b)
   sprintf (tmp, "%02x ", b);
   strcat (list, tmp);
 
+  if (a < first_addr_of_program)
+    first_addr_of_program = a;
   PutMem (a, b);
 }
 
@@ -840,7 +848,7 @@ void play_errors (void)
 	if (curwp->w_dotp == curbp->b_linep)
 	{
           backline (1, 1);
-	  while (curwp->w_dotp != curbp->b_linep->l_bp &&
+	  while (curwp->w_dotp != lforw(curbp->b_linep) &&
 		strncmp (curwp->w_dotp->l_text, "Error", 5) &&
 			strncmp (curwp->w_dotp->l_text, "Warning", 7))
 	    backline (1, 1);
@@ -849,10 +857,12 @@ void play_errors (void)
       case CTRL | 'P':		/* Up */
       case SPEC | 'P':
         backline (1, 1);
-	while (curwp->w_dotp != curbp->b_linep->l_bp &&
+	while (curwp->w_dotp != lforw(curbp->b_linep) &&
 		strncmp (curwp->w_dotp->l_text, "Error", 5) &&
 			strncmp (curwp->w_dotp->l_text, "Warning", 7))
 	  backline (1, 1);
+	if (curwp->w_dotp == lforw(curbp->b_linep))
+	  forwline (1, 1);
 	break;
       case SPEC | '<':		/* Home */
       case META | '<':
@@ -866,7 +876,7 @@ void play_errors (void)
       case SPEC | '>':
 	gotoeob ();
 	backline (1, 1);
-	while (curwp->w_dotp != curbp->b_linep->l_bp &&
+	while (curwp->w_dotp != lforw(curbp->b_linep) &&
 		strncmp (curwp->w_dotp->l_text, "Error", 5) &&
 			strncmp (curwp->w_dotp->l_text, "Warning", 7))
 	  backline (1, 1);

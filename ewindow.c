@@ -30,7 +30,7 @@ int reposition (int f, int n)
  * there is only 1 window on the screen. Bound to "C-X C-N".
  * 
  * with an argument this command finds the <n>th window from the top
- * 
+ *
  */
 int nextwind (int f, int n)
 {
@@ -571,7 +571,6 @@ int newsize (int f, int n)	  /* resize the screen, re-writing the screen */
   }
   else
   {
-
     /* rebuild the window structure */
     nextwp = wheadp;
     wp = NULL;
@@ -708,3 +707,4 @@ int new_row_org (int f, int n)	  /* reposition the screen, re-writing the
   sgarbf = TRUE;
   return (TRUE);
 }
+

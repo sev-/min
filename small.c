@@ -1,40 +1,163 @@
-/*
- * $Id: docom.c,v 1.10 1995/10/14 15:46:11 sev Exp $
- * 
- * ----------------------------------------------------------
- * 
- * $Log: docom.c,v $
- * Revision 1.10  1995/10/14 15:46:11  sev
- * Program was in MSDOS and done A _LOT OF_ changes
- *
- * Revision 1.9  1995/01/27  20:52:27  sev
- * Added Animate (only for Unix), Step over, Continue
- * Fixed bug with start label
- *
- * Revision 1.8  1995/01/21  15:19:59  sev
- * Now Run works, Ports and regs change, list creates
- *
- * Revision 1.7  1995/01/17  12:33:59  sev
- * Now run screen is done
- * Revision 1.6  1995/01/14  15:08:09  sev Menu works right.
- * Compiler also. Revision 1.5  1995/01/07  20:03:14  sev Maked indent and
- * some editor changes Revision 1.4  1995/01/06  21:45:10  sev It's full
- * emulator IMHO
- * 
- * Revision 1.3  1994/07/04  20:19:39  sev Added all non-arithmetic command
- * (without pchl and xthl)
- * 
- * Revision 1.2  1994/07/04  19:24:31  sev Some commands added. I need table!!!
- * 
- * Revision 1.1  1994/06/29  12:43:01  sev Initial revision
- * 
- * 
- */
+#include <stdio.h>
 
-#include "hardware.h"
-#include "estruct.h"
-#include "proto.h"
+#define MEMSIZE	(32768 - 1)
 
+#define VERSION "v1.1"
+
+typedef unsigned char byte;
+typedef unsigned short word;
+
+/* reg_f =  s z ac 0 p 1 n c */
+
+byte reg_f, reg_a, reg_b, reg_c, reg_d, reg_e, reg_h, reg_l;
+word reg_sp, reg_pc;
+byte interrupt_state;
+
+byte *memory;		/* CPU's memory */
+
+byte outport[256];		/* out ports values */
+byte inport[256];		/* in ports values */
+
+int terminateprogram;		/* set if need stop executing */
+
+long tacts_while_running;
+
+#define add_tacts(t)	(tacts_while_running += 3)
+
+#define True 0xff
+#define False 0x00
+
+#define inc(a)	(a)++
+#define dec(a)	(a)--;
+
+byte gcmd (void);		  /* docom.c */
+void AddAC (byte);
+void AddA (byte);
+void AddHL (word);
+void AndA (byte);
+void Call (byte);
+void CpA (byte);
+void Daa (void);
+void DecR (byte *);
+void ExB (byte *, byte *);
+int FlagP (byte);
+int FlagS (byte);
+byte GetMem (word);
+void InB (byte);
+void IncR (byte *);
+void Jmp (byte);
+void LfShC (void);
+void LfSh (void);
+void OrA (byte);
+void OutB (byte);
+void Pop (byte *, byte *);
+void Push (byte, byte);
+void PutMem (word, byte);
+void ResF (char);
+void Ret (byte);
+void RgShC (void);
+void RgSh (void);
+void Rst (word);
+void SetF (char);
+void SubAC (byte);
+void SubA (byte);
+int WhatF (char);
+void XorA (byte);
+
+typedef struct COMM
+{
+  char name[8];
+  int num;
+} COMM;
+COMM commands[256] = {
+  { "nop",	0},	{ "lxi b, ",	2},	{ "stax b", 	0},
+  { "inx b",	0},	{ "inr b",	0},	{ "dcr b",	0},
+  { "mvi b, ",	1},	{ "rlc",	0},	{ "???",	0},
+  { "dad b",	0},	{ "dcx b",	0},	{ "inr c",	0},
+  { "ldax b",	0},	{ "dcr c",	0},	{ "mvi c, ",	1},
+  { "rrc",	0},	{ "???",	0},	{ "lxi d, ",	2},
+  { "stax d",	0},	{ "inx d",	0},	{ "inr d",	0},
+  { "dcr d",	0},	{ "mvi d, ",	1},	{ "ral ",	0},
+  { "???", 	0},	{ "dad d",	0},	{ "dcx d",	0},
+  { "inr e",	0},	{ "ldax d", 	0},	{ "dcr e",	0},
+  { "mvi e, ",	1},	{ "rar ",	0},	{ "???",	0},
+  { "lxi h, ",	2},	{ "shld ",	2},	{ "inx h",	0},
+  { "inr h",	0},	{ "dcr h",	0},	{ "mvi h, ",	1},
+  { "daa",	0},	{ "???",	0},	{ "dad h",	0},
+  { "lhld  ",	2},	{ "dcx h",	0},	{ "inr l",	0},
+  { "dcr l",	0},	{ "mvi l, ",	1},	{ "cma",	0},
+  { "???",	0},	{ "lxi sp, ",	2},	{ "sta ",	2},
+  { "inx sp",	0},	{ "inr m",	0},	{ "dcr m",	0},
+  { "mvi m, ",	1},	{ "stc ",	0},	{ "???",	0},
+  { "dad sp",	0},	{ "lda ",	2},	{ "dcx sp",	0},
+  { "inr a",	0},	{ "dcr a",	0},	{ "mvi a, ",	1},
+  { "cmc",	0},	{ "mov b,b",	0},	{ "mov b,c",	0},
+  { "mov b,d",	0},	{ "mov b,e",	0},	{ "mov b,h",	0},
+  { "mov b,l",	0},	{ "mov b,m",	0},	{ "mov b,a",	0},
+  { "mov c,b",	0},	{ "mov c,c",	0},	{ "mov c,d",	0},
+  { "mov c,e",	0},	{ "mov c,h",	0},	{ "mov c,l",	0},
+  { "mov c,m",	0},	{ "mov c,a",	0},	{ "mov d,b",	0},
+  { "mov d,c",	0},	{ "mov d,d",	0},	{ "mov d,e",	0},
+  { "mov d,h",	0},	{ "mov d,l",	0},	{ "mov d,m",	0},
+  { "mov d,a",	0},	{ "mov e,b",	0},	{ "mov e,c",	0},
+  { "mov e,d",	0},	{ "mov e,e",	0},	{ "mov e,h",	0},
+  { "mov e,l",	0},	{ "mov e,m",	0},	{ "mov e,a",	0},
+  { "mov h,b",	0},	{ "mov h,c",	0},	{ "mov h,d",	0},
+  { "mov h,e",	0},	{ "mov h,h",	0},	{ "mov h,l",	0},
+  { "mov h,m",	0},	{ "mov h,a",	0},	{ "mov l,b",	0},
+  { "mov l,c",	0},	{ "mov l,d",	0},	{ "mov l,e",	0},
+  { "mov l,h",	0},	{ "mov l,l",	0},	{ "mov l,m",	0},
+  { "mov l,a",	0},	{ "mov m,b",	0},	{ "mov m,c",	0},
+  { "mov m,d",	0},	{ "mov m,e",	0},	{ "mov m,h",	0},
+  { "mov m,l",	0},	{ "hlt",	0},	{ "mov m,a",	0},
+  { "mov a,b",	0},	{ "mov a,c",	0},	{ "mov a,d",	0},
+  { "mov a,e",	0},	{ "mov a,h",	0},	{ "mov a,l",	0},
+  { "mov a,m",	0},	{ "mov a,a",	0},	{ "add b",	0},
+  { "add c",	0},	{ "add d",	0},	{ "add e",	0},
+  { "add h",	0},	{ "add l",	0},	{ "add m",	0},
+  { "add a",	0},	{ "adc b",	0},	{ "adc c",	0},
+  { "adc d",	0},	{ "adc e",	0},	{ "adc h",	0},
+  { "adc l",	0},	{ "adc m",	0},	{ "adc a",	0},
+  { "sub b",	0},	{ "sub c",	0},	{ "sub d",	0},
+  { "sub e",	0},	{ "sub h",	0},	{ "sub l",	0},
+  { "sub m",	0},	{ "sub a",	0},	{ "sbb b",	0},
+  { "sbb c",	0},	{ "sbb d",	0},	{ "sbb e",	0},
+  { "sbb h",	0},	{ "sbb l",	0},	{ "sbb m",	0},
+  { "sbb a",	0},	{ "ana b",	0},	{ "ana c",	0},
+  { "ana d",	0},	{ "ana e",	0},	{ "ana h",	0},
+  { "ana l",	0},	{ "ana m",	0},	{ "ana a",	0},
+  { "xra b",	0},	{ "xra c",	0},	{ "xra d",	0},
+  { "xra e",	0},	{ "xra h",	0},	{ "xra l",	0},
+  { "xra m",	0},	{ "xra a",	0},	{ "ora b",	0},
+  { "ora c",	0},	{ "ora d",	0},	{ "ora e",	0},
+  { "ora h",	0},	{ "ora l",	0},	{ "ora m",	0},
+  { "ora a",	0},	{ "cmp b",	0},	{ "cmp c",	0},
+  { "cmp d",	0},	{ "cmp e",	0},	{ "cmp h",	0},
+  { "cmp l",	0},	{ "cmp m",	0},	{ "cmp a",	0},
+  { "rnz ",	0},	{ "pop b",	0},	{ "jnz ",	2},
+  { "jmp ",	2},	{ "cnz ",	2},	{ "push b",	0},
+  { "adi ",	1},	{ "rst 0",	0},	{ "rz ",	0},
+  { "ret ",	0},	{ "jz ",	2},	{ "???",	0},
+  { "cz ",	2},	{ "call ",	2},	{ "aci ",	1},
+  { "rst 1",	0},	{ "rnc ",	0},	{ "pop d",	0},
+  { "jnc ",	2},	{ "out ",	1},	{ "cnc ",	2},
+  { "push d",	0},	{ "sui ",	1},	{ "rst 2",	0},
+  { "rc ",	0},	{ "???",	0},	{ "jc ",	2},
+  { "in ",	1},	{ "cc ",	2},	{ "???",	0},
+  { "sbi ",	1},	{ "rst 3",	0},	{ "rpo ",	0},
+  { "pop h",	0},	{ "jpo ",	2},	{ "xthl ",	0},
+  { "cpo ",	2},	{ "push h",	0},	{ "ani ",	1},
+  { "rst 4",	0},	{ "rpe ",	0},	{ "pchl ",	0},
+  { "jpe ",	2},	{ "xchg ",	0},	{ "cpe ",	2},
+  { "???",	0},	{ "xri ",	1},	{ "rst 5",	0},
+  { "rp ",	0},	{ "pop psw",	0},	{ "jp ",	2},
+  { "di ",	0},	{ "cp ",	2},	{ "push psw",	0},
+  { "ori ",	1},	{ "rst 6",	0},	{ "rm ",	0},
+  { "sphl ",	0},	{ "jm ",	2},	{ "ei ",	0},
+  { "cm ",	2},	{ "???",	0},	{ "cpi ",	1},
+  { "rst 7",	0}};
+
+void do_command (void);
 void do_command ()
 {
   byte a, h, l, m;
@@ -1131,7 +1254,7 @@ void do_command ()
 
 byte gcmd (void)
 {
-  return GetMem (reg_pc++);
+  return GetMem(reg_pc++);
 }
 
 void AddAC (byte r)
@@ -1663,3 +1786,180 @@ void XorA (byte r)
   reg_a = a;
 }
 
+main ()
+{
+  long i;
+
+  if ((memory = (byte *)malloc (MEMSIZE)) == (byte *)NULL)
+  {
+    printf ("Can not allocate memory\n");
+    exit (1);
+  }
+  for (i = 0; i < MEMSIZE; i++)
+    PutMem(i, 0);
+  reg_sp = 0;
+  debug ();
+}
+
+debug ()
+{
+  int op1, op2;		/* operands */
+  char comm[80];	/* full comand */
+  char comtype;		/* command type */
+  word i, j;
+  char str[80];
+  FILE *file;
+  byte b;
+  static word dump_addr = 0, memory_addr = 0, disassembly_addr = 0;
+  int prlines;
+
+  printf ("Small I8080 emulator  %s\n", VERSION);
+
+  while (1)
+  {
+    printf ("> ");
+    fflush (stdout);
+    gets (comm);
+    op1 = op2 = -1;
+    parse (comm, &comtype, &op1, &op2);
+    switch (comtype)
+    {
+      case 'm':		/* Enter memory */
+        if (op1 == -1)
+          op1 = memory_addr;
+	i = op1;
+	while (1)
+	{
+	  printf ("%04x ", i);
+	  fflush (stdout);
+	  if (!strcmp (gets (str), "."))
+	    break;
+	  sscanf (str, "%x", &b);
+	  PutMem (i++, b);
+	}
+	memory_addr = i;
+	break;
+      case 'q':		/* quit */
+	exit (0);
+	break;
+      case 'd':		/* dump */
+        if (op1 == -1)
+          op1 = dump_addr;
+	op1 &= 0xfff0;
+	if (op2 == -1)
+	  op2 = op1 + 256;
+	for (i = op1; i < op2; i += 16)
+	{
+	  printf ("%04x  ", i);
+	  for (j = 0; j < 16; j++)
+	  {
+	    if (j == 8)
+	      printf (" ");
+	    printf ("%02x ", GetMem(j+i));
+	  }
+	  printf ("\n");
+	}
+	dump_addr = op2;
+	break;
+      case 'w':		/* write */
+	sscanf (comm, "w%s", str);
+	printf ("Writing to %s...", str);
+	fflush (stdout);
+	if((file = fopen (str, "w")) == (FILE *)NULL)
+	{
+	  printf ("Error while opening\n");
+	  break;
+	}
+	if (fwrite (memory, 1, MEMSIZE, file) != MEMSIZE)
+	{
+	  printf ("Write error\n");
+	  fclose (file);
+	  break;
+	}
+	fclose (file);
+	printf ("Done\n");
+	break;
+      case 'r':		/* read */
+	sscanf (comm, "r%s", str);
+	printf ("Reading from %s...", str);
+	fflush (stdout);
+	if((file = fopen (str, "r")) == (FILE *)NULL)
+	{
+	  printf ("Error while opening\n");
+	  break;
+	}
+	if (fread (memory, 1, MEMSIZE, file) != MEMSIZE)
+	{
+	  printf ("Read error\n");
+	  fclose (file);
+	  break;
+	}
+	fclose (file);
+	printf ("Done\n");
+	break;
+      case 'g':		/* Go */
+	if (op1 == -1)
+	  op1 = 0;
+	reg_pc = op1;
+	while (!terminateprogram)
+	  do_command ();
+	break;
+      case 's':		/* State */
+	printf ("A = %02x  B = %02x  C = %02x  D = %02x  E = %02x  H = %02x  L = % 02x\n",
+		reg_a, reg_b, reg_c, reg_d, reg_e, reg_h, reg_l);
+	printf ("PC = %04x  SP = %04x  I = %d\n", reg_pc, reg_sp, interrupt_state);
+	break;
+      case 'l':		/* disassembly */
+        if (op1 == -1)
+          op1 = disassembly_addr;
+        i = op1;
+        prlines = 0;
+        while (op2 == -1 || i < op2)
+	{
+	  printf ("%04x  ", i);
+	  switch (commands[GetMem (i)].num)
+	  {
+	    case 0:
+	      printf ("%02x\t%s\n", GetMem (i), commands[GetMem (i)].name);
+	      i += 1;
+	      break;
+	    case 1:
+	      printf ("%02x %02x\t%s%02x\n", GetMem (i), GetMem (i+1),
+				commands[GetMem (i)].name, GetMem (i+1));
+	      i += 2;
+	      break;
+	    case 2:
+	      printf ("%02x %02x %02x\t%s%02x%02x\n", GetMem (i), GetMem (i+1),
+      				GetMem (i+2), commands[GetMem (i)].name,
+					GetMem (i+2), GetMem (i+1));
+	      i += 3;
+	      break;
+	  }
+	  prlines++;
+	  if (op2 == -1 && prlines == 22)
+	    op2 = i;
+	}
+	disassembly_addr = i;
+	break;
+      case '?':		/* Help */
+	printf ("Small I8080 emulator  %s\n", VERSION);
+	printf ("d[[start][,end]]  - dump from start to end\n");
+	printf ("m[start]          - edit memory from start\n");
+	printf ("w name            - write memory to file\n");
+	printf ("r name            - read memory from name\n");
+	printf ("g[addr]           - execute program from addr\n");
+	printf ("s                 - microprocessor state\n");
+	printf ("l[[start][,end]]  - disassembly from start to end\n");
+	printf ("q                 - quit\n");
+        break;
+      default:
+	printf ("Unknown command.  Type ? for help\n");
+	break;
+    }
+  }
+}
+
+parse (char *comm, int *comtype, int *op1, int *op2)
+{
+  sscanf (comm, "%c%x,%x", comtype, op1, op2);
+}

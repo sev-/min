@@ -1,10 +1,13 @@
 /*
- * $Id: efile.c,v 1.4 1995/01/17 12:33:59 sev Exp $
+ * $Id: efile.c,v 1.5 1995/10/14 15:46:11 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: efile.c,v $
- * Revision 1.4  1995/01/17 12:33:59  sev
+ * Revision 1.5  1995/10/14 15:46:11  sev
+ * Program was in MSDOS and done A _LOT OF_ changes
+ *
+ * Revision 1.4  1995/01/17  12:33:59  sev
  * Now run screen is done
  * Revision 1.3  1995/01/14  15:08:09  sev Menu works right.
  * Compiler also. Revision 1.2  1995/01/07  20:03:14  sev Maked indent and
@@ -330,16 +333,25 @@ int writeout (char *fn)
     if (sflag)
     {
 
+#if UNIX
       /*
        * tmp1 = ((tmp1 = strrchr(fn, '/')) == (char *)NULL) ? fn: tmp1;
-       * 
+       *
        * if(strlen(tmp1) > 11) { sprintf(tmpnam, "%s", fn);
        * strcpy(&tmpnam[strlen(tmpnam)-2], ".."); } else
        */
       sprintf (tmpnam, "%s.b", fn);
+#else
+      strcpy (tmpnam, fn);
+/*      if (strrchr (tmpnam, '.') == NULL)
+        strcat (tmpnam, ".bak");
+      else
+*/	strcpy (strrchr (tmpnam, '.'), ".bak");
+#endif
 
       /* rename temporary file to original name */
       /* if (unlink(fn) == 0 && rename(tname, fn) == 0) { */
+      unlink (tmpnam);
       if (rename (fn, tmpnam) == 0 && rename (tname, fn) == 0)
       {
       }
@@ -402,3 +414,4 @@ filewrite (int f, int n)	  /* emacs arguments */
   }
   return (s);
 }
+

@@ -1,10 +1,13 @@
 /*
- * $Id: ebind.h,v 1.6 1995/01/27 20:52:27 sev Exp $
+ * $Id: ebind.h,v 1.7 1995/10/14 15:46:11 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: ebind.h,v $
- * Revision 1.6  1995/01/27 20:52:27  sev
+ * Revision 1.7  1995/10/14 15:46:11  sev
+ * Program was in MSDOS and done A _LOT OF_ changes
+ *
+ * Revision 1.6  1995/01/27  20:52:27  sev
  * Added Animate (only for Unix), Step over, Continue
  * Fixed bug with start label
  *
@@ -39,77 +42,78 @@
  */
 KEYTAB keytab[NBINDS] =
 {
-  {CTRL | 'A', BINDFNC, gotobol},
-  {CTRL | 'B', BINDFNC, backchar},
-  {CTRL | 'C', BINDFNC, insspace},
-  {CTRL | 'D', BINDFNC, forwdel},
-  {CTRL | 'E', BINDFNC, gotoeol},
-  {CTRL | 'F', BINDFNC, forwchar},
-  {CTRL | 'G', BINDFNC, ctrlg},
-  {CTRL | 'H', BINDFNC, backdel},
-  {CTRL | 'I', BINDFNC, tab},
-  {CTRL | 'J', BINDFNC, indent},
-  {CTRL | 'K', BINDFNC, killtext},
-  {CTRL | 'L', BINDFNC, refresh},
-  {CTRL | 'M', BINDFNC, newline},
-  {CTRL | 'N', BINDFNC, forwline},
-  {CTRL | 'O', BINDFNC, mainmenu},
-  {CTRL | 'P', BINDFNC, backline},
-  {CTRL | 'Q', BINDFNC, quote},
-  {CTRL | 'R', BINDFNC, backsearch},
-  {CTRL | 'S', BINDFNC, forwsearch},
-  {CTRL | 'V', BINDFNC, forwpage},
-  {CTRL | 'W', BINDFNC, killregion},
-  {CTRL | 'X', BINDFNC, cex},
-  {CTRL | 'Y', BINDFNC, yank},
-  {CTRL | 'Z', BINDFNC, backpage},
-  {CTRL | '[', BINDFNC, meta},
-  {CTLX | CTRL | 'C', BINDFNC, quit},
-  {CTLX | CTRL | 'N', BINDFNC, mvdnwind},
-  {CTLX | CTRL | 'P', BINDFNC, mvupwind},
-  {CTLX | CTRL | 'R', BINDFNC, fileread},
-  {CTLX | CTRL | 'W', BINDFNC, filewrite},
-  {CTLX | CTRL | 'Z', BINDFNC, shrinkwind},
-  {CTLX | '(', BINDFNC, ctlxlp},
-  {CTLX | ')', BINDFNC, ctlxrp},
-  {CTLX | '^', BINDFNC, enlargewind},
-  {CTLX | '0', BINDFNC, delwind},
-  {CTLX | '1', BINDFNC, onlywind},
-  {CTLX | '2', BINDFNC, splitwind},
-  {CTLX | 'B', BINDFNC, usebuffer},
-  {CTLX | 'C', BINDFNC, spawncli},
-  {CTLX | 'E', BINDFNC, ctlxe},
-  {CTLX | 'K', BINDFNC, killbuffer},
-  {CTLX | 'P', BINDFNC, prevwind},
-  {CTLX | 'S', BINDFNC, filesave},
-  {CTLX | 'W', BINDFNC, resize},
-  {CTLX | 'X', BINDFNC, nextbuffer},
-  {META | CTRL | 'G', BINDFNC, gotomark},
-  {META | CTRL | 'L', BINDFNC, reposition},
-  {META | CTRL | 'N', BINDFNC, namebuffer},
-  {META | CTRL | 'R', BINDFNC, qreplace},
-  {META | ' ', BINDFNC, setmark},
-  {META | '>', BINDFNC, gotoeob},
-  {META | '<', BINDFNC, gotobob},
-  {META | 'C', BINDFNC, comp},
-  {META | 'N', BINDFNC, continueprogram},
-  {META | 'R', BINDFNC, sreplace},
-  {META | 'V', BINDFNC, backpage},
-  {META | 'W', BINDFNC, copyregion},
-  {META | 'Z', BINDFNC, quickexit},
-  {ALTD | 'S', BINDFNC, forwhunt},
-  {ALTD | 'R', BINDFNC, backhunt},
-  {SPEC | '7', BINDFNC, next_window},
-  {SPEC | '<', BINDFNC, gotobob},
-  {SPEC | 'P', BINDFNC, backline},
-  {SPEC | 'Z', BINDFNC, backpage},
-  {SPEC | 'B', BINDFNC, backchar},
-  {SPEC | 'F', BINDFNC, forwchar},
-  {SPEC | '>', BINDFNC, gotoeob},
-  {SPEC | 'N', BINDFNC, forwline},
-  {SPEC | 'V', BINDFNC, forwpage},
-  {SPEC | 'C', BINDFNC, insspace},
-  {SPEC | 'D', BINDFNC, forwdel},
+  {CTRL | 'A', BINDFNC, gotobol},	/* goto begin of line */
+  {CTRL | 'B', BINDFNC, backchar},	/* backward character */
+  {CTRL | 'C', BINDFNC, insspace},  	/* insert space */
+  {CTRL | 'D', BINDFNC, forwdel},	/* forward delete (under cursor) */
+  {CTRL | 'E', BINDFNC, gotoeol},	/* goto end of line */
+  {CTRL | 'F', BINDFNC, forwchar},	/* forward character */
+  {CTRL | 'G', BINDFNC, ctrlg},		/* abort */
+  {CTRL | 'H', BINDFNC, backdel},	/* backspace */
+  {CTRL | 'I', BINDFNC, tab},		/* tabulate */
+  {CTRL | 'J', BINDFNC, indent},	/* indenting */
+  {CTRL | 'K', BINDFNC, killtext},	/* kill text to end of line */
+  {CTRL | 'L', BINDFNC, refresh},	/* refresh screen */
+  {CTRL | 'M', BINDFNC, newline},	/* open new line */
+  {CTRL | 'N', BINDFNC, forwline},	/* next line */
+  {CTRL | 'O', BINDFNC, mainmenu},	/* choose menu */
+  {CTRL | 'P', BINDFNC, backline},	/* previous line */
+  {CTRL | 'Q', BINDFNC, quote},		/* quote character */
+  {CTRL | 'R', BINDFNC, backsearch},	/* backward search */
+  {CTRL | 'S', BINDFNC, forwsearch},	/* forward search */
+  {CTRL | 'V', BINDFNC, forwpage},	/* next page */
+  {CTRL | 'W', BINDFNC, killregion},	/* kill block */
+  {CTRL | 'X', BINDFNC, cex},		/* prefix key */
+  {CTRL | 'Y', BINDFNC, yank},		/* copy block from memory */
+  {CTRL | 'Z', BINDFNC, backpage},	/* previous page */
+  {CTRL | '[', BINDFNC, meta},		/* prefix key */
+  {CTLX | CTRL | 'C', BINDFNC, quit},	/* quit editor without saving */
+  {CTLX | CTRL | 'N', BINDFNC, mvdnwind},	/* move window down */
+  {CTLX | CTRL | 'P', BINDFNC, mvupwind},	/* move window up */
+  {CTLX | CTRL | 'R', BINDFNC, fileread},	/* read file into current buffer */
+  {CTLX | CTRL | 'W', BINDFNC, filewrite},	/* write file with asking name */
+  {CTLX | CTRL | 'Z', BINDFNC, shrinkwind},	/* shrink window */
+  {CTLX | '(', BINDFNC, ctlxlp},	/* begin keyboard macro */
+  {CTLX | ')', BINDFNC, ctlxrp},	/* end keyboard macro */
+  {CTLX | '^', BINDFNC, enlargewind},	/* enlarege window */
+  {CTLX | '0', BINDFNC, delwind},	/* delete current window */
+  {CTLX | '1', BINDFNC, onlywind},	/* left only current window */
+  {CTLX | '2', BINDFNC, splitwind},	/* split current window */
+  {CTLX | 'B', BINDFNC, usebuffer},	/* select buffer */
+/*  {CTLX | 'C', BINDFNC, spawncli}, */
+  {CTLX | 'E', BINDFNC, ctlxe},		/* execute keyboard macro */
+  {CTLX | 'K', BINDFNC, killbuffer},	/* kill buffer */
+  {CTLX | 'P', BINDFNC, prevwind},	/* goto previous window */
+  {CTLX | 'S', BINDFNC, filesave},	/* save current file without asking name */
+  {CTLX | 'W', BINDFNC, resize},	/* resize current window */
+/*  {CTLX | 'X', BINDFNC, nextbuffer},	/* select next buffer */
+  {META | CTRL | 'G', BINDFNC, gotomark},	/* goto mark */
+  {META | CTRL | 'L', BINDFNC, reposition},	/* reposition in current window */
+  {META | CTRL | 'N', BINDFNC, namebuffer},	/* change buffer name */
+  {META | CTRL | 'R', BINDFNC, qreplace},	/* replase with query */
+  {META | ' ', BINDFNC, setmark},	/* set begin of block */
+  {META | '>', BINDFNC, gotoeob},	/* goto end of buffer */
+  {META | '<', BINDFNC, gotobob},	/* goto begin of buffer */
+  {META | 'C', BINDFNC, comp},		/* compile current buffer */
+  {META | 'N', BINDFNC, continueprogram},	/* continue program */
+  {META | 'R', BINDFNC, sreplace},	/* search with replace */
+  {META | 'V', BINDFNC, backpage},	/* previous page */
+  {META | 'W', BINDFNC, copyregion},	/* copy region onto memory */
+  {META | 'Z', BINDFNC, quickexit},	/* exit with saving */
+  {ALTD | 'S', BINDFNC, forwhunt},	/* forward search with old pattern */
+  {ALTD | 'R', BINDFNC, backhunt},	/* backward search with old pattern */
+  {SPEC | '7', BINDFNC, next_window},	/* choose next woindow */
+  {SPEC | '<', BINDFNC, gotobob},	/* goto begin of buffer */
+  {SPEC | 'P', BINDFNC, backline},	/* previous line */
+  {SPEC | 'Z', BINDFNC, backpage},	/* previous page */
+  {SPEC | 'B', BINDFNC, backchar},	/* backward character */
+  {SPEC | 'F', BINDFNC, forwchar},	/* forward character */
+  {SPEC | '>', BINDFNC, gotoeob},	/* goto end of buffer */
+  {SPEC | 'N', BINDFNC, forwline},	/* next line */
+  {SPEC | 'V', BINDFNC, forwpage},	/* next page */
+  {SPEC | 'C', BINDFNC, insspace},	/* inset space under cursor */
+  {SPEC | 'D', BINDFNC, forwdel},	/* delete character under cursor */
   {0x7F, BINDFNC, backdel},
   {0, BINDNUL, (int (*) ()) NULL}
 };
+
