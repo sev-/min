@@ -1,10 +1,13 @@
 /*
- * $Id: compile.c,v 1.9 1996/11/12 15:48:56 sev Exp $
+ * $Id: compile.c,v 1.10 1997/07/17 12:01:33 sev Exp $
  * 
  * ----------------------------------------------------------
  * 
  * $Log: compile.c,v $
- * Revision 1.9  1996/11/12 15:48:56  sev
+ * Revision 1.10  1997/07/17 12:01:33  sev
+ * *** empty log message ***
+ *
+ * Revision 1.9  1996/11/12  15:48:56  sev
  * *** empty log message ***
  *
  * Revision 1.8  1995/10/14  15:46:11  sev
@@ -845,7 +848,7 @@ void clearlistbuffer (void)
 
   listbuf = bfind (LISTBUFFERNAME, 1, 0);
   listbuf->b_flag &= ~BFCHG;	  /* Not changed	       */
-  bclear (listbuf);
+  zotbuf (listbuf);
 }
 
 void addlistline (char *liststr, char *s, int len)
@@ -972,7 +975,7 @@ void clearlabelbuffer (void)
 
   labelbuf = bfind (LABELBUFFERNAME, 1, 0);
   labelbuf->b_flag &= ~BFCHG;	  /* Not changed	       */
-  bclear (labelbuf);
+  zotbuf (labelbuf);
 }
 
 void addlabelline (char *label, int addr)

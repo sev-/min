@@ -1,10 +1,13 @@
 /*                      `
- * $Id: run.c,v 1.6 1995/10/14 15:46:11 sev Exp $
+ * $Id: run.c,v 1.7 1997/07/17 12:01:33 sev Exp $
  *
  * ----------------------------------------------------------
  *
  * $Log: run.c,v $
- * Revision 1.6  1995/10/14 15:46:11  sev
+ * Revision 1.7  1997/07/17 12:01:33  sev
+ * *** empty log message ***
+ *
+ * Revision 1.6  1995/10/14  15:46:11  sev
  * Program was in MSDOS and done A _LOT OF_ changes
  *
  * Revision 1.5  1995/01/27  20:52:27  sev
@@ -119,7 +122,8 @@ int go_program (void)
   splitwind (TRUE, 1);
 
   runbuf = bfind (RUNBUFFERNAME, 1, 0);
-  bclear (runbuf);
+  zotbuf (runbuf);
+  runbuf = bfind (RUNBUFFERNAME, 1, 0);
   swbuffer (runbuf);
   linstr (" ");
   linstr (" ");
