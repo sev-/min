@@ -1,0 +1,13 @@
+    Registers                           F5 - Step   Tab - go to next field
+           s z ac  p   n c              ESC-Tab - go to prev field
+A=00       0 0 0 0 0 1 0 0              F1 - Restart
+B=00h      C=00h
+D=00h      E=00h    [sp]: fffd >00 00 00 01 10 00 21 00  00 09 cd 0e 00 d2 06 00
+H=00h      L=00h    [pc]: 0000 >01 10 00 21 00 00 09 cd  0e 00 d2 06 00 76 7c b7
+SP=fffdh  PC=0000h  [M1]: 0000  01 10 00 21 00 00 09 cd  0e 00>d2 06 00 76 7c b7
+                    [M2]: 0010  c2>19 00 7d fe 30 ca 1c  00 37 3f c9 37 c9 00 00
+                    [M3]: 0010  c2 19 00 7d>fe 30 ca 1c  00 37 3f c9 37 c9 00 00
+            
+          InPort 0  InPort 1  InPort 2       OutPort 0 OutPort 1 OutPort 2
+          ···■·■■·  ·■·■·■·■  ■·■·■·■·       ········  ·■·■·■·■  ■■■■■■■■  
+          (16h  22d)(55h  85d)(aah 170d)     (00h   0d)(55h  85d)(ffh 255d)

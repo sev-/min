@@ -1,0 +1,15 @@
+#!/bin/sh
+#  $Id: ema,v 1.1 1994/06/24 14:17:12 sev Exp sev $
+#
+# ---------------------------------------------------------- 
+#
+# $Log: ema,v $
+# Revision 1.1  1994/06/24  14:17:12  sev
+# Initial revision
+#
+#
+#
+ 
+TERMCAP=/user/sev/bin/other/termcap.em
+export TERMCAP
+emacs1 $*
